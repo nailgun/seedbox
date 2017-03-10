@@ -3,6 +3,9 @@ import os
 basedir = os.path.dirname(__file__)
 cachedir = os.path.join(basedir, 'cache')
 
+# TODO: move this to cluster config (model)
+install_etc_hosts = True
+
 etcd_client_port = 2379
 etcd_peer_port = 2380
 ca_cert_path = '/etc/ssl/ca.pem'

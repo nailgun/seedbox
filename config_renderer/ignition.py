@@ -1,20 +1,15 @@
-import os
 import json
-from jinja2 import Environment, FileSystemLoader
+from flask import request
 
 import config
 import models
 
-jinja = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')), autoescape=False)
 
+def render(node, indent=False):
+    from . import render_template
 
-def render(node, url_root, indent=False):
-    template_context = {
-        'node': node,
-        'cluster': node.cluster,
-        'url_root': url_root,
-        'config': config,
-    }
+    def render_tpl(template_name):
+        return render_template(template_name, node)
 
     def get_unit(name, enable=False, dropins=None):
         if dropins:
@@ -23,14 +18,14 @@ def render(node, url_root, indent=False):
                 'enable': enable,
                 'dropins': [{
                     'name': dropin,
-                    'contents': jinja.get_template('dropins/' + name + '/' + dropin).render(template_context),
+                    'contents': render_tpl('dropins/' + name + '/' + dropin),
                 } for dropin in dropins],
             }
         else:
             return {
                 'name': name,
                 'enable': enable,
-                'contents': jinja.get_template('units/' + name).render(template_context),
+                'contents': render_tpl('units/' + name),
             }
 
     units = [
@@ -56,7 +51,7 @@ def render(node, url_root, indent=False):
             'path': config.ca_cert_path,
             'mode': 0o444,
             'contents': {
-                'source': url_root + 'credentials/ca.pem',
+                'source': request.url_root + 'credentials/ca.pem',
             },
         },
         {
@@ -64,7 +59,7 @@ def render(node, url_root, indent=False):
             'path': config.node_cert_path,
             'mode': 0o444,
             'contents': {
-                'source': url_root + 'credentials/node.pem',
+                'source': request.url_root + 'credentials/node.pem',
             },
         },
         {
@@ -72,10 +67,20 @@ def render(node, url_root, indent=False):
             'path': config.node_key_path,
             'mode': 0o400,
             'contents': {
-                'source': url_root + 'credentials/node-key.pem',
+                'source': request.url_root + 'credentials/node-key.pem',
             },
         }
     ]
+
+    if config.install_etc_hosts:
+        files.append({
+            'filesystem': 'root',
+            'path': '/etc/hosts',
+            'mode': 0o644,
+            'contents': {
+                'source': request.url_root + 'hosts',
+            },
+        })
 
     cfg = {
         'ignition': {

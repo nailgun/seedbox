@@ -52,7 +52,7 @@ def ipxe_boot():
 @app.route('/boot/ignition')
 def ignition():
     node = get_node('Ignition config')
-    response = config_renderer.ignition.render(node, request.url_root, 'indent' in request.args)
+    response = config_renderer.ignition.render(node, 'indent' in request.args)
     return Response(response, mimetype='application/json')
 
 
@@ -113,6 +113,13 @@ def report():
         models.db.session.commit()
 
     return Response('ok', mimetype='application/json')
+
+
+@app.route('/hosts')
+def hosts():
+    node = get_node('/etc/hosts file')
+    result = config_renderer.render_template('hosts', node)
+    return Response(result, mimetype='text/plain')
 
 
 if __name__ == '__main__':
