@@ -35,6 +35,14 @@ def render(node, indent=False):
     files = [
         {
             'filesystem': 'root',
+            'path': '/etc/sysctl.d/max-user-watches.conf',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('sysctl-max-user-watches.conf')),
+            },
+        },
+        {
+            'filesystem': 'root',
             'path': config.ca_cert_path,
             'mode': 0o444,
             'contents': {
@@ -56,7 +64,135 @@ def render(node, indent=False):
             'contents': {
                 'source': request.url_root + 'credentials/node-key.pem',
             },
-        }
+        },
+        {
+            'filesystem': 'root',
+            'path': '/etc/kubernetes/cni/net.d/10-flannel.conf',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('cni-flannel.conf')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/etc/kubernetes/cni/docker_opts_cni.env',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('cni-docker-opts.env')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/etc/flannel/options.env',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('flannel-options.env')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/opt/init-flannel',
+            'mode': 0o755,
+            'contents': {
+                'source': to_data_url(render_tpl('init-flannel')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/etc/kubernetes/manifests/kube-proxy.yaml',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('manifests/kube-proxy.yaml')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/etc/kubernetes/manifests/kube-apiserver.yaml',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('manifests/kube-apiserver.yaml')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/etc/kubernetes/manifests/kube-controller-manager.yaml',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('manifests/kube-controller-manager.yaml')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/etc/kubernetes/manifests/kube-scheduler.yaml',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('manifests/kube-scheduler.yaml')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/srv/kubernetes/manifests/kube-dns-autoscaler-deployment.yaml',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('manifests/kube-dns-autoscaler-deployment.yaml')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/srv/kubernetes/manifests/kube-dns-deployment.yaml',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('manifests/kube-dns-deployment.yaml')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/srv/kubernetes/manifests/kube-dns-svc.yaml',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('manifests/kube-dns-svc.yaml')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/srv/kubernetes/manifests/heapster-deployment.yaml',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('manifests/heapster-deployment.yaml')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/srv/kubernetes/manifests/heapster-svc.yaml',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('manifests/heapster-svc.yaml')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/srv/kubernetes/manifests/kube-dashboard-deployment.yaml',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('manifests/kube-dashboard-deployment.yaml')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/srv/kubernetes/manifests/kube-dashboard-svc.yaml',
+            'mode': 0o644,
+            'contents': {
+                'source': to_data_url(render_tpl('manifests/kube-dashboard-svc.yaml')),
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': '/opt/k8s-addons',
+            'mode': 0o755,
+            'contents': {
+                'source': to_data_url(render_tpl('k8s-addons')),
+            },
+        },
     ]
 
     if config.install_etc_hosts:
@@ -66,6 +202,16 @@ def render(node, indent=False):
             'mode': 0o644,
             'contents': {
                 'source': to_data_url(render_tpl('hosts')),
+            },
+        })
+
+    if config.k8s_runtime == 'rkt':
+        files.append({
+            'filesystem': 'root',
+            'path': '/opt/bin/host-rkt',
+            'mode': 0o755,
+            'contents': {
+                'source': to_data_url(render_tpl('host-rkt')),
             },
         })
 

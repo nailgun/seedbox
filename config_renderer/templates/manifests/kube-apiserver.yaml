@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-apiserver
+  namespace: kube-system
+spec:
+  hostNetwork: true
+  containers:
+  - name: kube-apiserver
+    image: quay.io/coreos/hyperkube:v1.5.2_coreos.0
+    command:
+    - /hyperkube
+    - apiserver
+    - --bind-address=0.0.0.0
+    - --etcd-servers={% for n in cluster.nodes.filter_by(is_etcd_server=True) %}http://{{ n.fqdn }}:{{ config.etcd_peer_port }}{% if not loop.last %},{% endif %}{% endfor %}
+    - --allow-privileged=true
+    - --service-cluster-ip-range={{ config.k8s_service_ip_range }}
+    - --secure-port=443
+    - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota
+    - --tls-cert-file={{ config.node_cert_path }}
+    - --tls-private-key-file={{ config.node_key_path }}
+    - --client-ca-file={{ config.ca_cert_path }}
+    - --service-account-key-file={{ config.node_key_path }}
+    - --runtime-config=extensions/v1beta1/networkpolicies=true
+    - --anonymous-auth=false
+    livenessProbe:
+      httpGet:
+        host: 127.0.0.1
+        port: 8080
+        path: /healthz
+      initialDelaySeconds: 15
+      timeoutSeconds: 15
+    ports:
+    - containerPort: 443
+      hostPort: 443
+      name: https
+    - containerPort: 8080
+      hostPort: 8080
+      name: local
+    volumeMounts:
+    - mountPath: {{ config.cluster_credentials_path }}
+      name: ssl-certs-cluster
+      readOnly: true
+    - mountPath: /etc/ssl/certs
+      name: ssl-certs-host
+      readOnly: true
+  volumes:
+  - hostPath:
+      path: {{ config.cluster_credentials_path }}
+    name: ssl-certs-cluster
+  - hostPath:
+      path: /usr/share/ca-certificates
+    name: ssl-certs-host
