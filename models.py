@@ -36,8 +36,8 @@ class Node(db.Model):
     target_config_version = db.Column(db.Integer, default=1, nullable=False)
     current_config_version = db.Column(db.Integer, nullable=True)
 
-    _coreos_channel = db.Column(db.String(80), nullable=True)
-    _coreos_version = db.Column(db.String(80), nullable=True)
+    _coreos_channel = db.Column(db.String(80), nullable=False)
+    _coreos_version = db.Column(db.String(80), nullable=False)
 
     coreos_autologin = db.Column(db.Boolean, nullable=False)
     linux_consoles = db.Column(db.String(80), default='tty0,ttyS0', nullable=False)
@@ -80,7 +80,7 @@ class User(db.Model):
     name = db.Column(db.String(80), nullable=False)  # TODO: unique together with cluster_id
     credentials_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
     credentials = db.relationship('CredentialsData')
-    ssh_key = db.Column(db.Text, nullable=True)
+    ssh_key = db.Column(db.Text, nullable=False)
 
     def __repr__(self):
         return '<User %r>' % self.name
