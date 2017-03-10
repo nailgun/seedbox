@@ -33,7 +33,11 @@ def render(node, url_root, indent=False):
                 'contents': jinja.get_template('units/' + name).render(template_context),
             }
 
-    units = [get_unit('provision-report.service', enable=True)]
+    units = [
+        get_unit('provision-report.service', enable=True),
+        get_unit('credentials@.service'),
+        get_unit('credentials-all.service'),
+    ]
 
     if node.is_etcd_server:
         etcd_version = node.cluster.etcd_version
