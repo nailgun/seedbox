@@ -1,0 +1,18 @@
+[Unit]
+Description=Provision Report
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/curl --fail \
+                        --silent \
+                        --show-error \
+                        --location \
+                        -H 'Content-Type: application/json' \
+                        -X POST \
+                        -d '{"config_version":"{{ node.target_config_version }}"}' \
+                        {{ url_root }}report
+
+[Install]
+WantedBy=multi-user.target

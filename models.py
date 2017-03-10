@@ -33,6 +33,9 @@ class Node(db.Model):
     credentials_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
     credentials = db.relationship('CredentialsData')
 
+    target_config_version = db.Column(db.Integer, default=1, nullable=False)
+    current_config_version = db.Column(db.Integer, nullable=True)
+
     _coreos_channel = db.Column(db.String(80), nullable=True)
     _coreos_version = db.Column(db.String(80), nullable=True)
     _etcd_version = db.Column(db.Integer, nullable=True)
@@ -61,6 +64,10 @@ class Node(db.Model):
     @property
     def etcd_version(self):
         return self._etcd_version or self.cluster.etcd_version
+
+    @property
+    def is_ready(self):
+        return self.target_config_version == self.current_config_version
 
 
 class NodeConfig(db.Model):

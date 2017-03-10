@@ -4,7 +4,6 @@ import requests
 import filelock
 from flask import Flask, Response, request, abort, send_file
 
-import kube
 import config
 import models
 import config_renderer
@@ -53,7 +52,7 @@ def ipxe_boot():
 @app.route('/boot/ignition')
 def ignition():
     node = get_node('Ignition config')
-    response = kube.get_coreos_kube_ignition(node)
+    response = config_renderer.ignition.render(node, request.url_root, 'indent' in request.args)
     return Response(response, mimetype='application/json')
 
 
@@ -99,6 +98,21 @@ def credentials(cred_type):
         return Response(node.credentials.key, mimetype='text/plain')
 
     abort(404)
+
+
+@app.route('/report', methods=['POST'])
+def report():
+    node = get_node('Provision report')
+    data = request.get_json()
+    if not isinstance(data, dict):
+        abort(400)
+
+    if 'config_version' in data:
+        node.current_config_version = data['config_version']
+        models.db.session.add(node)
+        models.db.session.commit()
+
+    return Response('ok', mimetype='application/json')
 
 
 if __name__ == '__main__':

@@ -34,17 +34,19 @@ class ClusterView(ModelView):
 
 
 class NodeView(ModelView):
-    column_list = ['cluster', 'fqdn', 'ip', 'credentials']
+    column_list = ['cluster', 'fqdn', 'ip', 'is_ready', 'credentials']
     list_template = 'admin/node_list.html'
     details_template = 'admin/node_details.html'
-    form_excluded_columns = ['credentials']
+    form_excluded_columns = ['credentials', 'target_config_version', 'current_config_version']
     column_formatters = {
         'credentials': macro('render_credentials'),
     }
 
     def on_model_change(self, form, model, is_created):
         if not is_created:
+            model.target_config_version += 1
             return
+
         with self.session.no_autoflush:
             ca_creds = model.cluster.ca_credentials
         creds = models.CredentialsData()

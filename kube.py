@@ -32,7 +32,3 @@ def get_kubeconfig(cluster_name, apiserver_host, ca_cert, user_name, user_cert, 
         user_cert=base64.b64encode(user_cert).decode('ascii'),
         user_key=base64.b64encode(user_key).decode('ascii'),
     )
-
-
-def get_coreos_kube_ignition(node):
-    return '{}'
