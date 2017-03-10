@@ -6,7 +6,11 @@ import config
 from . import kernel
 from . import ignition
 
-jinja = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')), autoescape=False)
+jinja = Environment(
+    loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')),
+    keep_trailing_newline=True,
+    autoescape=False,
+)
 
 
 def render_template(template_name, node):
