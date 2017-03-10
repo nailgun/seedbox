@@ -22,7 +22,6 @@ class Cluster(db.Model):
         return self.name
 
 
-# TODO: add SMBIOS UUID, serial, mac, etc? (http://ipxe.org/cfg/uuid)
 class Node(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ip = db.Column(db.String(80), unique=True, nullable=False)

@@ -20,22 +20,8 @@ models.db.app = app
 models.db.init_app(app)
 admin.init_app(app)
 
-node_boot_args = {
-    'uuid': '${uuid}',
-    'serial': '${serial}',
-    'mac': '${net0/mac:hexhyp}',
-    'domain': '${domain}',
-    'hostname': '${hostname}',
-}
-
-node_boot_string = '&'.join('{}={}'.format(k, v) for k, v in node_boot_args.items())
-
-boot_chain_response = """#!ipxe
-chain /boot/ipxe?{node_boot_string}
-"""
-
-boot_response = """#!ipxe
-kernel /boot/image/{coreos_channel}/{coreos_version}/coreos_production_pxe.vmlinuz coreos.config.url={base_url}boot/ignition?{node_boot_string} {kernel_args}
+ipxe_response = """#!ipxe
+kernel /boot/image/{coreos_channel}/{coreos_version}/coreos_production_pxe.vmlinuz coreos.config.url={base_url}boot/ignition {kernel_args}
 initrd /boot/image/{coreos_channel}/{coreos_version}/coreos_production_pxe_image.cpio.gz
 boot
 """
@@ -50,29 +36,17 @@ def get_node(request_type, require_args=False):
         log.error('Node %s is unknown', node_ip)
         abort(403)
 
-    try:
-        node.request = {request.args[key] for key in node_boot_args}
-    except KeyError:
-        node.request = None
-        if require_args:
-            log.error('%s request without required parameters from %s', request_type, node_ip)
-            abort(400)
-
     return node
 
 
 @app.route('/boot/ipxe')
 def ipxe_boot():
     node = get_node('iPXE boot')
-    if node.request is None:
-        response = boot_chain_response.format(node_boot_string=node_boot_string)
-    else:
-        kernel_args = ' '.join(config_renderer.kernel.get_kernel_arguments(node))
-        response = boot_response.format(node_boot_string=node_boot_string,
-                                        coreos_channel=node.coreos_channel,
-                                        coreos_version=node.coreos_version,
-                                        base_url=request.url_root,
-                                        kernel_args=kernel_args)
+    kernel_args = ' '.join(config_renderer.kernel.get_kernel_arguments(node))
+    response = ipxe_response.format(coreos_channel=node.coreos_channel,
+                                    coreos_version=node.coreos_version,
+                                    base_url=request.url_root,
+                                    kernel_args=kernel_args)
     return Response(response, mimetype='text/plain')
 
 
