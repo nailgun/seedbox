@@ -38,7 +38,6 @@ class Node(db.Model):
 
     _coreos_channel = db.Column(db.String(80), nullable=True)
     _coreos_version = db.Column(db.String(80), nullable=True)
-    _etcd_version = db.Column(db.Integer, nullable=True)
 
     coreos_autologin = db.Column(db.Boolean, nullable=False)
     linux_consoles = db.Column(db.String(80), default='tty0,ttyS0', nullable=False)
@@ -60,10 +59,6 @@ class Node(db.Model):
     @property
     def coreos_version(self):
         return self._coreos_version or self.cluster.coreos_version
-
-    @property
-    def etcd_version(self):
-        return self._etcd_version or self.cluster.etcd_version
 
     @property
     def is_ready(self):
