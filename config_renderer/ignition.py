@@ -89,7 +89,7 @@ def render(node, url_root, indent=False):
         'passwd': {
             'users': [{
                 'name': 'core',
-                'ssh_authorized_keys': ssh_keys,
+                'sshAuthorizedKeys': ssh_keys,
             }],
         },
         'systemd': {
