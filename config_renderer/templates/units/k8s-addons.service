@@ -1,0 +1,9 @@
+[Unit]
+Description=Kubernetes Addons
+
+[Service]
+Type=oneshot
+ExecStart=/opt/k8s-addons
+
+[Install]
+WantedBy=multi-user.target

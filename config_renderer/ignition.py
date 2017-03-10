@@ -69,7 +69,17 @@ def render(node, indent=False):
 
     units = [
         get_unit('provision-report.service', enable=True),
+        get_unit('flanneld.service', dropins=['40-ExecStartPre-symlink.conf']),
+        get_unit('docker.service', dropins=['40-flannel.conf']),
+        get_unit('kubelet.service', enable=True),
+        get_unit('k8s-addons.service', enable=True),
     ]
+
+    if config.k8s_runtime == 'rkt':
+        units += [
+            get_unit('rkt-api.service', enable=True),
+            get_unit('load-rkt-stage1.service', enable=True),
+        ]
 
     if node.is_etcd_server:
         etcd_version = node.cluster.etcd_version
