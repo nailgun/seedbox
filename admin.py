@@ -126,6 +126,9 @@ class CredentialsDataView(ModelView):
         info = pki.get_certificate_info(creds.cert)
         return Response(info, mimetype='text/plain')
 
+    def is_visible(self):
+        return False
+
 
 admin = Admin(name='Cluster manager', template_mode='bootstrap3')
 admin.add_view(ClusterView(models.Cluster, models.db.session))
