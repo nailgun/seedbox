@@ -109,5 +109,21 @@ def image(channel, version, filename):
     return send_file(filepath)
 
 
+# TODO: ensure connection is encrypted
+@app.route('/credentials/<cred_type>.pem')
+def credentials(cred_type):
+    node = get_node('Credentials download')
+    if cred_type == 'ca':
+        return Response(node.cluster.ca_credentials.cert, mimetype='text/plain')
+
+    if cred_type == 'node':
+        return Response(node.credentials.cert, mimetype='text/plain')
+
+    if cred_type == 'node-key':
+        return Response(node.credentials.key, mimetype='text/plain')
+
+    abort(404)
+
+
 if __name__ == '__main__':
     app.run('0.0.0.0')
