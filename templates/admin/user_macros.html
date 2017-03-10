@@ -1,0 +1,7 @@
+{% macro render_credentials(model, column) %}
+    <a href="{{ url_for('credentialsdata.details_view', id=model.credentials_id) }}">view</a>
+{% endmacro %}
+
+{% macro render_kubeconfig(model, column) %}
+    <a href="{{ url_for('user.kubeconfig_view', id=model.id) }}">raw</a>
+{% endmacro %}
