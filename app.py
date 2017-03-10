@@ -20,8 +20,8 @@ models.db.init_app(app)
 admin.init_app(app)
 
 ipxe_response = """#!ipxe
-kernel /boot/image/{coreos_channel}/{coreos_version}/coreos_production_pxe.vmlinuz coreos.config.url={base_url}boot/ignition {kernel_args}
-initrd /boot/image/{coreos_channel}/{coreos_version}/coreos_production_pxe_image.cpio.gz
+kernel /image/{coreos_channel}/{coreos_version}/coreos_production_pxe.vmlinuz coreos.config.url={base_url}ignition {kernel_args}
+initrd /image/{coreos_channel}/{coreos_version}/coreos_production_pxe_image.cpio.gz
 boot
 """
 
@@ -38,7 +38,7 @@ def get_node(request_type):
     return node
 
 
-@app.route('/boot/ipxe')
+@app.route('/ipxe')
 def ipxe_boot():
     node = get_node('iPXE boot')
     kernel_args = ' '.join(config_renderer.kernel.get_kernel_arguments(node))
@@ -49,14 +49,14 @@ def ipxe_boot():
     return Response(response, mimetype='text/plain')
 
 
-@app.route('/boot/ignition')
+@app.route('/ignition')
 def ignition():
     node = get_node('Ignition config')
     response = config_renderer.ignition.render(node, 'indent' in request.args)
     return Response(response, mimetype='application/json')
 
 
-@app.route('/boot/image/<channel>/<version>/<filename>')
+@app.route('/image/<channel>/<version>/<filename>')
 def image(channel, version, filename):
     get_node('Image download')
 
