@@ -28,21 +28,6 @@ def render(node, indent=False):
                 'contents': render_tpl('units/' + name),
             }
 
-    units = [
-        get_unit('provision-report.service', enable=True),
-    ]
-
-    if node.is_etcd_server:
-        etcd_version = node.cluster.etcd_version
-        if etcd_version == 2:
-            unit_name = 'etcd2.service'
-        elif etcd_version == 3:
-            unit_name = 'etcd-member.service'
-        else:
-            raise Exception('Unknown etcd version', etcd_version)
-        units.append(get_unit(unit_name, enable=True, dropins=['40-etcd-cluster.conf']))
-        units.append(get_unit('locksmithd.service', dropins=['40-etcd-lock.conf']))
-
     ssh_keys = [user.ssh_key for user in node.cluster.users.filter(models.User.ssh_key != '')]
 
     files = [
@@ -81,6 +66,21 @@ def render(node, indent=False):
                 'source': request.url_root + 'hosts',
             },
         })
+
+    units = [
+        get_unit('provision-report.service', enable=True),
+    ]
+
+    if node.is_etcd_server:
+        etcd_version = node.cluster.etcd_version
+        if etcd_version == 2:
+            unit_name = 'etcd2.service'
+        elif etcd_version == 3:
+            unit_name = 'etcd-member.service'
+        else:
+            raise Exception('Unknown etcd version', etcd_version)
+        units.append(get_unit(unit_name, enable=True, dropins=['40-etcd-cluster.conf']))
+        units.append(get_unit('locksmithd.service', dropins=['40-etcd-lock.conf']))
 
     cfg = {
         'ignition': {
