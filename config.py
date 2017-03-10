@@ -8,3 +8,4 @@ boot_secret = '123'
 
 etcd_client_port = 2379
 etcd_peer_port = 2380
+credentials_path = '/etc/ssl/private'
