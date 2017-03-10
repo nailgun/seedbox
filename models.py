@@ -20,11 +20,6 @@ class Cluster(db.Model):
     def __str__(self):
         return self.name
 
-    @property
-    def coreos_base_url(self):
-        # TODO: not secure, download to manager first
-        return 'http://{}.release.core-os.net/amd64-usr/{}/'.format(self.coreos_channel, self.coreos_version)
-
 
 # TODO: add SMBIOS UUID, serial, mac, etc? (http://ipxe.org/cfg/uuid)
 class Node(db.Model):

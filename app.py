@@ -1,6 +1,8 @@
+import os
 import logging
-import urllib.parse
-from flask import Flask, Response, request, abort
+import requests
+import filelock
+from flask import Flask, Response, request, abort, send_file
 
 import kube
 import config
@@ -18,7 +20,6 @@ models.db.init_app(app)
 admin.init_app(app)
 
 node_boot_args = {
-    'secret': urllib.parse.quote(config.boot_secret),
     'uuid': '${uuid}',
     'serial': '${serial}',
     'mac': '${net0/mac:hexhyp}',
@@ -33,44 +34,42 @@ chain /boot/ipxe?{node_boot_string}
 """
 
 boot_response = """#!ipxe
-kernel {coreos_base_url}coreos_production_pxe.vmlinuz coreos.config.url={base_url}boot/ignition?{node_boot_string} coreos.first_boot=yes console=tty0 console=ttyS0 coreos.autologin
-initrd {coreos_base_url}coreos_production_pxe_image.cpio.gz
+kernel /boot/image/{coreos_channel}/{coreos_version}/coreos_production_pxe.vmlinuz coreos.config.url={base_url}boot/ignition?{node_boot_string} coreos.first_boot=yes console=tty0 console=ttyS0 coreos.autologin
+initrd /boot/image/{coreos_channel}/{coreos_version}/coreos_production_pxe_image.cpio.gz
 boot
 """
 
 
-def get_node(request_type, require_args=True):
+def get_node(request_type, require_args=False):
     node_ip = request.remote_addr
     log.info('%s request from %s', request_type, node_ip)
-
-    if request.args.get('secret') != config.boot_secret:
-        log.info('Invalid boot secret from %s', node_ip)
-        abort(401)
-
-    if not all(key in request.args for key in node_boot_args):
-        if require_args:
-            log.error('%s request without required parameters from %s', request_type, node_ip)
-            abort(400)
-        else:
-            return None
 
     node = models.Node.query.filter_by(ip=node_ip).first()
     if node is None:
         log.error('Node %s is unknown', node_ip)
         abort(403)
 
+    try:
+        node.request = {request.args[key] for key in node_boot_args}
+    except KeyError:
+        node.request = None
+        if require_args:
+            log.error('%s request without required parameters from %s', request_type, node_ip)
+            abort(400)
+
     return node
 
 
 @app.route('/boot/ipxe')
 def ipxe_boot():
-    node = get_node('iPXE boot', require_args=False)
-    if node is None:
+    node = get_node('iPXE boot')
+    if node.request is None:
         response = boot_chain_response.format(node_boot_string=node_boot_string)
     else:
         cluster = node.cluster
         response = boot_response.format(node_boot_string=node_boot_string,
-                                        coreos_base_url=cluster.coreos_base_url,
+                                        coreos_channel=cluster.coreos_channel,
+                                        coreos_version=cluster.coreos_version,
                                         base_url=request.url_root)
     return Response(response, mimetype='text/plain')
 
@@ -80,6 +79,34 @@ def ignition():
     node = get_node('Ignition config')
     response = kube.get_coreos_kube_ignition(node)
     return Response(response, mimetype='application/json')
+
+
+@app.route('/boot/image/<channel>/<version>/<filename>')
+def image(channel, version, filename):
+    get_node('Image download')
+
+    dirpath = os.path.join(config.basedir, 'cache', channel, version)
+    filepath = os.path.join(dirpath, filename)
+
+    os.makedirs(dirpath, exist_ok=True)
+
+    lock = filelock.FileLock(filepath + '.lock')
+    with lock:
+        if not os.path.exists(filepath):
+            source_url = 'https://{}.release.core-os.net/amd64-usr/{}/{}'.format(channel, version, filename)
+            resp = requests.get(source_url, stream=True)
+            if resp.status_code == 404:
+                abort(404)
+            resp.raise_for_status()
+
+            with open(filepath + '.partial', 'wb') as f:
+                for chunk in resp.iter_content(chunk_size=1024):
+                    f.write(chunk)
+            os.rename(filepath + '.partial', filepath)
+
+        os.remove(filepath + '.lock')
+
+    return send_file(filepath)
 
 
 if __name__ == '__main__':
