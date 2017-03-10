@@ -26,7 +26,7 @@ boot
 """
 
 
-def get_node(request_type, require_args=False):
+def get_node(request_type):
     node_ip = request.remote_addr
     log.info('%s request from %s', request_type, node_ip)
 
