@@ -85,7 +85,7 @@ def ignition():
 def image(channel, version, filename):
     get_node('Image download')
 
-    dirpath = os.path.join(config.basedir, 'cache', channel, version)
+    dirpath = os.path.join(config.cachedir, channel, version)
     filepath = os.path.join(dirpath, filename)
 
     os.makedirs(dirpath, exist_ok=True)

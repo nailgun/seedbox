@@ -1,10 +1,12 @@
 from flask import request, Response
 from flask_admin import Admin, expose
 from flask_admin.model.template import macro
+from flask_admin.contrib.fileadmin import FileAdmin
 from flask_admin.contrib.sqla import ModelView as BaseModelView
 
 import pki
 import kube
+import config
 import models
 
 
@@ -124,3 +126,4 @@ admin.add_view(ClusterView(models.Cluster, models.db.session))
 admin.add_view(NodeView(models.Node, models.db.session))
 admin.add_view(UserView(models.User, models.db.session))
 admin.add_view(CredentialsDataView(models.CredentialsData, models.db.session))
+admin.add_view(FileAdmin(config.cachedir, '/cache/', name='Cache'))
