@@ -35,8 +35,6 @@ def render(node, url_root, indent=False):
 
     units = [
         get_unit('provision-report.service', enable=True),
-        get_unit('credentials@.service'),
-        get_unit('credentials-all.service'),
     ]
 
     if node.is_etcd_server:
@@ -52,12 +50,41 @@ def render(node, url_root, indent=False):
 
     ssh_keys = [user.ssh_key for user in node.cluster.users.filter(models.User.ssh_key != '')]
 
+    files = [
+        {
+            'filesystem': 'root',
+            'path': config.ca_cert_path,
+            'mode': 0o444,
+            'contents': {
+                'source': url_root + 'credentials/ca.pem',
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': config.node_cert_path,
+            'mode': 0o444,
+            'contents': {
+                'source': url_root + 'credentials/node.pem',
+            },
+        },
+        {
+            'filesystem': 'root',
+            'path': config.node_key_path,
+            'mode': 0o400,
+            'contents': {
+                'source': url_root + 'credentials/node-key.pem',
+            },
+        }
+    ]
+
     cfg = {
         'ignition': {
             'version': '2.0.0',
             'config': {},
         },
-        'storage': {},
+        'storage': {
+            'files': files,
+        },
         'networkd': {},
         'passwd': {
             'users': [{
