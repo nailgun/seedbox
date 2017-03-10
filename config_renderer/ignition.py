@@ -1,4 +1,6 @@
 import json
+import base64
+import urllib.parse
 from flask import request
 
 import config
@@ -63,7 +65,7 @@ def render(node, indent=False):
             'path': '/etc/hosts',
             'mode': 0o644,
             'contents': {
-                'source': request.url_root + 'hosts',
+                'source': to_data_url(render_tpl('hosts')),
             },
         })
 
@@ -116,3 +118,12 @@ def render(node, indent=False):
         return json.dumps(cfg, indent=2)
     else:
         return json.dumps(cfg, separators=(',', ':'))
+
+
+def to_data_url(data, mediatype='', b64=False):
+    if b64:
+        if not isinstance(data, bytes):
+            data = data.encode('utf-8')
+        return 'data:{};base64,{}'.format(mediatype, base64.b64encode(data).decode('ascii'))
+    else:
+        return 'data:{},{}'.format(mediatype, urllib.parse.quote(data))

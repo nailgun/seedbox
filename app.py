@@ -115,12 +115,5 @@ def report():
     return Response('ok', mimetype='application/json')
 
 
-@app.route('/hosts')
-def hosts():
-    node = get_node('/etc/hosts file')
-    result = config_renderer.render_template('hosts', node)
-    return Response(result, mimetype='text/plain')
-
-
 if __name__ == '__main__':
     app.run('0.0.0.0')
