@@ -1,8 +1,8 @@
-from flask import request, Response
+from flask import request, abort, Response
 from flask_admin import Admin, expose
 from flask_admin.model.template import macro
 from flask_admin.contrib.fileadmin import FileAdmin
-from flask_admin.contrib.sqla import ModelView as BaseModelView
+from flask_admin.contrib.sqla import ModelView as BaseModelView, form
 
 import pki
 import kube
@@ -34,7 +34,7 @@ class ClusterView(ModelView):
 
 
 class NodeView(ModelView):
-    column_list = ['cluster', 'is_master', 'fqdn', 'ip', 'credentials']
+    column_list = ['cluster', 'fqdn', 'ip', 'credentials']
     list_template = 'admin/node_list.html'
     details_template = 'admin/node_details.html'
     form_excluded_columns = ['credentials']
@@ -88,9 +88,15 @@ class UserView(ModelView):
         user = self.get_one(request.args.get('id'))
         user_creds = user.credentials
         ca_creds = user.cluster.ca_credentials
-        # TODO: get apiserver HA proxy
-        master_node = models.Node.query.filter_by(cluster_id=user.cluster_id, is_master=True).first()
-        kubeconfig = kube.get_kubeconfig(user.cluster.name, master_node.fqdn, ca_creds.cert, user.name, user_creds.cert, user_creds.key)
+        apiserver_node = models.Node.query.filter_by(cluster_id=user.cluster_id,
+                                                     is_k8s_apiserver_lb=True).first()
+        if apiserver_node is None:
+            apiserver_node = models.Node.query.filter_by(cluster_id=user.cluster_id,
+                                                         is_k8s_apiserver=True).first()
+            if apiserver_node is None:
+                abort(400)
+
+        kubeconfig = kube.get_kubeconfig(user.cluster.name, apiserver_node.fqdn, ca_creds.cert, user.name, user_creds.cert, user_creds.key)
         return Response(kubeconfig, mimetype='text/plain')
 
 

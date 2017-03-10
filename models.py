@@ -1,6 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
+default_coreos_channel = 'stable'
+default_coreos_version = '1235.9.0'
+default_etcd_version = 2
 
 
 class Cluster(db.Model):
@@ -8,11 +11,9 @@ class Cluster(db.Model):
     name = db.Column(db.String(80), unique=True, nullable=False)
     ca_credentials_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
     ca_credentials = db.relationship('CredentialsData')
-    coreos_channel = db.Column(db.String(80), default='stable', nullable=False)
-    coreos_version = db.Column(db.String(80), default='1235.9.0', nullable=False)
-    #
-    # def __init__(self, name):
-    #     self.name = name
+    coreos_channel = db.Column(db.String(80), default=default_coreos_channel, nullable=False)
+    coreos_version = db.Column(db.String(80), default=default_coreos_version, nullable=False)
+    etcd_version = db.Column(db.Integer, default=default_etcd_version, nullable=False)
 
     def __repr__(self):
         return '<Cluster %r>' % self.name
@@ -24,23 +25,50 @@ class Cluster(db.Model):
 # TODO: add SMBIOS UUID, serial, mac, etc? (http://ipxe.org/cfg/uuid)
 class Node(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.id'), nullable=False)
-    cluster = db.relationship('Cluster', backref=db.backref('nodes', lazy='dynamic'))
     ip = db.Column(db.String(80), unique=True, nullable=False)
     fqdn = db.Column(db.String(80), unique=True, nullable=False)
-    is_master = db.Column(db.Boolean, nullable=False)
+
+    cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.id'), nullable=False)
+    cluster = db.relationship('Cluster', backref=db.backref('nodes', lazy='dynamic'))
+
     credentials_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
     credentials = db.relationship('CredentialsData')
-    #
-    # def __init__(self, cluster_id, ip):
-    #     self.cluster_id = cluster_id
-    #     self.ip = ip
+
+    _coreos_channel = db.Column(db.String(80), nullable=True)
+    _coreos_version = db.Column(db.String(80), nullable=True)
+    _etcd_version = db.Column(db.Integer, nullable=True)
+
+    coreos_autologin = db.Column(db.Boolean, nullable=False)
+    linux_consoles = db.Column(db.String(80), default='tty0,ttyS0', nullable=False)
+
+    is_etcd_server = db.Column(db.Boolean, nullable=False)
+    is_k8s_apiserver = db.Column(db.Boolean, nullable=False)
+    is_k8s_apiserver_lb = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
-        return '<Node %r>' % self.ip
+        return '<Node %r>' % self.fqdn
 
     def __str__(self):
-        return self.ip
+        return self.fqdn
+
+    @property
+    def coreos_channel(self):
+        return self._coreos_channel or self.cluster.coreos_channel
+
+    @property
+    def coreos_version(self):
+        return self._coreos_version or self.cluster.coreos_version
+
+    @property
+    def etcd_version(self):
+        return self._etcd_version or self.cluster.etcd_version
+
+
+class NodeConfig(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    def __repr__(self):
+        return '<NodeConfig %r>' % self.id
 
 
 # TODO: allow user to belong to more then one cluster (https://kubernetes.io/docs/user-guide/kubeconfig-file/)
@@ -51,10 +79,7 @@ class User(db.Model):
     name = db.Column(db.String(80), nullable=False)  # TODO: unique together with cluster_id
     credentials_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
     credentials = db.relationship('CredentialsData')
-    #
-    # def __init__(self, cluster_id, name):
-    #     self.cluster_id = cluster_id
-    #     self.name = name
+    ssh_key = db.Column(db.Text, nullable=True)
 
     def __repr__(self):
         return '<User %r>' % self.name

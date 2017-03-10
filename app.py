@@ -7,6 +7,7 @@ from flask import Flask, Response, request, abort, send_file
 import kube
 import config
 import models
+import config_renderer
 from admin import admin
 
 log = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ chain /boot/ipxe?{node_boot_string}
 """
 
 boot_response = """#!ipxe
-kernel /boot/image/{coreos_channel}/{coreos_version}/coreos_production_pxe.vmlinuz coreos.config.url={base_url}boot/ignition?{node_boot_string} coreos.first_boot=yes console=tty0 console=ttyS0 coreos.autologin
+kernel /boot/image/{coreos_channel}/{coreos_version}/coreos_production_pxe.vmlinuz coreos.config.url={base_url}boot/ignition?{node_boot_string} {kernel_args}
 initrd /boot/image/{coreos_channel}/{coreos_version}/coreos_production_pxe_image.cpio.gz
 boot
 """
@@ -66,11 +67,12 @@ def ipxe_boot():
     if node.request is None:
         response = boot_chain_response.format(node_boot_string=node_boot_string)
     else:
-        cluster = node.cluster
+        kernel_args = ' '.join(config_renderer.kernel.get_kernel_arguments(node))
         response = boot_response.format(node_boot_string=node_boot_string,
-                                        coreos_channel=cluster.coreos_channel,
-                                        coreos_version=cluster.coreos_version,
-                                        base_url=request.url_root)
+                                        coreos_channel=node.coreos_channel,
+                                        coreos_version=node.coreos_version,
+                                        base_url=request.url_root,
+                                        kernel_args=kernel_args)
     return Response(response, mimetype='text/plain')
 
 
