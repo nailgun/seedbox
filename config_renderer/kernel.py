@@ -1,3 +1,6 @@
+import config
+
+
 def get_kernel_arguments(node):
     args = ['coreos.first_boot=yes']
 
@@ -6,5 +9,7 @@ def get_kernel_arguments(node):
 
     for console in node.linux_consoles.split(','):
         args.append('console='+console)
+
+    args.append('root=' + config.root_partition)
 
     return args
