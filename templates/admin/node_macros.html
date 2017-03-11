@@ -1,3 +1,10 @@
 {% macro render_credentials(model, column) %}
-    <a href="{{ url_for('credentialsdata.details_view', id=model.credentials_id) }}">view</a>
+    <a href="{{ url_for('credentialsdata.cert_view', id=model.credentials.id) }}">[cert]</a>
+    <a href="{{ url_for('credentialsdata.cert_text_view', id=model.credentials.id) }}">[text]</a>
+    <a href="{{ url_for('credentialsdata.key_view', id=model.credentials.id) }}">[key]</a>
+
+    {% set credentials_error=model.credentials_error %}
+    {% if credentials_error %}
+        <span class="glyphicon glyphicon-exclamation-sign text-danger" title="{{ credentials_error }}" style="cursor: pointer"></span>
+    {% endif %}
 {% endmacro %}

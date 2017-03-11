@@ -3,3 +3,5 @@ flask_admin
 flask_sqlalchemy
 filelock
 requests
+cryptography
+pyopenssl

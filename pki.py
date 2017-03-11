@@ -1,7 +1,13 @@
+import ssl
 import sys
+import idna
 import tempfile
+import ipaddress
 import subprocess
-
+from OpenSSL import crypto
+from cryptography import x509
+from cryptography.x509.oid import NameOID, ExtensionOID
+from cryptography.hazmat.backends import default_backend
 
 encoding = sys.getdefaultencoding()
 
@@ -94,3 +100,62 @@ def get_certificate_text(cert):
                           check=True,
                           stdout=subprocess.PIPE,
                           input=cert).stdout
+
+
+def verify_certificate_chain(ca_pem_data, cert_pem_data):
+    try:
+        ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, ca_pem_data)
+        cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_pem_data)
+
+        store = crypto.X509Store()
+        store.add_cert(ca_cert)
+
+        store_ctx = crypto.X509StoreContext(store, cert)
+        store_ctx.verify_certificate()
+    except crypto.Error as e:
+        raise InvalidCertificate('Broken certificate') from e
+    except crypto.X509StoreContextError as e:
+        raise InvalidCertificate('Invalid certificate chain: ' + str(e)) from e
+
+
+def validate_certificate_host(cert_pem_data, host_name, host_ip):
+    cert = x509.load_pem_x509_certificate(cert_pem_data, default_backend())
+    try:
+        _match_host(cert, host_name, host_ip)
+    except idna.core.IDNAError as e:
+        raise InvalidCertificate('Invalid subject IDNA name') from e
+
+
+# based on ssl.match_hostname code
+# https://github.com/python/cpython/blob/6f0eb93183519024cb360162bdd81b9faec97ba6/Lib/ssl.py#L279
+def _match_host(cert, host_name, host_ip):
+    alt_names = cert.extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME)
+    dns = alt_names.value.get_values_for_type(x509.DNSName)
+    ips = alt_names.value.get_values_for_type(x509.IPAddress)
+
+    if not dns:
+        common_names = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
+        if common_names:
+            common_name = common_names[0]
+            dns = [common_name.value]
+
+    if not any(ssl._dnsname_match(dn, host_name) for dn in dns):
+        if len(dns) > 1:
+            raise InvalidCertificate("hostname %r doesn't match either of %s" % (host_name, ', '.join(map(repr, dns))))
+        elif len(dns) == 1:
+            raise InvalidCertificate("hostname %r doesn't match %r" % (host_name, dns[0]))
+        else:
+            raise InvalidCertificate("no appropriate commonName or subjectAltName DNSName fields were found")
+
+    host_ip = ipaddress.ip_address(host_ip)
+    if not any(ip == host_ip for ip in ips):
+        if len(ips) > 1:
+            raise InvalidCertificate("host ip %r doesn't match either of %s" % (host_name, ', '.join(map(repr, ips))))
+        elif len(ips) == 1:
+            raise InvalidCertificate("ho ip %r doesn't match %r" % (host_name, ips[0]))
+        else:
+            raise InvalidCertificate("no appropriate subjectAltName IPAddress fields were found")
+
+
+class InvalidCertificate(Exception):
+    pass

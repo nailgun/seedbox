@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 
+import pki
+
 db = SQLAlchemy()
 default_coreos_channel = 'stable'
 default_coreos_version = '1235.9.0'
@@ -63,6 +65,14 @@ class Node(db.Model):
     @property
     def is_ready(self):
         return self.target_config_version == self.current_config_version
+
+    @property
+    def credentials_error(self):
+        try:
+            pki.verify_certificate_chain(self.cluster.ca_credentials.cert, self.credentials.cert)
+            pki.validate_certificate_host(self.credentials.cert, self.fqdn, self.ip)
+        except pki.InvalidCertificate as e:
+            return str(e)
 
 
 class NodeConfig(db.Model):
