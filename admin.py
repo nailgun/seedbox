@@ -26,6 +26,7 @@ class ClusterView(ModelView):
 
     def on_model_change(self, form, model, is_created):
         if not is_created:
+            model.nodes.update({models.Node.target_config_version: models.Node.target_config_version + 1})
             return
         ca = models.CredentialsData()
         ca.cert, ca.key = pki.create_ca_certificate(model.name,
