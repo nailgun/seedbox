@@ -25,7 +25,9 @@ ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
 
 ExecStart=/usr/lib/coreos/kubelet-wrapper \
   --api-servers=http://127.0.0.1:{{ config.k8s_apiserver_insecure_port }} \
+  {% if node.is_k8s_schedulable %}
   --register-schedulable=true \
+  {% endif %}
   --cni-conf-dir=/etc/kubernetes/cni/net.d \
   --network-plugin=cni \
   --container-runtime={{ config.k8s_runtime }} \
