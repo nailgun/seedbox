@@ -7,6 +7,7 @@ import config
 import models
 
 
+# TODO: deploy addons separately via admin button
 def render(node, indent=False):
     from . import render_template
 
