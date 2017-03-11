@@ -1,5 +1,6 @@
 import os
 
+allow_unsafe_credentials_transfer = True
 basedir = os.path.dirname(__file__)
 cachedir = os.path.join(basedir, 'cache')
 
