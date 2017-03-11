@@ -6,7 +6,7 @@ function init_flannel {
   do
       for ETCD in {% for n in cluster.nodes.filter_by(is_etcd_server=True) %}http://{{ n.fqdn }}:{{ config.etcd_peer_port }} {% endfor %}; do
           echo "Trying: $ETCD"
-          if [ -n "$(curl --silent "$ETCD/v2/machines")" ]; then
+          if [ -n "$(curl --fail --silent "$ETCD/v2/machines")" ]; then
               local ACTIVE_ETCD=$ETCD
               break
           fi
@@ -16,7 +16,7 @@ function init_flannel {
           break
       fi
   done
-  RES=$(curl --silent -X PUT -d "value={\"Network\":\"{{ config.k8s_pod_network }}\",\"Backend\":{\"Type\":\"vxlan\"}}" "$ACTIVE_ETCD/v2/keys/coreos.com/network/config?prevExist=false")
+  RES=$(curl --fail --silent -X PUT -d "value={\"Network\":\"{{ config.k8s_pod_network }}\",\"Backend\":{\"Type\":\"vxlan\"}}" "$ACTIVE_ETCD/v2/keys/coreos.com/network/config?prevExist=false")
   if [ -z "$(echo $RES | grep '"action":"create"')" ] && [ -z "$(echo $RES | grep 'Key already exists')" ]; then
       echo "Unexpected error configuring flannel pod network: $RES"
   fi
