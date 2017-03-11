@@ -1,7 +1,7 @@
 {% macro render_credentials(model, column) %}
-    <a href="{{ url_for('credentialsdata.cert_view', id=model.credentials.id) }}">[cert]</a>
-    <a href="{{ url_for('credentialsdata.cert_text_view', id=model.credentials.id) }}">[text]</a>
-    <a href="{{ url_for('credentialsdata.key_view', id=model.credentials.id) }}">[key]</a>
+    <a href="{{ url_for('credentialsdata.cert_view', id=model.credentials_id) }}">[cert]</a>
+    <a href="{{ url_for('credentialsdata.cert_text_view', id=model.credentials_id) }}">[text]</a>
+    <a href="{{ url_for('credentialsdata.key_view', id=model.credentials_id) }}">[key]</a>
 
     <form class="icon" method="POST" action="{{ url_for('node.reissue_creds_view', id=model.id) }}">
         <button onclick="return confirm('Are you sure you want to reissue this credentials?');" class="btn btn-link">
