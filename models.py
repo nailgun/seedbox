@@ -82,13 +82,6 @@ class Node(db.Model):
             return str(e)
 
 
-class NodeConfig(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-
-    def __repr__(self):
-        return '<NodeConfig %r>' % self.id
-
-
 # TODO: allow user to belong to more then one cluster (https://kubernetes.io/docs/user-guide/kubeconfig-file/)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
