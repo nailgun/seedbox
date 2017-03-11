@@ -77,7 +77,7 @@ class Node(db.Model):
     def credentials_error(self):
         try:
             pki.verify_certificate_chain(self.cluster.ca_credentials.cert, self.credentials.cert)
-            pki.validate_certificate_host(self.credentials.cert, self.fqdn, self.ip)
+            pki.validate_certificate_host(self.credentials.cert, self.fqdn)
         except pki.InvalidCertificate as e:
             return str(e)
 

@@ -135,10 +135,9 @@ def validate_certificate_subject_name(cert_pem_data, subject_name):
 
 
 @wrap_subject_matching_errors
-def validate_certificate_host(cert_pem_data, host_name, host_ip):
+def validate_certificate_host(cert_pem_data, host_name):
     cert = x509.load_pem_x509_certificate(cert_pem_data, default_backend())
     _match_subject_name(cert, host_name, compare_func=ssl._dnsname_match)
-    _match_subject_ip(cert, host_ip)
 
 
 # based on ssl.match_hostname code
@@ -163,20 +162,6 @@ def _match_subject_name(cert, subject_name, compare_func=operator.eq):
             raise InvalidCertificate("subject name %r doesn't match %r" % (subject_name, names[0]))
         else:
             raise InvalidCertificate("no appropriate commonName or subjectAltName DNSName fields were found")
-
-
-def _match_subject_ip(cert, subject_ip, compare_func=operator.eq):
-    alt_names = cert.extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME)
-    ips = alt_names.value.get_values_for_type(x509.IPAddress)
-
-    subject_ip = ipaddress.ip_address(subject_ip)
-    if not any(compare_func(ip, subject_ip) for ip in ips):
-        if len(ips) > 1:
-            raise InvalidCertificate("subject ip %s doesn't match either of %s" % (subject_ip, ', '.join(map(repr, ips))))
-        elif len(ips) == 1:
-            raise InvalidCertificate("subject ip %s doesn't match %s" % (subject_ip, ips[0]))
-        else:
-            raise InvalidCertificate("no appropriate subjectAltName IPAddress fields were found")
 
 
 class InvalidCertificate(Exception):

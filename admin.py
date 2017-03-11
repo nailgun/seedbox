@@ -63,7 +63,7 @@ class NodeView(ModelView):
             ca_creds = model.cluster.ca_credentials
         creds = models.CredentialsData()
         creds.cert, creds.key = pki.create_certificate(model.fqdn,
-                                                       ips=[model.ip],
+                                                       ips=[config.k8s_apiserver_service_ip],
                                                        fqdns=[model.fqdn],
                                                        ca_cert=ca_creds.cert,
                                                        ca_key=ca_creds.key,
