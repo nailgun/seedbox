@@ -1,96 +1,84 @@
 import ssl
-import sys
 import idna
+import datetime
 import operator
-import tempfile
 import ipaddress
 import subprocess
 from OpenSSL import crypto
 from cryptography import x509
 from cryptography.x509.oid import NameOID, ExtensionOID
 from cryptography.hazmat.backends import default_backend
-
-encoding = sys.getdefaultencoding()
-
-# TODO: should be different for user (no alt_names at least)
-CNF_TEMPLATE = b"""
-[req]
-req_extensions = v3_req
-distinguished_name = req_distinguished_name
-
-[req_distinguished_name]
-
-[ v3_req ]
-basicConstraints = CA:FALSE
-keyUsage = nonRepudiation, digitalSignature, keyEncipherment
-subjectAltName = @alt_names
-
-[alt_names]
-DNS.101 = kubernetes
-DNS.102 = kubernetes.default
-DNS.103 = kubernetes.default.svc
-DNS.104 = kubernetes.default.svc.cluster.local
-"""
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 
 
-def gen_rsakey(length_bits=2048):
-    return subprocess.run(['openssl', 'genrsa', str(length_bits)], check=True, stdout=subprocess.PIPE).stdout
+def create_ca_certificate(cn, key_size=2048, certify_days=365):
+    key = rsa.generate_private_key(public_exponent=65537, key_size=key_size, backend=default_backend())
+    key_id = x509.SubjectKeyIdentifier.from_public_key(key.public_key())
 
+    subject = issuer = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, cn)])
 
-def create_ca_certificate(cn, key_length_bits=2048, certify_days=365):
-    key = gen_rsakey(key_length_bits)
-    cert = subprocess.run(['openssl', 'req',
-                           '-x509',
-                           '-new',
-                           '-key', '/dev/stdin',
-                           '-days', str(certify_days),
-                           '-subj', '/CN={}'.format(cn)],
-                          check=True,
-                          stdout=subprocess.PIPE,
-                          input=key).stdout
+    now = datetime.datetime.utcnow()
+    serial = x509.random_serial_number()
+    cert = x509.CertificateBuilder() \
+        .subject_name(subject) \
+        .issuer_name(issuer) \
+        .public_key(key.public_key()) \
+        .serial_number(serial) \
+        .not_valid_before(now) \
+        .not_valid_after(now + datetime.timedelta(days=certify_days)) \
+        .add_extension(key_id, critical=False) \
+        .add_extension(x509.AuthorityKeyIdentifier(key_id.digest, [x509.DirectoryName(issuer)], serial), critical=False) \
+        .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=False) \
+        .sign(key, hashes.SHA256(), default_backend())
+
+    cert = cert.public_bytes(serialization.Encoding.PEM)
+    key = key.private_bytes(encoding=serialization.Encoding.PEM,
+                            format=serialization.PrivateFormat.TraditionalOpenSSL,
+                            encryption_algorithm=serialization.NoEncryption())
     return cert, key
 
 
-def create_certificate(cn, ips, fqdns, ca_cert, ca_key, key_length_bits=2048, certify_days=365):
-    key = gen_rsakey(key_length_bits)
+def issue_certificate(cn, ca_cert, ca_key, san_dns=(), san_ips=(), key_size=2048, certify_days=365):
+    ca_cert = x509.load_pem_x509_certificate(ca_cert, default_backend())
+    ca_key = serialization.load_pem_private_key(ca_key, password=None, backend=default_backend())
 
-    with tempfile.NamedTemporaryFile() as csr_file:
-        with tempfile.NamedTemporaryFile() as cnf_file:
+    key = rsa.generate_private_key(public_exponent=65537, key_size=key_size, backend=default_backend())
 
-            cnf = CNF_TEMPLATE
-            for idx, ip in enumerate(ips, 1):
-                cnf += 'IP.{}={}\n'.format(idx, ip).encode(encoding)
-            for idx, fqdn in enumerate(fqdns, 1):
-                cnf += 'DNS.{}={}\n'.format(idx, fqdn).encode(encoding)
-            cnf_file.write(cnf)
-            cnf_file.flush()
+    subject = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, cn)])
 
-            subprocess.run(['openssl', 'req',
-                            '-new',
-                            '-key', '/dev/stdin',
-                            '-out', csr_file.name,
-                            '-subj', '/CN={}'.format(cn),
-                            '-config', cnf_file.name],
-                           check=True,
-                           input=key)
+    now = datetime.datetime.utcnow()
+    cert = x509.CertificateBuilder() \
+        .subject_name(subject) \
+        .issuer_name(ca_cert.issuer) \
+        .public_key(key.public_key()) \
+        .serial_number(x509.random_serial_number()) \
+        .not_valid_before(now) \
+        .not_valid_after(now + datetime.timedelta(days=certify_days)) \
+        .add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=False) \
+        .add_extension(x509.KeyUsage(digital_signature=True,
+                                     content_commitment=True,
+                                     key_encipherment=True,
+                                     data_encipherment=False,
+                                     key_agreement=False,
+                                     key_cert_sign=False,
+                                     crl_sign=False,
+                                     encipher_only=False,
+                                     decipher_only=False),
+                       critical=False)
 
-            with tempfile.NamedTemporaryFile() as ca_cert_file:
-                ca_cert_file.write(ca_cert)
-                ca_cert_file.flush()
+    sans = [x509.DNSName(name) for name in san_dns]
+    sans += [x509.IPAddress(ipaddress.ip_address(ip)) for ip in san_ips]
+    if sans:
+        cert = cert.add_extension(x509.SubjectAlternativeName(sans), critical=False)
 
-                cert = subprocess.run(['openssl', 'x509',
-                                       '-req',
-                                       '-in', csr_file.name,
-                                       '-CA', ca_cert_file.name,
-                                       '-CAkey', '/dev/stdin',
-                                       '-CAcreateserial',
-                                       '-days', str(certify_days),
-                                       '-extensions', 'v3_req',
-                                       '-extfile', cnf_file.name],
-                                      check=True,
-                                      stdout=subprocess.PIPE,
-                                      input=ca_key).stdout
+    cert = cert.sign(ca_key, hashes.SHA256(), default_backend())
 
+    cert = cert.public_bytes(serialization.Encoding.PEM)
+    key = key.private_bytes(encoding=serialization.Encoding.PEM,
+                            format=serialization.PrivateFormat.TraditionalOpenSSL,
+                            encryption_algorithm=serialization.NoEncryption())
     return cert, key
 
 
