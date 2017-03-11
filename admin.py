@@ -134,13 +134,21 @@ class UserView(ModelView):
         ca_creds = user.cluster.ca_credentials
         apiserver_node = models.Node.query.filter_by(cluster_id=user.cluster_id,
                                                      is_k8s_apiserver_lb=True).first()
+        apiserver_port = config.k8s_apiserver_lb_port
         if apiserver_node is None:
             apiserver_node = models.Node.query.filter_by(cluster_id=user.cluster_id,
                                                          is_k8s_apiserver=True).first()
+            apiserver_port = config.k8s_apiserver_secure_port
             if apiserver_node is None:
                 abort(400)
 
-        kubeconfig = kube.get_kubeconfig(user.cluster.name, apiserver_node.fqdn, ca_creds.cert, user.name, user_creds.cert, user_creds.key)
+        kubeconfig = kube.get_kubeconfig(user.cluster.name,
+                                         apiserver_node.fqdn,
+                                         apiserver_port,
+                                         ca_creds.cert,
+                                         user.name,
+                                         user_creds.cert,
+                                         user_creds.key)
         return Response(kubeconfig, mimetype='text/plain')
 
 

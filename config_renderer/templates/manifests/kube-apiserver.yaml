@@ -15,7 +15,8 @@ spec:
     - --etcd-servers={% for n in cluster.nodes.filter_by(is_etcd_server=True) %}http://{{ n.fqdn }}:{{ config.etcd_client_port }}{% if not loop.last %},{% endif %}{% endfor %}
     - --allow-privileged=true
     - --service-cluster-ip-range={{ config.k8s_service_ip_range }}
-    - --secure-port=443
+    - --secure-port={{ config.k8s_apiserver_secure_port }}
+    - --insecure-port={{ config.k8s_apiserver_insecure_port }}
     - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota
     - --tls-cert-file={{ config.node_cert_path }}
     - --tls-private-key-file={{ config.node_key_path }}
@@ -31,10 +32,10 @@ spec:
       initialDelaySeconds: 15
       timeoutSeconds: 15
     ports:
-    - containerPort: 443
-      hostPort: 443
+    - containerPort: {{ config.k8s_apiserver_secure_port }}
+      hostPort: {{ config.k8s_apiserver_secure_port }}
       name: https
-    - containerPort: 8080
+    - containerPort: {{ config.k8s_apiserver_insecure_port }}
       hostPort: {{ config.k8s_apiserver_insecure_port }}
       name: local
     volumeMounts:

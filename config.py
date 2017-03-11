@@ -17,6 +17,8 @@ root_partition = '/dev/sda1'
 
 etcd_client_port = 2379
 etcd_peer_port = 2380
+k8s_apiserver_lb_port = 433
+k8s_apiserver_secure_port = 6443
 k8s_apiserver_insecure_port = 8080
 k8s_cluster_domain = 'cluster.local'
 cluster_credentials_path = '/etc/ssl/cluster'
