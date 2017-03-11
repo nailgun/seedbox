@@ -1,8 +1,7 @@
 import base64
 
 
-KUBECONFIG_TEMPLATE = """
-apiVersion: v1
+KUBECONFIG_TEMPLATE = """apiVersion: v1
 kind: Config
 users:
 - name: {user_name}
