@@ -99,9 +99,7 @@ class UserView(ModelView):
         'kubeconfig': macro('render_kubeconfig'),
     }
 
-    def on_model_change(self, form, model, is_created):
-        if not is_created:
-            return
+    def _issue_creds(self, model):
         with self.session.no_autoflush:
             ca_creds = model.cluster.ca_credentials
         creds = models.CredentialsData()
@@ -113,6 +111,21 @@ class UserView(ModelView):
                                                        certify_days=365)
         self.session.add(creds)
         model.credentials = creds
+
+    def on_model_change(self, form, model, is_created):
+        if not is_created:
+            return
+        self._issue_creds(model)
+
+    @expose('/reissue-credentials', methods=['POST'])
+    def reissue_creds_view(self):
+        model = self.get_one(request.args.get('id'))
+        self._issue_creds(model)
+        self.session.add(model)
+        self.session.commit()
+        return_url = get_redirect_target() or self.get_url('.index_view')
+        flash('The credentials successfully reissued', 'success')
+        return redirect(return_url)
 
     @expose('/kubeconfig')
     def kubeconfig_view(self):

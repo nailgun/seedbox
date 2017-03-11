@@ -98,6 +98,13 @@ class User(db.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def credentials_error(self):
+        try:
+            pki.validate_certificate_subject_name(self.credentials.cert, self.name)
+        except pki.InvalidCertificate as e:
+            return str(e)
+
 
 class CredentialsData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
