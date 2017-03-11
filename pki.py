@@ -87,7 +87,7 @@ def create_certificate(cn, ips, fqdns, ca_cert, ca_key, key_length_bits=2048, ce
     return cert, key
 
 
-def get_certificate_info(cert):
+def get_certificate_text(cert):
     return subprocess.run(['openssl', 'x509',
                            '-in', '/dev/stdin',
                            '-text'],
