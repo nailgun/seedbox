@@ -1,6 +1,7 @@
 import ssl
 import sys
 import idna
+import operator
 import tempfile
 import ipaddress
 import subprocess
@@ -118,41 +119,62 @@ def verify_certificate_chain(ca_pem_data, cert_pem_data):
         raise InvalidCertificate('Invalid certificate chain: ' + str(e)) from e
 
 
+def wrap_subject_matching_errors(func):
+    def wrapped(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except idna.core.IDNAError as e:
+            raise InvalidCertificate('Invalid subject IDNA name') from e
+    return wrapped
+
+
+@wrap_subject_matching_errors
+def validate_certificate_subject_name(cert_pem_data, subject_name):
+    cert = x509.load_pem_x509_certificate(cert_pem_data, default_backend())
+    _match_subject_name(cert, subject_name)
+
+
+@wrap_subject_matching_errors
 def validate_certificate_host(cert_pem_data, host_name, host_ip):
     cert = x509.load_pem_x509_certificate(cert_pem_data, default_backend())
-    try:
-        _match_host(cert, host_name, host_ip)
-    except idna.core.IDNAError as e:
-        raise InvalidCertificate('Invalid subject IDNA name') from e
+    _match_subject_name(cert, host_name, compare_func=ssl._dnsname_match)
+    _match_subject_ip(cert, host_ip)
 
 
 # based on ssl.match_hostname code
 # https://github.com/python/cpython/blob/6f0eb93183519024cb360162bdd81b9faec97ba6/Lib/ssl.py#L279
-def _match_host(cert, host_name, host_ip):
-    alt_names = cert.extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME)
-    dns = alt_names.value.get_values_for_type(x509.DNSName)
-    ips = alt_names.value.get_values_for_type(x509.IPAddress)
+def _match_subject_name(cert, subject_name, compare_func=operator.eq):
+    try:
+        alt_names = cert.extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME)
+        names = alt_names.value.get_values_for_type(x509.DNSName)
+    except x509.extensions.ExtensionNotFound:
+        names = []
 
-    if not dns:
+    if not names:
         common_names = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
         if common_names:
             common_name = common_names[0]
-            dns = [common_name.value]
+            names = [common_name.value]
 
-    if not any(ssl._dnsname_match(dn, host_name) for dn in dns):
-        if len(dns) > 1:
-            raise InvalidCertificate("hostname %r doesn't match either of %s" % (host_name, ', '.join(map(repr, dns))))
-        elif len(dns) == 1:
-            raise InvalidCertificate("hostname %r doesn't match %r" % (host_name, dns[0]))
+    if not any(compare_func(name, subject_name) for name in names):
+        if len(names) > 1:
+            raise InvalidCertificate("subject name %r doesn't match either of %s" % (subject_name, ', '.join(map(repr, names))))
+        elif len(names) == 1:
+            raise InvalidCertificate("subject name %r doesn't match %r" % (subject_name, names[0]))
         else:
             raise InvalidCertificate("no appropriate commonName or subjectAltName DNSName fields were found")
 
-    host_ip = ipaddress.ip_address(host_ip)
-    if not any(ip == host_ip for ip in ips):
+
+def _match_subject_ip(cert, subject_ip, compare_func=operator.eq):
+    alt_names = cert.extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME)
+    ips = alt_names.value.get_values_for_type(x509.IPAddress)
+
+    subject_ip = ipaddress.ip_address(subject_ip)
+    if not any(compare_func(ip, subject_ip) for ip in ips):
         if len(ips) > 1:
-            raise InvalidCertificate("host ip %r doesn't match either of %s" % (host_name, ', '.join(map(repr, ips))))
+            raise InvalidCertificate("subject ip %s doesn't match either of %s" % (subject_ip, ', '.join(map(repr, ips))))
         elif len(ips) == 1:
-            raise InvalidCertificate("ho ip %r doesn't match %r" % (host_name, ips[0]))
+            raise InvalidCertificate("subject ip %s doesn't match %s" % (subject_ip, ips[0]))
         else:
             raise InvalidCertificate("no appropriate subjectAltName IPAddress fields were found")
 
