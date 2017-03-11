@@ -85,7 +85,7 @@ class UserView(ModelView):
         self.session.add(creds)
         model.credentials = creds
 
-    @expose('/kubeconfig', methods=['GET'])
+    @expose('/kubeconfig')
     def kubeconfig_view(self):
         user = self.get_one(request.args.get('id'))
         user_creds = user.credentials
@@ -111,17 +111,17 @@ class CredentialsDataView(ModelView):
         'key': macro('render_key'),
     }
 
-    @expose('/cert.pem', methods=['GET'])
+    @expose('/cert.pem')
     def cert_view(self):
         creds = self.get_one(request.args.get('id'))
         return Response(creds.cert, mimetype='text/plain')
 
-    @expose('/key.pem', methods=['GET'])
+    @expose('/key.pem')
     def key_view(self):
         creds = self.get_one(request.args.get('id'))
         return Response(creds.key, mimetype='text/plain')
 
-    @expose('/cert.txt', methods=['GET'])
+    @expose('/cert.txt')
     def cert_text_view(self):
         creds = self.get_one(request.args.get('id'))
         info = pki.get_certificate_text(creds.cert)
