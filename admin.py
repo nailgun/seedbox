@@ -62,17 +62,27 @@ class NodeView(ModelView):
         with self.session.no_autoflush:
             ca_creds = model.cluster.ca_credentials
         creds = models.CredentialsData()
+
+        if model.is_k8s_apiserver:
+            san_dns = [
+                'kubernetes',
+                'kubernetes.default',
+                'kubernetes.default.svc',
+                'kubernetes.default.svc.' + config.k8s_cluster_domain,
+            ]
+            san_ips = [config.k8s_apiserver_service_ip]
+        else:
+            san_dns = []
+            san_ips = []
+
+        san_dns.append(model.fqdn)
+        san_ips.append(model.ip)
+
         creds.cert, creds.key = pki.issue_certificate(model.fqdn,
                                                       ca_cert=ca_creds.cert,
                                                       ca_key=ca_creds.key,
-                                                      san_dns=[
-                                                          'kubernetes',
-                                                          'kubernetes.default',
-                                                          'kubernetes.default.svc',
-                                                          'kubernetes.default.svc.' + config.k8s_cluster_domain,
-                                                          model.fqdn,
-                                                      ],
-                                                      san_ips=[config.k8s_apiserver_service_ip],
+                                                      san_dns=san_dns,
+                                                      san_ips=san_ips,
                                                       certify_days=10000)
         self.session.add(creds)
         model.credentials = creds
@@ -110,12 +120,6 @@ class UserView(ModelView):
             ca_creds = model.cluster.ca_credentials
         creds = models.CredentialsData()
         creds.cert, creds.key = pki.issue_certificate(model.name,
-                                                      san_dns=[
-                                                          'kubernetes',
-                                                          'kubernetes.default',
-                                                          'kubernetes.default.svc',
-                                                          'kubernetes.default.svc.' + config.k8s_cluster_domain,
-                                                      ],
                                                       ca_cert=ca_creds.cert,
                                                       ca_key=ca_creds.key,
                                                       certify_days=365)
