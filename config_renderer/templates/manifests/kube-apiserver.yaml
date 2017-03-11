@@ -12,7 +12,7 @@ spec:
     - /hyperkube
     - apiserver
     - --bind-address=0.0.0.0
-    - --etcd-servers={% for n in cluster.nodes.filter_by(is_etcd_server=True) %}http://{{ n.fqdn }}:{{ config.etcd_peer_port }}{% if not loop.last %},{% endif %}{% endfor %}
+    - --etcd-servers={% for n in cluster.nodes.filter_by(is_etcd_server=True) %}http://{{ n.fqdn }}:{{ config.etcd_client_port }}{% if not loop.last %},{% endif %}{% endfor %}
     - --allow-privileged=true
     - --service-cluster-ip-range={{ config.k8s_service_ip_range }}
     - --secure-port=443
