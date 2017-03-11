@@ -32,6 +32,29 @@ def render(node, indent=False):
 
     ssh_keys = [user.ssh_key for user in node.cluster.users.filter(models.User.ssh_key != '')]
 
+    disks = [{
+        'device': config.root_disk,
+        'wipeTable': True,
+        'partitions': [{
+            'label': 'ROOT',
+            'number': 0,
+            'start': 0,
+            'size': 0,
+        }],
+    }]
+
+    filesystems = [{
+        'name': 'root',
+        'mount': {
+            'device': config.root_partition,
+            'format': 'ext4',
+            'create': {
+                'force': True,
+                'options': ['-LROOT'],
+            },
+        },
+    }]
+
     files = [
         {
             'filesystem': 'root',
@@ -246,6 +269,8 @@ def render(node, indent=False):
             'config': {},
         },
         'storage': {
+            'disks': disks,
+            'filesystems': filesystems,
             'files': files,
         },
         'networkd': {},
