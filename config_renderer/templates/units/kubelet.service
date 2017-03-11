@@ -3,7 +3,7 @@ Description=Kubelet via Hyperkube ACI
 Wants=flanneld.service
 
 [Service]
-Environment=KUBELET_VERSION=v1.5.2_coreos.0
+Environment=KUBELET_VERSION={{ config.k8s_hyperkube_tag }}
 Environment="RKT_OPTS=--uuid-file-save=/var/run/kubelet-pod.uuid \
   --volume dns,kind=host,source=/etc/resolv.conf \
   --mount volume=dns,target=/etc/resolv.conf \
@@ -24,7 +24,7 @@ ExecStartPre=/usr/bin/systemctl is-active flanneld.service
 ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
 
 ExecStart=/usr/lib/coreos/kubelet-wrapper \
-  --api-servers=http://127.0.0.1:8080 \
+  --api-servers=http://127.0.0.1:{{ config.k8s_apiserver_insecure_port }} \
   --register-schedulable=true \
   --cni-conf-dir=/etc/kubernetes/cni/net.d \
   --network-plugin=cni \
@@ -35,7 +35,7 @@ ExecStart=/usr/lib/coreos/kubelet-wrapper \
   --pod-manifest-path=/etc/kubernetes/manifests \
   --hostname-override={{ node.fqdn }} \
   --cluster_dns={{ config.k8s_dns_service_ip }} \
-  --cluster_domain=cluster.local
+  --cluster_domain={{ config.k8s_cluster_domain }}
 
 ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
 

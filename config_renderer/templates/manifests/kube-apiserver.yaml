@@ -7,7 +7,7 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-apiserver
-    image: quay.io/coreos/hyperkube:v1.5.2_coreos.0
+    image: quay.io/coreos/hyperkube:{{ config.k8s_hyperkube_tag }}
     command:
     - /hyperkube
     - apiserver
@@ -35,7 +35,7 @@ spec:
       hostPort: 443
       name: https
     - containerPort: 8080
-      hostPort: 8080
+      hostPort: {{ config.k8s_apiserver_insecure_port }}
       name: local
     volumeMounts:
     - mountPath: {{ config.cluster_credentials_path }}
