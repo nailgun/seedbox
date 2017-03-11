@@ -3,6 +3,12 @@
     <a href="{{ url_for('credentialsdata.cert_text_view', id=model.credentials.id) }}">[text]</a>
     <a href="{{ url_for('credentialsdata.key_view', id=model.credentials.id) }}">[key]</a>
 
+    <form class="icon" method="POST" action="{{ url_for('node.reissue_creds_view', id=model.id) }}">
+        <button onclick="return confirm('Are you sure you want to reissue this credentials?');" class="btn btn-link">
+            [reissue]
+        </button>
+    </form>
+
     {% set credentials_error=model.credentials_error %}
     {% if credentials_error %}
         <span class="glyphicon glyphicon-exclamation-sign text-danger" title="{{ credentials_error }}" style="cursor: pointer"></span>

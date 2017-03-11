@@ -1,8 +1,9 @@
-from flask import request, abort, Response
+from flask import request, abort, Response, flash, redirect
 from flask_admin import Admin, expose
 from flask_admin.model.template import macro
+from flask_admin.helpers import get_redirect_target
 from flask_admin.contrib.fileadmin import FileAdmin
-from flask_admin.contrib.sqla import ModelView as BaseModelView, form
+from flask_admin.contrib.sqla import ModelView as BaseModelView
 
 import pki
 import kube
@@ -42,11 +43,7 @@ class NodeView(ModelView):
         'credentials': macro('render_credentials'),
     }
 
-    def on_model_change(self, form, model, is_created):
-        if not is_created:
-            model.target_config_version += 1
-            return
-
+    def _issue_creds(self, model):
         with self.session.no_autoflush:
             ca_creds = model.cluster.ca_credentials
         creds = models.CredentialsData()
@@ -58,6 +55,23 @@ class NodeView(ModelView):
                                                        certify_days=10000)
         self.session.add(creds)
         model.credentials = creds
+
+    def on_model_change(self, form, model, is_created):
+        if not is_created:
+            model.target_config_version += 1
+            return
+        self._issue_creds(model)
+
+    @expose('/reissue-credentials', methods=['POST'])
+    def reissue_creds_view(self):
+        model = self.get_one(request.args.get('id'))
+        model.target_config_version += 1
+        self._issue_creds(model)
+        self.session.add(model)
+        self.session.commit()
+        return_url = get_redirect_target() or self.get_url('.index_view')
+        flash('The credentials successfully reissued', 'success')
+        return redirect(return_url)
 
 
 class UserView(ModelView):
