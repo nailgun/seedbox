@@ -24,15 +24,29 @@ class ClusterView(ModelView):
         'ca_credentials': macro('render_ca_credentials'),
     }
 
-    def on_model_change(self, form, model, is_created):
-        if not is_created:
-            model.nodes.update({models.Node.target_config_version: models.Node.target_config_version + 1})
-            return
+    def _issue_ca_creds(self, model):
         ca = models.CredentialsData()
         ca.cert, ca.key = pki.create_ca_certificate(model.name,
                                                     certify_days=10000)
         self.session.add(ca)
         model.ca_credentials = ca
+
+    def on_model_change(self, form, model, is_created):
+        if not is_created:
+            model.nodes.update({models.Node.target_config_version: models.Node.target_config_version + 1})
+            return
+        self._issue_ca_creds(model)
+
+    @expose('/reissue-ca-credentials', methods=['POST'])
+    def reissue_ca_creds_view(self):
+        model = self.get_one(request.args.get('id'))
+        model.nodes.update({models.Node.target_config_version: models.Node.target_config_version + 1})
+        self._issue_ca_creds(model)
+        self.session.add(model)
+        self.session.commit()
+        return_url = get_redirect_target() or self.get_url('.index_view')
+        flash('The credentials successfully reissued', 'success')
+        return redirect(return_url)
 
 
 class NodeView(ModelView):

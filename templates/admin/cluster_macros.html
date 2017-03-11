@@ -1,3 +1,16 @@
 {% macro render_ca_credentials(model, column) %}
-    <a href="{{ url_for('credentialsdata.details_view', id=model.ca_credentials_id) }}">view</a>
+    <a href="{{ url_for('credentialsdata.cert_view', id=model.ca_credentials_id) }}">[cert]</a>
+    <a href="{{ url_for('credentialsdata.cert_text_view', id=model.ca_credentials_id) }}">[text]</a>
+    <a href="{{ url_for('credentialsdata.key_view', id=model.ca_credentials_id) }}">[key]</a>
+
+    <form class="icon" method="POST" action="{{ url_for('cluster.reissue_ca_creds_view', id=model.id) }}">
+        <button onclick="return confirm('Are you sure you want to reissue this credentials?');" class="btn btn-link">
+            [reissue]
+        </button>
+    </form>
+
+    {% set ca_credentials_error=model.ca_credentials_error %}
+    {% if ca_credentials_error %}
+        <span class="glyphicon glyphicon-exclamation-sign text-danger" title="{{ ca_credentials_error }}" style="cursor: pointer"></span>
+    {% endif %}
 {% endmacro %}

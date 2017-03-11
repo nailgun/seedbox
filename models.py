@@ -23,6 +23,13 @@ class Cluster(db.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def ca_credentials_error(self):
+        try:
+            pki.validate_certificate_subject_name(self.ca_credentials.cert, self.name)
+        except pki.InvalidCertificate as e:
+            return str(e)
+
 
 class Node(db.Model):
     id = db.Column(db.Integer, primary_key=True)
