@@ -1,0 +1,23 @@
+from .base import BaseIgnitionPackage
+
+import config
+
+
+class KubeletPackage(BaseIgnitionPackage):
+    name = 'kubelet'
+
+    def __init__(self, hyperkube_tag, hostname, is_schedulable, is_apiserver, runtime, apiserver_nodes):
+        self.template_context = {
+            'hyperkube_tag': hyperkube_tag,
+            'hostname': hostname,
+            'is_schedulable': is_schedulable,
+            'is_apiserver': is_apiserver,
+            'runtime': runtime,
+            'config': config,
+            'apiserver_endpoints': ['https://{}:{}'.format(n.fqdn, config.k8s_apiserver_secure_port) for n in apiserver_nodes],
+        }
+
+    def get_units(self):
+        return [
+            self.get_unit('kubelet.service', enable=True),
+        ]
