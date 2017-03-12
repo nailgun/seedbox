@@ -20,19 +20,25 @@ spec:
     securityContext:
       privileged: true
     volumeMounts:
-    - mountPath: /etc/ssl/certs
-      name: ssl-certs
+    - name: ssl-certs
+      mountPath: /etc/ssl/certs
       readOnly: true
-    - mountPath: /etc/kubernetes/kubeconfig.yaml
-      name: kubeconfig
+    - name: ssl-cluster-credentials
+      mountPath: {{ config.cluster_credentials_path }}
       readOnly: true
-    - mountPath: /var/run/dbus
-      name: dbus
+    - name: kubeconfig
+      mountPath: /etc/kubernetes/kubeconfig.yaml
+      readOnly: true
+    - name: dbus
+      mountPath: /var/run/dbus
       readOnly: false
   volumes:
   - name: ssl-certs
     hostPath:
       path: /usr/share/ca-certificates
+  - name: ssl-cluster-credentials
+    hostPath:
+      path: {{ config.cluster_credentials_path }}
   - name: kubeconfig
     hostPath:
       path: {{ config.kubeconfig_path }}
