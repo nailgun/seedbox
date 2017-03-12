@@ -23,7 +23,7 @@ class Cluster(db.Model):
     k8s_runtime = db.Column(db.Integer, default=Runtime.docker.value, nullable=False)
     k8s_pod_network = db.Column(db.String(80), default='10.2.0.0/16', nullable=False)
     k8s_service_network = db.Column(db.String(80), default='10.3.0.0/24', nullable=False)
-    k8s_hyperkube_tag = db.Column(db.String(80), default='v1.5.2_coreos.0', nullable=False)
+    k8s_hyperkube_tag = db.Column(db.String(80), default='v1.5.4_coreos.0', nullable=False)
 
     def __repr__(self):
         return '<Cluster %r>' % self.name
