@@ -102,6 +102,8 @@ def credentials(cred_type):
     abort(404)
 
 
+# TODO: upload ignition config and compare it with current one
+# TODO: also dump it somewhere for debugging purposes
 @app.route('/report', methods=['POST'])
 def report():
     node = get_node('Provision report')
