@@ -4,7 +4,7 @@ function init_flannel {
   echo "Waiting for etcd..."
   while true
   do
-      for ETCD in {% for n in cluster.nodes.filter_by(is_etcd_server=True) %}http://{{ n.fqdn }}:{{ config.etcd_client_port }} {% endfor %}; do
+      for ETCD in {{ etcd_endpoints|join(' ') }}; do
           echo "Trying: $ETCD"
           if [ -n "$(curl --fail --silent "$ETCD/v2/machines")" ]; then
               local ACTIVE_ETCD=$ETCD

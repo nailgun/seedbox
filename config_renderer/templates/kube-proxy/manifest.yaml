@@ -9,22 +9,12 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-proxy
-    image: quay.io/coreos/hyperkube:{{ config.k8s_hyperkube_tag }}
+    image: quay.io/coreos/hyperkube:{{ hyperkube_tag }}
     command:
     - /hyperkube
     - proxy
-    {% if node.is_k8s_apiserver -%}
-    - --master=http://127.0.0.1:{{ config.k8s_apiserver_insecure_port }}
-    {% else -%}
-    {% set apiserver = cluster.nodes.filter_by(is_k8s_apiserver_lb=True).first() -%}
-    {% set apiserver_port = config.k8s_apiserver_lb_port -%}
-    {% if not apiserver -%}
-    {% set apiserver = cluster.nodes.filter_by(is_k8s_apiserver=True).first() -%}
-    {% set apiserver_port = config.k8s_apiserver_secure_port -%}
-    {% endif -%}
-    - --master=https://{{apiserver_lb}}:{{ apiserver_port }}
-    {% endif -%}
-    {% if not node.is_k8s_apiserver -%}
+    - --master={{ apiserver_endpoint }}
+    {% if set_kubeconfig -%}
     - --kubeconfig=/etc/kubernetes/kubeconfig.yaml
     {% endif -%}
     securityContext:

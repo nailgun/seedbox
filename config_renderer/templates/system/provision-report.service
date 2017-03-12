@@ -11,7 +11,7 @@ ExecStart=/usr/bin/curl --fail \
                         --location \
                         -H 'Content-Type: application/json' \
                         -X POST \
-                        -d '{"config_version":"{{ node.target_config_version }}"}' \
+                        -d '{"config_version":"{{ target_config_version }}"}' \
                         {{ url_root }}report
 
 [Install]

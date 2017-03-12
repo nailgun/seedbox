@@ -1,6 +1,6 @@
 127.0.0.1       localhost
 ::1             localhost
 
-{% for n in cluster.nodes.all() %}
+{% for n in nodes %}
 {{ n.ip }}  {{ n.fqdn }}
 {% endfor %}

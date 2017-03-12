@@ -7,12 +7,12 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-apiserver
-    image: quay.io/coreos/hyperkube:{{ config.k8s_hyperkube_tag }}
+    image: quay.io/coreos/hyperkube:{{ hyperkube_tag }}
     command:
     - /hyperkube
     - apiserver
     - --bind-address=0.0.0.0
-    - --etcd-servers={% for n in cluster.nodes.filter_by(is_etcd_server=True) %}http://{{ n.fqdn }}:{{ config.etcd_client_port }}{% if not loop.last %},{% endif %}{% endfor %}
+    - --etcd-servers={{ etcd_endpoints|join(',') }}
     - --allow-privileged=true
     - --service-cluster-ip-range={{ config.k8s_service_ip_range }}
     - --secure-port={{ config.k8s_apiserver_secure_port }}

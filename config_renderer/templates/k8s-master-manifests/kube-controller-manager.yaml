@@ -6,7 +6,7 @@ metadata:
 spec:
   containers:
   - name: kube-controller-manager
-    image: quay.io/coreos/hyperkube:{{ config.k8s_hyperkube_tag }}
+    image: quay.io/coreos/hyperkube:{{ hyperkube_tag }}
     command:
     - /hyperkube
     - controller-manager
