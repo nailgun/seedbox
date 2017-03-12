@@ -1,5 +1,8 @@
-def get_kernel_arguments(node):
-    args = ['coreos.first_boot=yes']
+def get_kernel_arguments(node, url_root):
+    args = [
+        'coreos.config.url={}ignition'.format(url_root),
+        'coreos.first_boot=yes',
+    ]
 
     if node.coreos_autologin:
         args.append('coreos.autologin')

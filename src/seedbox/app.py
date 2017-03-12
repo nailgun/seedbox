@@ -22,7 +22,7 @@ migrate = Migrate(app, models.db)
 admin.init_app(app)
 
 ipxe_response = """#!ipxe
-kernel /image/{coreos_channel}/{coreos_version}/coreos_production_pxe.vmlinuz coreos.config.url={base_url}ignition {kernel_args}
+kernel /image/{coreos_channel}/{coreos_version}/coreos_production_pxe.vmlinuz {kernel_args}
 initrd /image/{coreos_channel}/{coreos_version}/coreos_production_pxe_image.cpio.gz
 boot
 """
@@ -43,10 +43,9 @@ def get_node(request_type):
 @app.route('/ipxe')
 def ipxe_boot():
     node = get_node('iPXE boot')
-    kernel_args = ' '.join(config_renderer.kernel.get_kernel_arguments(node))
+    kernel_args = ' '.join(config_renderer.kernel.get_kernel_arguments(node, request.url_root))
     response = ipxe_response.format(coreos_channel=node.coreos_channel,
                                     coreos_version=node.coreos_version,
-                                    base_url=request.url_root,
                                     kernel_args=kernel_args)
     return Response(response, mimetype='text/plain')
 
