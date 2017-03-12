@@ -1,5 +1,6 @@
 import json
 import base64
+import itertools
 import urllib.parse
 from flask import request
 
@@ -19,13 +20,35 @@ class IgnitionConfig(object):
 
     def render(self, indent=False):
         content = self.get_content()
-
         if indent:
             return json.dumps(content, indent=2)
         else:
             return json.dumps(content, separators=(',', ':'))
 
     def get_content(self):
+        packages = self.get_packages()
+        files = list(itertools.chain.from_iterable(p.get_files() for p in packages))
+        units = list(itertools.chain.from_iterable(p.get_units() for p in packages))
+
+        return {
+            'ignition': {
+                'version': '2.0.0',
+                'config': {},
+            },
+            'storage': self.get_storage_config(files),
+            'networkd': {},
+            'passwd': {
+                'users': [{
+                    'name': 'core',
+                    'sshAuthorizedKeys': self.get_ssh_keys(),
+                }],
+            },
+            'systemd': {
+                'units': units
+            },
+        }
+
+    def get_packages(self):
         etcd_nodes = self.cluster.nodes.filter_by(is_etcd_server=True)
         k8s_apiserver_nodes = self.cluster.nodes.filter_by(is_k8s_apiserver=True)
 
@@ -64,30 +87,7 @@ class IgnitionConfig(object):
                 K8sAddonsManifestsPackage(),
             ]
 
-        files = []
-        units = []
-
-        for package in packages:
-            files += package.get_files()
-            units += package.get_units()
-
-        return {
-            'ignition': {
-                'version': '2.0.0',
-                'config': {},
-            },
-            'storage': self.get_storage_config(files),
-            'networkd': {},
-            'passwd': {
-                'users': [{
-                    'name': 'core',
-                    'sshAuthorizedKeys': self.get_ssh_keys(),
-                }],
-            },
-            'systemd': {
-                'units': units
-            },
-        }
+        return packages
 
     def get_storage_config(self, files):
         return {
