@@ -32,7 +32,7 @@ ExecStart=/usr/lib/coreos/kubelet-wrapper \
   {% else -%}
   --api-servers={{ apiserver_endpoints|join(',') }}
   {% endif -%}
-  --cni-conf-dir=/etc/kubernetes/cni/net.d \
+  --cni-conf-dir={{ config.k8s_cni_conf_path }} \
   --network-plugin=cni \
   --container-runtime={{ runtime }} \
   --rkt-path=/usr/bin/rkt \

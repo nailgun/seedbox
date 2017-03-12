@@ -1,6 +1,8 @@
 from config_renderer.ignition.base import BaseIgnitionPackage
 from config_renderer.ignition.mixins import EtcdEndpointsMixin
 
+import config
+
 
 class CNIPackage(EtcdEndpointsMixin, BaseIgnitionPackage):
     def __init__(self, etcd_nodes):
@@ -10,7 +12,7 @@ class CNIPackage(EtcdEndpointsMixin, BaseIgnitionPackage):
         return [
             {
                 'filesystem': 'root',
-                'path': '/etc/kubernetes/cni/net.d/10-flannel.conf',
+                'path': config.k8s_cni_conf_path + '/10-flannel.conf',
                 'mode': 0o644,
                 'contents': {
                     'source': self.to_data_url(self.render_template('cni.conf')),
@@ -26,7 +28,7 @@ class CNIPackage(EtcdEndpointsMixin, BaseIgnitionPackage):
             },
             {
                 'filesystem': 'root',
-                'path': '/etc/kubernetes/cni/docker_opts_cni.env',
+                'path': config.k8s_cni_path + '/docker_opts_cni.env',
                 'mode': 0o644,
                 'contents': {
                     'source': self.to_data_url(self.render_template('docker-opts.env')),
