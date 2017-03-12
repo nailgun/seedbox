@@ -39,10 +39,10 @@ class ClusterView(ModelView):
         model.ca_credentials = ca
 
     def on_model_change(self, form, model, is_created):
-        if not is_created:
+        if is_created:
+            self._issue_ca_creds(model)
+        else:
             model.nodes.update({models.Node.target_config_version: models.Node.target_config_version + 1})
-            return
-        self._issue_ca_creds(model)
 
     @expose('/reissue-ca-credentials', methods=['POST'])
     def reissue_ca_creds_view(self):
@@ -108,13 +108,13 @@ class NodeView(ModelView):
         model.credentials = creds
 
     def on_model_change(self, form, model, is_created):
-        if not is_created:
+        if is_created:
+            self._issue_creds(model)
+            model._coreos_channel = ''
+            model._coreos_version = ''
+            model.current_ignition_config = ''
+        else:
             model.target_config_version += 1
-            return
-        self._issue_creds(model)
-        model._coreos_channel = ''
-        model._coreos_version = ''
-        model.current_ignition_config = ''
 
     @expose('/reissue-credentials', methods=['POST'])
     def reissue_creds_view(self):
@@ -160,9 +160,8 @@ class UserView(ModelView):
         model.credentials = creds
 
     def on_model_change(self, form, model, is_created):
-        if not is_created:
-            return
-        self._issue_creds(model)
+        if is_created:
+            self._issue_creds(model)
 
     @expose('/reissue-credentials', methods=['POST'])
     def reissue_creds_view(self):
