@@ -54,7 +54,7 @@ class IgnitionConfig(object):
         from .credentials import CredentialsPackage
 
         packages = [
-            SystemPackage(request.url_root, self.node.target_config_version),
+            SystemPackage(request.url_root, self.node.target_config_version, self.node.fqdn),
             CredentialsPackage(request.url_root),
         ]
 
