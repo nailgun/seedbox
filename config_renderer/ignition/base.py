@@ -47,8 +47,8 @@ class BaseIgnitionPackage(object):
         cls = self.__class__
         while True:
             template_roots.append(os.path.dirname(inspect.getfile(cls)))
-            cls = cls.__base__
-            if cls == BaseIgnitionPackage:
+            cls = get_base_class(cls)
+            if cls in (BaseIgnitionPackage, None):
                 break
 
         return ChoiceLoader([FileSystemLoader(root) for root in template_roots])
@@ -61,3 +61,10 @@ class BaseIgnitionPackage(object):
             return 'data:{};base64,{}'.format(mediatype, base64.b64encode(data).decode('ascii'))
         else:
             return 'data:{},{}'.format(mediatype, urllib.parse.quote(data))
+
+
+def get_base_class(cls):
+    for base in cls.__bases__:
+        if issubclass(base, BaseIgnitionPackage):
+            return base
+    return None
