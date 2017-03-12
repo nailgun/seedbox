@@ -8,98 +8,136 @@ import models
 
 
 # TODO: deploy addons separately via admin button
-# TODO: split into functions
 def render(node, indent=False):
-    from . import render_template
+    return IgnitionConfig(node).render(indent)
 
-    def render_tpl(template_name):
-        return render_template(template_name, node)
 
-    def get_unit(name, enable=False, dropins=None):
-        if dropins:
-            return {
-                'name': name,
-                'enable': enable,
-                'dropins': [{
-                    'name': dropin,
-                    'contents': render_tpl('dropins/' + name + '/' + dropin),
-                } for dropin in dropins],
-            }
+class IgnitionConfig(object):
+    def __init__(self, node):
+        self.node = node
+        self.cluster = node.cluster
+
+    def render(self, indent=False):
+        content = self.get_content()
+
+        if indent:
+            return json.dumps(content, indent=2)
         else:
-            return {
-                'name': name,
-                'enable': enable,
-                'contents': render_tpl('units/' + name),
-            }
+            return json.dumps(content, separators=(',', ':'))
 
-    ssh_keys = [user.ssh_key for user in node.cluster.users.filter(models.User.ssh_key != '')]
+    def get_content(self):
+        storage = self.get_storage_config()
+        storage['files'] = self.get_files_config()
 
-    disks = [{
-        'device': config.root_disk,
-        'wipeTable': True,
-        'partitions': [{
-            'label': 'ROOT',
-            'number': 0,
-            'start': 0,
-            'size': 0,
-        }],
-    }]
+        return {
+            'ignition': {
+                'version': '2.0.0',
+                'config': {},
+            },
+            'storage': storage,
+            'networkd': {},
+            'passwd': {
+                'users': [{
+                    'name': 'core',
+                    'sshAuthorizedKeys': self.get_ssh_keys(),
+                }],
+            },
+            'systemd': {
+                'units': self.get_units_config(),
+            },
+        }
 
-    filesystems = [{
-        'name': 'root',
-        'mount': {
-            'device': config.root_partition,
-            'format': 'ext4',
-            'create': {
-                'force': True,
-                'options': ['-LROOT'],
-            },
-        },
-    }]
+    def get_storage_config(self):
+        return {
+            'disks': [{
+                'device': config.root_disk,
+                'wipeTable': True,
+                'partitions': [{
+                    'label': 'ROOT',
+                    'number': 0,
+                    'start': 0,
+                    'size': 0,
+                }],
+            }],
+            'filesystems': [{
+                'name': 'root',
+                'mount': {
+                    'device': config.root_partition,
+                    'format': 'ext4',
+                    'create': {
+                        'force': True,
+                        'options': ['-LROOT'],
+                    },
+                },
+            }]
+        }
 
-    files = [
-        {
-            'filesystem': 'root',
-            'path': '/etc/sysctl.d/max-user-watches.conf',
-            'mode': 0o644,
-            'contents': {
-                'source': to_data_url(render_tpl('sysctl-max-user-watches.conf')),
-            },
-        },
-        {
-            'filesystem': 'root',
-            'path': config.ca_cert_path,
-            'mode': 0o444,
-            'contents': {
-                'source': request.url_root + 'credentials/ca.pem',
-            },
-        },
-        {
-            'filesystem': 'root',
-            'path': config.node_cert_path,
-            'mode': 0o444,
-            'contents': {
-                'source': request.url_root + 'credentials/node.pem',
-            },
-        },
-        {
-            'filesystem': 'root',
-            'path': config.node_key_path,
-            'mode': 0o400,
-            'contents': {
-                'source': request.url_root + 'credentials/node-key.pem',
-            },
-        },
-    ]
+    def get_files_config(self):
+        files = self.get_common_files()
 
-    if node.is_k8s_apiserver or node.is_k8s_schedulable:
-        files += [
+        if config.install_etc_hosts:
+            files += [{
+                'filesystem': 'root',
+                'path': '/etc/hosts',
+                'mode': 0o644,
+                'contents': {
+                    'source': to_data_url(self._render_template('hosts')),
+                },
+            }]
+
+        if self.node.is_k8s_apiserver or self.node.is_k8s_schedulable:
+            files += self.get_k8s_files()
+
+        if self.node.is_k8s_apiserver:
+            files += self.get_k8s_apiserver_files()
+            files += self.get_k8s_addons_files()
+
+        return files
+
+    def get_common_files(self):
+        return [
+            {
+                'filesystem': 'root',
+                'path': '/etc/sysctl.d/max-user-watches.conf',
+                'mode': 0o644,
+                'contents': {
+                    'source': to_data_url(self._render_template('sysctl-max-user-watches.conf')),
+                },
+            },
+            {
+                'filesystem': 'root',
+                'path': config.ca_cert_path,
+                'mode': 0o444,
+                'contents': {
+                    'source': request.url_root + 'credentials/ca.pem',
+                },
+            },
+            {
+                'filesystem': 'root',
+                'path': config.node_cert_path,
+                'mode': 0o444,
+                'contents': {
+                    'source': request.url_root + 'credentials/node.pem',
+                },
+            },
+            {
+                'filesystem': 'root',
+                'path': config.node_key_path,
+                'mode': 0o400,
+                'contents': {
+                    'source': request.url_root + 'credentials/node-key.pem',
+                },
+            },
+        ]
+
+    def get_k8s_files(self):
+        files = [
             {
                 'filesystem': 'root',
                 'path': '/etc/kubernetes/kubeconfig.yaml',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('kubeconfig.yaml')),
+                    'source': to_data_url(self._render_template('kubeconfig.yaml')),
                 },
             },
             {
@@ -107,7 +145,7 @@ def render(node, indent=False):
                 'path': '/etc/kubernetes/cni/net.d/10-flannel.conf',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('cni-flannel.conf')),
+                    'source': to_data_url(self._render_template('cni-flannel.conf')),
                 },
             },
             {
@@ -115,7 +153,7 @@ def render(node, indent=False):
                 'path': '/etc/kubernetes/cni/docker_opts_cni.env',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('cni-docker-opts.env')),
+                    'source': to_data_url(self._render_template('cni-docker-opts.env')),
                 },
             },
             {
@@ -123,7 +161,7 @@ def render(node, indent=False):
                 'path': '/etc/flannel/options.env',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('flannel-options.env')),
+                    'source': to_data_url(self._render_template('flannel-options.env')),
                 },
             },
             {
@@ -131,19 +169,31 @@ def render(node, indent=False):
                 'path': '/etc/kubernetes/manifests/kube-proxy.yaml',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('manifests/kube-proxy.yaml')),
+                    'source': to_data_url(self._render_template('manifests/kube-proxy.yaml')),
                 },
             },
         ]
 
-    if node.is_k8s_apiserver:
-        files += [
+        if config.k8s_runtime == 'rkt':
+            files += [{
+                'filesystem': 'root',
+                'path': '/opt/bin/host-rkt',
+                'mode': 0o755,
+                'contents': {
+                    'source': to_data_url(self._render_template('host-rkt')),
+                },
+            }]
+
+        return files
+
+    def get_k8s_apiserver_files(self):
+        return [
             {
                 'filesystem': 'root',
                 'path': '/opt/init-flannel',
                 'mode': 0o755,
                 'contents': {
-                    'source': to_data_url(render_tpl('init-flannel')),
+                    'source': to_data_url(self._render_template('init-flannel')),
                 },
             },
             {
@@ -151,7 +201,7 @@ def render(node, indent=False):
                 'path': '/etc/kubernetes/manifests/kube-apiserver.yaml',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('manifests/kube-apiserver.yaml')),
+                    'source': to_data_url(self._render_template('manifests/kube-apiserver.yaml')),
                 },
             },
             {
@@ -159,7 +209,7 @@ def render(node, indent=False):
                 'path': '/etc/kubernetes/manifests/kube-controller-manager.yaml',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('manifests/kube-controller-manager.yaml')),
+                    'source': to_data_url(self._render_template('manifests/kube-controller-manager.yaml')),
                 },
             },
             {
@@ -167,15 +217,19 @@ def render(node, indent=False):
                 'path': '/etc/kubernetes/manifests/kube-scheduler.yaml',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('manifests/kube-scheduler.yaml')),
+                    'source': to_data_url(self._render_template('manifests/kube-scheduler.yaml')),
                 },
             },
+        ]
+
+    def get_k8s_addons_files(self):
+        return [
             {
                 'filesystem': 'root',
                 'path': '/srv/kubernetes/manifests/kube-dns-autoscaler-deployment.yaml',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('manifests/kube-dns-autoscaler-deployment.yaml')),
+                    'source': to_data_url(self._render_template('manifests/kube-dns-autoscaler-deployment.yaml')),
                 },
             },
             {
@@ -183,7 +237,7 @@ def render(node, indent=False):
                 'path': '/srv/kubernetes/manifests/kube-dns-deployment.yaml',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('manifests/kube-dns-deployment.yaml')),
+                    'source': to_data_url(self._render_template('manifests/kube-dns-deployment.yaml')),
                 },
             },
             {
@@ -191,7 +245,7 @@ def render(node, indent=False):
                 'path': '/srv/kubernetes/manifests/kube-dns-svc.yaml',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('manifests/kube-dns-svc.yaml')),
+                    'source': to_data_url(self._render_template('manifests/kube-dns-svc.yaml')),
                 },
             },
             {
@@ -199,7 +253,7 @@ def render(node, indent=False):
                 'path': '/srv/kubernetes/manifests/heapster-deployment.yaml',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('manifests/heapster-deployment.yaml')),
+                    'source': to_data_url(self._render_template('manifests/heapster-deployment.yaml')),
                 },
             },
             {
@@ -207,7 +261,7 @@ def render(node, indent=False):
                 'path': '/srv/kubernetes/manifests/heapster-svc.yaml',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('manifests/heapster-svc.yaml')),
+                    'source': to_data_url(self._render_template('manifests/heapster-svc.yaml')),
                 },
             },
             {
@@ -215,7 +269,7 @@ def render(node, indent=False):
                 'path': '/srv/kubernetes/manifests/kube-dashboard-deployment.yaml',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('manifests/kube-dashboard-deployment.yaml')),
+                    'source': to_data_url(self._render_template('manifests/kube-dashboard-deployment.yaml')),
                 },
             },
             {
@@ -223,7 +277,7 @@ def render(node, indent=False):
                 'path': '/srv/kubernetes/manifests/kube-dashboard-svc.yaml',
                 'mode': 0o644,
                 'contents': {
-                    'source': to_data_url(render_tpl('manifests/kube-dashboard-svc.yaml')),
+                    'source': to_data_url(self._render_template('manifests/kube-dashboard-svc.yaml')),
                 },
             },
             {
@@ -231,60 +285,30 @@ def render(node, indent=False):
                 'path': '/opt/k8s-addons',
                 'mode': 0o755,
                 'contents': {
-                    'source': to_data_url(render_tpl('k8s-addons')),
+                    'source': to_data_url(self._render_template('k8s-addons')),
                 },
             },
         ]
 
-    if config.install_etc_hosts:
-        files.append({
-            'filesystem': 'root',
-            'path': '/etc/hosts',
-            'mode': 0o644,
-            'contents': {
-                'source': to_data_url(render_tpl('hosts')),
-            },
-        })
+    def get_ssh_keys(self):
+        return [user.ssh_key for user in self.cluster.users.filter(models.User.ssh_key != '')]
 
-    if config.k8s_runtime == 'rkt':
-        files.append({
-            'filesystem': 'root',
-            'path': '/opt/bin/host-rkt',
-            'mode': 0o755,
-            'contents': {
-                'source': to_data_url(render_tpl('host-rkt')),
-            },
-        })
+    def get_units_config(self):
+        units = self.get_common_units()
 
-    units = [
-        get_unit('provision-report.service', enable=True),
-        get_unit('docker.service', dropins=['40-flannel.conf']),
-    ]
+        if self.node.is_etcd_server:
+            units += self.get_etcd_server_units()
 
-    flanneld_service_dropins = ['40-add-options.conf']
-    if node.is_k8s_apiserver:
-        flanneld_service_dropins += ['40-init-flannel.conf']
+        if self.node.is_k8s_apiserver or self.node.is_k8s_schedulable:
+            units += self.get_k8s_units()
 
-    units += [get_unit('flanneld.service', dropins=flanneld_service_dropins)]
+        if self.node.is_k8s_apiserver:
+            units += self.get_k8s_addons_units()
 
-    if node.is_k8s_apiserver or node.is_k8s_schedulable:
-        units += [
-            get_unit('kubelet.service', enable=True),
-        ]
+        return units
 
-    if node.is_k8s_apiserver:
-        units += [
-            get_unit('k8s-addons.service', enable=True),
-        ]
-
-    if config.k8s_runtime == 'rkt':
-        units += [
-            get_unit('rkt-api.service', enable=True),
-            get_unit('load-rkt-stage1.service', enable=True),
-        ]
-
-    if node.is_etcd_server:
-        etcd_version = node.cluster.etcd_version
+    def get_etcd_server_units(self):
+        etcd_version = self.cluster.etcd_version
         if etcd_version == 2:
             unit_name = 'etcd2.service'
         elif etcd_version == 3:
@@ -292,38 +316,61 @@ def render(node, indent=False):
         else:
             raise Exception('Unknown etcd version', etcd_version)
 
-        units += [
-            get_unit(unit_name, enable=True, dropins=['40-etcd-cluster.conf']),
+        return [
+            self.get_unit(unit_name, enable=True, dropins=['40-etcd-cluster.conf']),
             # TODO: add support for etcd proxies
-            get_unit('locksmithd.service', dropins=['40-etcd-lock.conf']),
+            self.get_unit('locksmithd.service', dropins=['40-etcd-lock.conf']),
         ]
 
-    cfg = {
-        'ignition': {
-            'version': '2.0.0',
-            'config': {},
-        },
-        'storage': {
-            'disks': disks,
-            'filesystems': filesystems,
-            'files': files,
-        },
-        'networkd': {},
-        'passwd': {
-            'users': [{
-                'name': 'core',
-                'sshAuthorizedKeys': ssh_keys,
-            }],
-        },
-        'systemd': {
-            'units': units,
-        },
-    }
+    def get_common_units(self):
+        flanneld_service_dropins = ['40-add-options.conf']
+        if self.node.is_k8s_apiserver:
+            flanneld_service_dropins += ['40-init-flannel.conf']
 
-    if indent:
-        return json.dumps(cfg, indent=2)
-    else:
-        return json.dumps(cfg, separators=(',', ':'))
+        return [
+            self.get_unit('provision-report.service', enable=True),
+            self.get_unit('docker.service', dropins=['40-flannel.conf']),
+            self.get_unit('flanneld.service', dropins=flanneld_service_dropins),
+        ]
+
+    def get_k8s_units(self):
+        units = [
+            self.get_unit('kubelet.service', enable=True),
+        ]
+
+        if config.k8s_runtime == 'rkt':
+            units += [
+                self.get_unit('rkt-api.service', enable=True),
+                self.get_unit('load-rkt-stage1.service', enable=True),
+            ]
+
+        return units
+
+    def get_k8s_addons_units(self):
+        return [
+            self.get_unit('k8s-addons.service', enable=True),
+        ]
+
+    def get_unit(self, name, enable=False, dropins=None):
+        if dropins:
+            return {
+                'name': name,
+                'enable': enable,
+                'dropins': [{
+                    'name': dropin,
+                    'contents': self._render_template('dropins/' + name + '/' + dropin),
+                } for dropin in dropins],
+            }
+        else:
+            return {
+                'name': name,
+                'enable': enable,
+                'contents': self._render_template('units/' + name),
+            }
+
+    def _render_template(self, name):
+        from . import render_template
+        return render_template(name, self.node)
 
 
 def to_data_url(data, mediatype='', b64=False):
