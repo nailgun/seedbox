@@ -3,6 +3,7 @@ import base64
 import inspect
 import urllib.parse
 
+from flask.helpers import locked_cached_property
 from jinja2 import Environment, ChoiceLoader, FileSystemLoader
 
 from seedbox import config
@@ -41,12 +42,15 @@ class BaseIgnitionPackage(object):
         return context
 
     def render_template(self, name):
-        jinja = Environment(loader=self.get_template_loader(),
-                            keep_trailing_newline=True,
-                            autoescape=False)
-        return jinja.get_template(name).render(self.get_template_context())
+        return self.jinja_env.get_template(name).render(self.get_template_context())
 
-    def get_template_loader(self):
+    @locked_cached_property
+    def jinja_env(self):
+        return Environment(loader=self.create_template_loader(),
+                           keep_trailing_newline=True,
+                           autoescape=False)
+
+    def create_template_loader(self):
         template_roots = []
 
         cls = self.__class__
