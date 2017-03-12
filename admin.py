@@ -92,6 +92,8 @@ class NodeView(ModelView):
             model.target_config_version += 1
             return
         self._issue_creds(model)
+        model._coreos_channel = ''
+        model._coreos_version = ''
 
     @expose('/reissue-credentials', methods=['POST'])
     def reissue_creds_view(self):
