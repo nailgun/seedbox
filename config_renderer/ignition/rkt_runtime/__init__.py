@@ -1,9 +1,7 @@
-from .base import BaseIgnitionPackage
+from config_renderer.ignition.base import BaseIgnitionPackage
 
 
 class RktRuntimePackage(BaseIgnitionPackage):
-    name = 'rkt-runtime'
-
     def get_files(self):
         return [{
             'filesystem': 'root',

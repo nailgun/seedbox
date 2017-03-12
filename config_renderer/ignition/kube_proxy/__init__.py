@@ -1,9 +1,7 @@
-from .base import BaseIgnitionPackage
+from config_renderer.ignition.base import BaseIgnitionPackage
 
 
 class KubeProxyPackage(BaseIgnitionPackage):
-    name = 'kube-proxy'
-
     def __init__(self, hyperkube_tag, apiserver_endpoint, set_kubeconfig):
         self.template_context = {
             'hyperkube_tag': hyperkube_tag,

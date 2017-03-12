@@ -1,9 +1,7 @@
-from .base import BaseIgnitionPackage
+from config_renderer.ignition.base import BaseIgnitionPackage
 
 
 class SystemPackage(BaseIgnitionPackage):
-    name = 'system'
-
     def __init__(self, url_root, target_config_version):
         self.template_context = {
             'url_root': url_root,

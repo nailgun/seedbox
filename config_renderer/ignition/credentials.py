@@ -1,11 +1,9 @@
-from .base import BaseIgnitionPackage
+from config_renderer.ignition.base import BaseIgnitionPackage
 
 import config
 
 
 class CredentialsPackage(BaseIgnitionPackage):
-    name = 'credentials'
-
     def __init__(self, url_root):
         self.url_root = url_root
 

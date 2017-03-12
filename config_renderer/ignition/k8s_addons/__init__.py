@@ -1,11 +1,9 @@
-from .base import BaseIgnitionPackage
+from config_renderer.ignition.base import BaseIgnitionPackage
 
 import config
 
 
 class K8sAddonsPackage(BaseIgnitionPackage):
-    name = 'k8s-addons'
-
     def __init__(self):
         self.template_context = {
             'config': config,

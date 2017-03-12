@@ -1,11 +1,9 @@
-from .base import BaseIgnitionPackage
+from config_renderer.ignition.base import BaseIgnitionPackage
 
 import config
 
 
 class FlannelInitPackage(BaseIgnitionPackage):
-    name = 'flannel-init'
-
     def __init__(self, etcd_nodes):
         self.template_context = {
             # TODO: move this to mixin

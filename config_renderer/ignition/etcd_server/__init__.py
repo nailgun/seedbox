@@ -1,11 +1,9 @@
-from .base import BaseIgnitionPackage
+from config_renderer.ignition.base import BaseIgnitionPackage
 
 import config
 
 
 class EtcdServerPackage(BaseIgnitionPackage):
-    name = 'etcd-server'
-
     def __init__(self, version, hostname, etcd_nodes):
         self.version = version
         self.template_context = {

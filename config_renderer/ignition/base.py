@@ -1,5 +1,8 @@
+import os
 import base64
+import inspect
 import urllib.parse
+from jinja2 import Environment, ChoiceLoader, FileSystemLoader
 
 
 class BaseIgnitionPackage(object):
@@ -33,8 +36,22 @@ class BaseIgnitionPackage(object):
         return self.template_context
 
     def render_template(self, name):
-        from config_renderer import jinja
-        return jinja.get_template(self.name + '/' + name).render(self.get_template_context())
+        jinja = Environment(loader=self.get_template_loader(),
+                            keep_trailing_newline=True,
+                            autoescape=False)
+        return jinja.get_template(name).render(self.get_template_context())
+
+    def get_template_loader(self):
+        template_roots = []
+
+        cls = self.__class__
+        while True:
+            template_roots.append(os.path.dirname(inspect.getfile(cls)))
+            cls = cls.__base__
+            if cls == BaseIgnitionPackage:
+                break
+
+        return ChoiceLoader([FileSystemLoader(root) for root in template_roots])
 
     @staticmethod
     def to_data_url(data, mediatype='', b64=False):

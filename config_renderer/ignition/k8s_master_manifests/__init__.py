@@ -1,11 +1,9 @@
-from .base import BaseIgnitionPackage
+from config_renderer.ignition.base import BaseIgnitionPackage
 
 import config
 
 
 class K8sMasterManifestsPackage(BaseIgnitionPackage):
-    name = 'k8s-master-manifests'
-
     def __init__(self, hyperkube_tag, etcd_nodes):
         self.template_context = {
             'hyperkube_tag': hyperkube_tag,

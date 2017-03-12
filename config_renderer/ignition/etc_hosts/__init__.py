@@ -1,9 +1,7 @@
-from .base import BaseIgnitionPackage
+from config_renderer.ignition.base import BaseIgnitionPackage
 
 
 class EtcHostsPackage(BaseIgnitionPackage):
-    name = 'etc-hosts'
-
     def __init__(self, nodes):
         self.template_context = {
             'nodes': nodes,

@@ -1,11 +1,9 @@
-from .base import BaseIgnitionPackage
+from config_renderer.ignition.base import BaseIgnitionPackage
 
 import config
 
 
 class KubeconfigPackage(BaseIgnitionPackage):
-    name = 'kubeconfig'
-
     def __init__(self, cluster_name):
         self.template_context = {
             'cluster_name': cluster_name,

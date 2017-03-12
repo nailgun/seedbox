@@ -1,11 +1,9 @@
-from .base import BaseIgnitionPackage
+from config_renderer.ignition.base import BaseIgnitionPackage
 
 import config
 
 
 class KubeletPackage(BaseIgnitionPackage):
-    name = 'kubelet'
-
     def __init__(self, hyperkube_tag, hostname, is_schedulable, is_apiserver, runtime, apiserver_nodes):
         self.template_context = {
             'hyperkube_tag': hyperkube_tag,
