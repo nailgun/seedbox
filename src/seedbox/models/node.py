@@ -14,6 +14,7 @@ class Node(db.Model):
     credentials = db.relationship('CredentialsData')
 
     target_config_version = db.Column(db.Integer, default=1, nullable=False)
+    # TODO: rename to "active_"
     current_config_version = db.Column(db.Integer, nullable=True)
     current_ignition_config = db.Column(db.Text, nullable=False)
 
@@ -44,7 +45,7 @@ class Node(db.Model):
         return self._coreos_version or self.cluster.coreos_version
 
     @property
-    def is_ready(self):
+    def is_config_match(self):
         return self.target_config_version == self.current_config_version
 
     @property

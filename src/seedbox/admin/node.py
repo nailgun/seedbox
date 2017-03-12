@@ -5,7 +5,7 @@ from flask_admin import expose
 from flask_admin.helpers import get_redirect_target
 from flask_admin.model.template import macro
 
-from seedbox import config, pki, models
+from seedbox import config, pki, models, config_renderer
 from .base import ModelView
 
 
@@ -14,9 +14,8 @@ class NodeView(ModelView):
         'cluster',
         'fqdn',
         'ip',
-        'is_ready',
         'credentials',
-        'current_ignition_config',
+        'ignition_config',
     ]
     list_template = 'admin/node_list.html'
     details_template = 'admin/node_details.html'
@@ -28,7 +27,7 @@ class NodeView(ModelView):
     ]
     column_formatters = {
         'credentials': macro('render_credentials'),
-        'current_ignition_config': macro('render_current_ignition_config'),
+        'ignition_config': macro('render_ignition_config'),
     }
 
     def _issue_creds(self, model):
@@ -80,7 +79,7 @@ class NodeView(ModelView):
         flash('The credentials successfully reissued', 'success')
         return redirect(return_url)
 
-    @expose('/ignition.json')
+    @expose('/active-ignition.json')
     def current_ignition_config_view(self):
         node = self.get_one(request.args.get('id'))
         if not node.current_ignition_config:
@@ -89,3 +88,9 @@ class NodeView(ModelView):
         data = json.loads(node.current_ignition_config)
         data = json.dumps(data, indent=2)
         return Response(data, mimetype='application/json')
+
+    @expose('/target-ignition.json')
+    def target_ignition_config_view(self):
+        node = self.get_one(request.args.get('id'))
+        response = config_renderer.ignition.render(node, indent=True)
+        return Response(response, mimetype='application/json')
