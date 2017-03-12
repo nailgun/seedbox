@@ -12,7 +12,7 @@ from seedbox.admin import admin
 log = logging.getLogger(__name__)
 
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='admin/templates')
 app.secret_key = '-'
 app.config['SQLALCHEMY_DATABASE_URI'] = config.database_uri
 models.db.app = app
