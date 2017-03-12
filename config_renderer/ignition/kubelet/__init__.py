@@ -11,7 +11,6 @@ class KubeletPackage(BaseIgnitionPackage):
             'is_schedulable': is_schedulable,
             'is_apiserver': is_apiserver,
             'runtime': runtime,
-            'config': config,
             'apiserver_endpoints': ['https://{}:{}'.format(n.fqdn, config.k8s_apiserver_secure_port) for n in apiserver_nodes],
         }
 

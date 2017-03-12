@@ -1,15 +1,10 @@
 from config_renderer.ignition.base import BaseIgnitionPackage
 from config_renderer.ignition.mixins import EtcdEndpointsMixin
 
-import config
-
 
 class FlannelInitPackage(EtcdEndpointsMixin, BaseIgnitionPackage):
     def __init__(self, etcd_nodes):
         self.etcd_nodes = etcd_nodes
-        self.template_context = {
-            'config': config,
-        }
 
     def get_files(self):
         return [

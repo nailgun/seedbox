@@ -1,13 +1,10 @@
 from config_renderer.ignition.base import BaseIgnitionPackage
 
-import config
-
 
 class KubeconfigPackage(BaseIgnitionPackage):
     def __init__(self, cluster_name):
         self.template_context = {
             'cluster_name': cluster_name,
-            'config': config,
         }
 
     def get_files(self):

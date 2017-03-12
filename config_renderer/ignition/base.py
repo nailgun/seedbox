@@ -4,6 +4,8 @@ import inspect
 import urllib.parse
 from jinja2 import Environment, ChoiceLoader, FileSystemLoader
 
+import config
+
 
 class BaseIgnitionPackage(object):
     name = None
@@ -33,7 +35,9 @@ class BaseIgnitionPackage(object):
             }
 
     def get_template_context(self):
-        return self.template_context
+        context = dict(self.template_context)
+        context.setdefault('config', config)
+        return context
 
     def render_template(self, name):
         jinja = Environment(loader=self.get_template_loader(),

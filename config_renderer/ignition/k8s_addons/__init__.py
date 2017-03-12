@@ -1,14 +1,7 @@
 from config_renderer.ignition.base import BaseIgnitionPackage
 
-import config
-
 
 class K8sAddonsPackage(BaseIgnitionPackage):
-    def __init__(self):
-        self.template_context = {
-            'config': config,
-        }
-
     def get_files(self):
         return [
             {

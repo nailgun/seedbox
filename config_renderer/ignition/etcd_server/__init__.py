@@ -1,7 +1,5 @@
 from config_renderer.ignition.base import BaseIgnitionPackage
 
-import config
-
 
 class EtcdServerPackage(BaseIgnitionPackage):
     def __init__(self, version, hostname, etcd_nodes):
@@ -10,7 +8,6 @@ class EtcdServerPackage(BaseIgnitionPackage):
             'version': version,
             'hostname': hostname,
             'etcd_nodes': etcd_nodes,
-            'config': config,
         }
 
     def get_units(self):
