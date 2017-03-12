@@ -139,4 +139,8 @@ class IgnitionConfig(object):
                 return 'https://{}:{}'.format(node.fqdn, config.k8s_apiserver_lb_port)
             else:
                 node = self.cluster.nodes.filter_by(is_k8s_apiserver=True).first()
-                return 'https://{}:{}'.format(node.fqdn, config.k8s_apiserver_secure_port)
+
+            if not node:
+                raise Exception('no k8s apiserver node')
+
+            return 'https://{}:{}'.format(node.fqdn, config.k8s_apiserver_secure_port)
