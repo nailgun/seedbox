@@ -1,5 +1,7 @@
 from config_renderer.ignition.base import BaseIgnitionPackage
 
+import config
+
 
 class KubeconfigPackage(BaseIgnitionPackage):
     def __init__(self, cluster_name):
@@ -11,7 +13,7 @@ class KubeconfigPackage(BaseIgnitionPackage):
         return [
             {
                 'filesystem': 'root',
-                'path': '/etc/kubernetes/kubeconfig.yaml',
+                'path': config.kubeconfig_path,
                 'mode': 0o644,
                 'contents': {
                     'source': self.to_data_url(self.render_template('kubeconfig.yaml')),

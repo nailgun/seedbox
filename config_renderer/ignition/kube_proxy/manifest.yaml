@@ -35,7 +35,7 @@ spec:
       path: /usr/share/ca-certificates
   - name: kubeconfig
     hostPath:
-      path: /etc/kubernetes/kubeconfig.yaml
+      path: {{ config.kubeconfig_path }}
   - name: dbus
     hostPath:
       path: /var/run/dbus

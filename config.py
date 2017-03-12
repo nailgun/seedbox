@@ -29,4 +29,4 @@ node_cert_path = cluster_credentials_path + '/node.pem'
 node_key_path = cluster_credentials_path + '/node-key.pem'
 k8s_cni_path = '/etc/kubernetes/cni'
 k8s_cni_conf_path = k8s_cni_path + '/net.d'
-# TODO: add kubeconfig_path=/etc/kubernetes/kubeconfig.yaml
+kubeconfig_path = '/etc/kubernetes/kubeconfig.yaml'

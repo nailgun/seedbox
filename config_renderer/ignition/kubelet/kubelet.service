@@ -46,7 +46,7 @@ ExecStart=/usr/lib/coreos/kubelet-wrapper \
   --cluster_dns={{ config.k8s_dns_service_ip }} \
   --cluster_domain={{ config.k8s_cluster_domain }} \
   {% if not is_apiserver -%}
-  --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
+  --kubeconfig={{ config.kubeconfig_path }} \
   --tls-cert-file={{ config.node_cert_path }} \
   --tls-private-key-file={{ config.node_key_path }} \
   {% endif %}
