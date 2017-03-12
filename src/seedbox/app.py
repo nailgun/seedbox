@@ -4,6 +4,7 @@ import logging
 import filelock
 import requests
 from flask import Flask, Response, request, abort, send_file
+from flask_migrate import Migrate
 
 from seedbox import config, models, config_renderer
 from seedbox.admin import admin
@@ -17,6 +18,7 @@ app.secret_key = config.secret_key
 app.config['SQLALCHEMY_DATABASE_URI'] = config.database_uri
 models.db.app = app
 models.db.init_app(app)
+migrate = Migrate(app, models.db)
 admin.init_app(app)
 
 ipxe_response = """#!ipxe
@@ -121,7 +123,3 @@ def report():
     models.db.session.commit()
 
     return Response('ok', mimetype='application/json')
-
-
-if __name__ == '__main__':
-    app.run('0.0.0.0')
