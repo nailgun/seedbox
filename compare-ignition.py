@@ -2,6 +2,7 @@ import json
 import difflib
 import argparse
 import urllib.parse
+from collections import defaultdict
 
 not_set = object()
 
@@ -32,14 +33,24 @@ def compare(path, v1, v2):
         return print('+-', path, 'types dont match', '\n\n')
 
     if path == '/storage/files':
-        # TODO: there can be multiple files with same name
-        v1 = {'[{filesystem}:{path}]'.format(**f): f for f in v1}
-        v2 = {'[{filesystem}:{path}]'.format(**f): f for f in v2}
+        v1src = v1
+        v1 = defaultdict(list)
+        for f in v1src:
+            v1['[{filesystem}:{path}]'.format(**f)].append(f)
+        v2src = v2
+        v2 = defaultdict(list)
+        for f in v2src:
+            v2['[{filesystem}:{path}]'.format(**f)].append(f)
 
     if path == '/systemd/units':
-        # TODO: there can be multiple units with same name
-        v1 = {'[{name}]'.format(**u): u for u in v1}
-        v2 = {'[{name}]'.format(**u): u for u in v2}
+        v1src = v1
+        v1 = defaultdict(list)
+        for u in v1src:
+            v1['[{name}]'.format(**u)].append(u)
+        v2src = v2
+        v2 = defaultdict(list)
+        for u in v2src:
+            v2['[{name}]'.format(**u)].append(u)
 
     if isinstance(v1, dict):
         return compare_dict(path, v1, v2)
