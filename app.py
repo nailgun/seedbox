@@ -86,10 +86,11 @@ def image(channel, version, filename):
 
 @app.route('/credentials/<cred_type>.pem')
 def credentials(cred_type):
-    if not config.allow_unsafe_credentials_transfer and request.environ['wsgi.url_scheme'] != 'https':
+    node = get_node('Credentials download')
+
+    if not node.cluster.allow_unsafe_credentials_transfer and request.environ['wsgi.url_scheme'] != 'https':
         abort(400)
 
-    node = get_node('Credentials download')
     if cred_type == 'ca':
         return Response(node.cluster.ca_credentials.cert, mimetype='text/plain')
 

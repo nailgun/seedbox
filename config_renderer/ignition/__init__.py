@@ -58,7 +58,7 @@ class IgnitionConfig(object):
             CredentialsPackage(request.url_root),
         ]
 
-        if config.install_etc_hosts:
+        if self.cluster.manage_etc_hosts:
             from .etc_hosts import EtcHostsPackage
             packages += [
                 EtcHostsPackage(self.cluster.nodes.all()),
@@ -75,14 +75,15 @@ class IgnitionConfig(object):
             from .cni import CNIPackage
             from .kubelet import KubeletPackage
             from .kube_proxy import KubeProxyPackage
+            runtime = models.Runtime(self.cluster.k8s_runtime)
             packages += [
                 KubeconfigPackage(self.cluster.name),
                 CNIPackage(etcd_nodes),
-                KubeletPackage(config.k8s_hyperkube_tag, self.node.fqdn, self.node.is_k8s_schedulable, self.node.is_k8s_apiserver, config.k8s_runtime, k8s_apiserver_nodes),
-                KubeProxyPackage(config.k8s_hyperkube_tag, self.get_single_k8s_apiserver_endpoint(), set_kubeconfig=not self.node.is_k8s_apiserver),
+                KubeletPackage(self.cluster.k8s_hyperkube_tag, self.node.fqdn, self.node.is_k8s_schedulable, self.node.is_k8s_apiserver, runtime.name, k8s_apiserver_nodes, self.cluster.k8s_dns_service_ip),
+                KubeProxyPackage(self.cluster.k8s_hyperkube_tag, self.get_single_k8s_apiserver_endpoint(), set_kubeconfig=not self.node.is_k8s_apiserver),
             ]
 
-            if config.k8s_runtime == 'rkt':
+            if runtime == models.Runtime.rkt:
                 from .rkt_runtime import RktRuntimePackage
                 packages += [
                     RktRuntimePackage(),
@@ -93,9 +94,9 @@ class IgnitionConfig(object):
             from .k8s_master_manifests import K8sMasterManifestsPackage
             from .k8s_addons import K8sAddonsPackage
             packages += [
-                FlannelInitPackage(etcd_nodes),
-                K8sMasterManifestsPackage(config.k8s_hyperkube_tag, etcd_nodes),
-                K8sAddonsPackage(),
+                FlannelInitPackage(etcd_nodes, self.cluster.k8s_pod_network),
+                K8sMasterManifestsPackage(self.cluster.k8s_hyperkube_tag, etcd_nodes, self.cluster.k8s_service_network),
+                K8sAddonsPackage(self.cluster.k8s_dns_service_ip),
             ]
 
         return packages
@@ -103,7 +104,7 @@ class IgnitionConfig(object):
     def get_storage_config(self, files):
         return {
             'disks': [{
-                'device': config.root_disk,
+                'device': self.node.root_disk,
                 'wipeTable': True,
                 'partitions': [{
                     'label': 'ROOT',
@@ -115,7 +116,7 @@ class IgnitionConfig(object):
             'filesystems': [{
                 'name': 'root',
                 'mount': {
-                    'device': config.root_partition,
+                    'device': self.node.root_partition,
                     'format': 'ext4',
                     'create': {
                         'force': True,

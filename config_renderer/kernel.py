@@ -10,6 +10,6 @@ def get_kernel_arguments(node):
     for console in node.linux_consoles.split(','):
         args.append('console='+console)
 
-    args.append('root=' + config.root_partition)
+    args.append('root=' + node.root_partition)
 
     return args

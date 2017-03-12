@@ -3,8 +3,11 @@ from config_renderer.ignition.mixins import EtcdEndpointsMixin
 
 
 class FlannelInitPackage(EtcdEndpointsMixin, BaseIgnitionPackage):
-    def __init__(self, etcd_nodes):
+    def __init__(self, etcd_nodes, pod_network):
         self.etcd_nodes = etcd_nodes
+        self.template_context = {
+            'pod_network': pod_network,
+        }
 
     def get_files(self):
         return [

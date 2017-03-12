@@ -43,7 +43,7 @@ ExecStart=/usr/lib/coreos/kubelet-wrapper \
   --allow-privileged=true \
   --pod-manifest-path=/etc/kubernetes/manifests \
   --hostname-override={{ hostname }} \
-  --cluster_dns={{ config.k8s_dns_service_ip }} \
+  --cluster_dns={{ dns_service_ip }} \
   --cluster_domain={{ config.k8s_cluster_domain }} \
   {% if not is_apiserver -%}
   --kubeconfig={{ config.kubeconfig_path }} \

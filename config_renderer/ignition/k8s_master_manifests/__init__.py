@@ -3,10 +3,11 @@ from config_renderer.ignition.mixins import EtcdEndpointsMixin
 
 
 class K8sMasterManifestsPackage(EtcdEndpointsMixin, BaseIgnitionPackage):
-    def __init__(self, hyperkube_tag, etcd_nodes):
+    def __init__(self, hyperkube_tag, etcd_nodes, service_network):
         self.etcd_nodes = etcd_nodes
         self.template_context = {
             'hyperkube_tag': hyperkube_tag,
+            'service_network': service_network,
         }
 
     def get_files(self):

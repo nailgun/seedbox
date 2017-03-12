@@ -14,7 +14,7 @@ spec:
     - --bind-address=0.0.0.0
     - --etcd-servers={{ etcd_endpoints|join(',') }}
     - --allow-privileged=true
-    - --service-cluster-ip-range={{ config.k8s_service_ip_range }}
+    - --service-cluster-ip-range={{ service_network }}
     - --secure-port={{ config.k8s_apiserver_secure_port }}
     - --insecure-port={{ config.k8s_apiserver_insecure_port }}
     - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota

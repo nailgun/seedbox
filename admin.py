@@ -24,6 +24,12 @@ class ClusterView(ModelView):
     column_formatters = {
         'ca_credentials': macro('render_ca_credentials'),
     }
+    form_choices = {
+        'k8s_runtime': [
+            (str(models.Runtime.docker.value), 'Docker'),
+            (str(models.Runtime.rkt.value), 'rkt'),
+        ]
+    }
 
     def _issue_ca_creds(self, model):
         ca = models.CredentialsData()
@@ -84,7 +90,7 @@ class NodeView(ModelView):
                 'kubernetes.default.svc',
                 'kubernetes.default.svc.' + config.k8s_cluster_domain,
             ]
-            san_ips = [config.k8s_apiserver_service_ip]
+            san_ips = [model.cluster.k8s_apiserver_service_ip]
         else:
             san_dns = []
             san_ips = []
