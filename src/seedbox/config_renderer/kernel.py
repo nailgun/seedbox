@@ -9,4 +9,7 @@ def get_kernel_arguments(node):
 
     args.append('root=' + node.root_partition)
 
+    if node.disable_ipv6:
+        args.append('ipv6.disable=1')
+
     return args

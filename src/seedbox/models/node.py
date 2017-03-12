@@ -23,6 +23,7 @@ class Node(db.Model):
     coreos_autologin = db.Column(db.Boolean, nullable=False)
     root_disk = db.Column(db.String(80), default='/dev/sda', nullable=False)
     linux_consoles = db.Column(db.String(80), default='tty0,ttyS0', nullable=False)
+    disable_ipv6 = db.Column(db.Boolean, nullable=False)
 
     is_etcd_server = db.Column(db.Boolean, nullable=False)
     is_k8s_schedulable = db.Column(db.Boolean, default=True, nullable=False)
