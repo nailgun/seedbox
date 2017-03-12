@@ -18,7 +18,7 @@ class Cluster(db.Model):
     coreos_version = db.Column(db.String(80), default=default_coreos_version, nullable=False)
     etcd_version = db.Column(db.Integer, default=default_etcd_version, nullable=False)
     manage_etc_hosts = db.Column(db.Boolean, nullable=False)
-    allow_unsafe_credentials_transfer = db.Column(db.Boolean, nullable=False)
+    allow_insecure_provision = db.Column(db.Boolean, nullable=False)
 
     k8s_runtime = db.Column(db.Integer, default=Runtime.docker.value, nullable=False)
     k8s_pod_network = db.Column(db.String(80), default='10.2.0.0/16', nullable=False)

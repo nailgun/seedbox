@@ -3,7 +3,7 @@ import logging
 
 import filelock
 import requests
-from flask import Flask, Response, request, abort, send_file
+from flask import Flask, Response, request, abort, send_file, redirect
 from flask_migrate import Migrate
 
 from seedbox import config, models, config_renderer
@@ -28,21 +28,39 @@ boot
 """
 
 
-def get_node(request_type):
-    node_ip = request.remote_addr
-    log.info('%s request from %s', request_type, node_ip)
-
+def get_node(node_ip):
     node = models.Node.query.filter_by(ip=node_ip).first()
     if node is None:
         log.error('Node %s is unknown', node_ip)
         abort(403)
-
     return node
 
 
-@app.route('/ipxe')
-def ipxe_boot():
-    node = get_node('iPXE boot')
+def route(rule, request_name, secure=True, **route_kwargs):
+    def decorator(func):
+        def wrapped(*args, **kwargs):
+            node_ip = request.remote_addr
+            log.info('%s request from %s', request_name, node_ip)
+            node = get_node(node_ip)
+
+            is_request_secure = request.environ['wsgi.url_scheme'] == 'https'
+            if secure and not is_request_secure and not node.cluster.allow_insecure_provision:
+                if request.method in ('POST', 'PUT', 'PATCH'):
+                    # request body already sent in insecure manner
+                    # return error in this case to notify cluster admin
+                    abort(400)
+                else:
+                    return redirect(request.url.replace('http://', 'https://', 1))
+
+            return func(node, *args, **kwargs)
+
+        wrapped.__name__ = func.__name__
+        return app.route(rule, **route_kwargs)(wrapped)
+    return decorator
+
+
+@route('/ipxe', 'iPXE boot', secure=False)
+def ipxe_boot(node):
     kernel_args = ' '.join(config_renderer.kernel.get_kernel_arguments(node, request.url_root))
     response = ipxe_response.format(coreos_channel=node.coreos_channel,
                                     coreos_version=node.coreos_version,
@@ -50,17 +68,8 @@ def ipxe_boot():
     return Response(response, mimetype='text/plain')
 
 
-@app.route('/ignition')
-def ignition():
-    node = get_node('Ignition config')
-    response = config_renderer.ignition.render(node, 'indent' in request.args)
-    return Response(response, mimetype='application/json')
-
-
-@app.route('/image/<channel>/<version>/<filename>')
-def image(channel, version, filename):
-    get_node('Image download')
-
+@route('/image/<channel>/<version>/<filename>', 'Image download', secure=False)
+def image(node, channel, version, filename):
     dirpath = os.path.join(config.cachedir, channel, version)
     filepath = os.path.join(dirpath, filename)
 
@@ -85,13 +94,14 @@ def image(channel, version, filename):
     return send_file(filepath)
 
 
-@app.route('/credentials/<cred_type>.pem')
-def credentials(cred_type):
-    node = get_node('Credentials download')
+@route('/ignition', 'Ignition config')
+def ignition(node):
+    response = config_renderer.ignition.render(node, 'indent' in request.args)
+    return Response(response, mimetype='application/json')
 
-    if not node.cluster.allow_unsafe_credentials_transfer and request.environ['wsgi.url_scheme'] != 'https':
-        abort(400)
 
+@route('/credentials/<cred_type>.pem', 'Credentials download')
+def credentials(node, cred_type):
     if cred_type == 'ca':
         return Response(node.cluster.ca_credentials.cert, mimetype='text/plain')
 
@@ -104,10 +114,8 @@ def credentials(cred_type):
     abort(404)
 
 
-@app.route('/report', methods=['POST'])
-def report():
-    node = get_node('Provision report')
-
+@route('/report', 'Provision report', methods=['POST'])
+def report(node):
     node.active_config_version = request.args.get('version')
     if node.active_config_version is None:
         abort(400)
