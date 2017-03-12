@@ -1,13 +1,13 @@
 from config_renderer.ignition.base import BaseIgnitionPackage
+from config_renderer.ignition.mixins import EtcdEndpointsMixin
 
 import config
 
 
-class FlannelInitPackage(BaseIgnitionPackage):
+class FlannelInitPackage(EtcdEndpointsMixin, BaseIgnitionPackage):
     def __init__(self, etcd_nodes):
+        self.etcd_nodes = etcd_nodes
         self.template_context = {
-            # TODO: move this to mixin
-            'etcd_endpoints': ['http://{}:{}'.format(n.fqdn, config.etcd_client_port) for n in etcd_nodes],
             'config': config,
         }
 
