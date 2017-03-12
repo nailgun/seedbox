@@ -1,23 +1,43 @@
 import json
 import difflib
+import argparse
 import urllib.parse
 
-with open('their.json', 'rb') as d1:
-    d1 = json.load(d1)
+not_set = object()
 
-with open('my.json', 'rb') as d2:
-    d2 = json.load(d2)
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('v1')
+    parser.add_argument('v2')
+    args = parser.parse_args()
+
+    with open(args.v1, 'rb') as v1:
+        v1 = json.load(v1)
+
+    with open(args.v2, 'rb') as v2:
+        v2 = json.load(v2)
+
+    compare('', v1, v2)
 
 
 def compare(path, v1, v2):
+    if v1 is not_set:
+        return print('+', path, '\n\n')
+
+    if v2 is not_set:
+        return print('-', path, '\n\n')
+
     if type(v1) != type(v2):
-        return print('+-', path, 'types dont match')
+        return print('+-', path, 'types dont match', '\n\n')
 
     if path == '/storage/files':
+        # TODO: there can be multiple files with same name
         v1 = {'[{filesystem}:{path}]'.format(**f): f for f in v1}
         v2 = {'[{filesystem}:{path}]'.format(**f): f for f in v2}
 
     if path == '/systemd/units':
+        # TODO: there can be multiple units with same name
         v1 = {'[{name}]'.format(**u): u for u in v1}
         v2 = {'[{name}]'.format(**u): u for u in v2}
 
@@ -40,24 +60,37 @@ def compare(path, v1, v2):
             diff = difflib.unified_diff(v1.splitlines(keepends=True), v2.splitlines(keepends=True))
             delta = ''.join(x for x in diff)
             print(path, ':')
-            print(delta)
+            print(delta, '\n')
         else:
-            print('+-', path, 'different:', v1, v2)
+            print(path, ':')
+            print('-', v1)
+            print('+', v2, '\n\n')
 
 
 def compare_dict(path, v1, v2):
-    for k, v1i in v1.items():
-        v2i = v2.get(k)
+    keys = set(v1.keys()) | set(v2.keys())
+    keys = sorted(keys)
+
+    for k in keys:
+        v1i = v1.get(k, not_set)
+        v2i = v2.get(k, not_set)
         compare(path + '/' + k, v1i, v2i)
 
 
 def compare_list(path, v1, v2):
-    for idx, v1i in enumerate(v1):
+    max_len = max(len(v1), len(v2))
+
+    for idx in range(max_len):
+        try:
+            v1i = v1[idx]
+        except IndexError:
+            v1i = not_set
         try:
             v2i = v2[idx]
         except IndexError:
-            v2i = None
+            v2i = not_set
         compare(path + '/' + str(idx), v1i, v2i)
 
 
-compare('', d1, d2)
+if __name__ == '__main__':
+    main()
