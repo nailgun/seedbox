@@ -27,3 +27,5 @@ cluster_credentials_path = '/etc/ssl/cluster'
 ca_cert_path = cluster_credentials_path + '/ca.pem'
 node_cert_path = cluster_credentials_path + '/node.pem'
 node_key_path = cluster_credentials_path + '/node-key.pem'
+# TODO: add cni-conf-dir=/etc/kubernetes/cni/net.d
+# TODO: add kubeconfig_path=/etc/kubernetes/kubeconfig.yaml
