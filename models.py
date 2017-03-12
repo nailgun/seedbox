@@ -44,6 +44,7 @@ class Node(db.Model):
 
     target_config_version = db.Column(db.Integer, default=1, nullable=False)
     current_config_version = db.Column(db.Integer, nullable=True)
+    current_ignition_config = db.Column(db.Text, nullable=False)
 
     _coreos_channel = db.Column(db.String(80), nullable=False)
     _coreos_version = db.Column(db.String(80), nullable=False)

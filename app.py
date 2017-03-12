@@ -102,19 +102,22 @@ def credentials(cred_type):
     abort(404)
 
 
-# TODO: upload ignition config and compare it with current one
-# TODO: also dump it somewhere for debugging purposes
 @app.route('/report', methods=['POST'])
 def report():
     node = get_node('Provision report')
-    data = request.get_json()
-    if not isinstance(data, dict):
+
+    node.current_config_version = request.args.get('version')
+    if node.current_config_version is None:
         abort(400)
 
-    if 'config_version' in data:
-        node.current_config_version = data['config_version']
-        models.db.session.add(node)
-        models.db.session.commit()
+    ignition_config = request.get_json()
+    if ignition_config is None:
+        abort(400)
+
+    node.current_ignition_config = request.data
+
+    models.db.session.add(node)
+    models.db.session.commit()
 
     return Response('ok', mimetype='application/json')
 

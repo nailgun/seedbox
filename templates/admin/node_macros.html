@@ -14,3 +14,11 @@
         <span class="glyphicon glyphicon-exclamation-sign text-danger" title="{{ credentials_error }}" style="cursor: pointer"></span>
     {% endif %}
 {% endmacro %}
+
+{% macro render_current_ignition_config(model, column) %}
+    {% if model.current_ignition_config %}
+        <a href="{{ url_for('node.current_ignition_config_view', id=model.id) }}">[raw]</a>
+    {% else %}
+        None
+    {% endif %}
+{% endmacro %}

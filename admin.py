@@ -1,3 +1,4 @@
+import json
 from flask import request, abort, Response, flash, redirect
 from flask_admin import Admin, expose
 from flask_admin.model.template import macro
@@ -50,12 +51,25 @@ class ClusterView(ModelView):
 
 
 class NodeView(ModelView):
-    column_list = ['cluster', 'fqdn', 'ip', 'is_ready', 'credentials']
+    column_list = [
+        'cluster',
+        'fqdn',
+        'ip',
+        'is_ready',
+        'credentials',
+        'current_ignition_config',
+    ]
     list_template = 'admin/node_list.html'
     details_template = 'admin/node_details.html'
-    form_excluded_columns = ['credentials', 'target_config_version', 'current_config_version']
+    form_excluded_columns = [
+        'credentials',
+        'target_config_version',
+        'current_config_version',
+        'current_ignition_config',
+    ]
     column_formatters = {
         'credentials': macro('render_credentials'),
+        'current_ignition_config': macro('render_current_ignition_config'),
     }
 
     def _issue_creds(self, model):
@@ -94,6 +108,7 @@ class NodeView(ModelView):
         self._issue_creds(model)
         model._coreos_channel = ''
         model._coreos_version = ''
+        model.current_ignition_config = ''
 
     @expose('/reissue-credentials', methods=['POST'])
     def reissue_creds_view(self):
@@ -105,6 +120,16 @@ class NodeView(ModelView):
         return_url = get_redirect_target() or self.get_url('.index_view')
         flash('The credentials successfully reissued', 'success')
         return redirect(return_url)
+
+    @expose('/ignition.json')
+    def current_ignition_config_view(self):
+        node = self.get_one(request.args.get('id'))
+        if not node.current_ignition_config:
+            abort(404)
+
+        data = json.loads(node.current_ignition_config)
+        data = json.dumps(data, indent=2)
+        return Response(data, mimetype='application/json')
 
 
 class UserView(ModelView):

@@ -11,8 +11,8 @@ ExecStart=/usr/bin/curl --fail \
                         --location \
                         -H 'Content-Type: application/json' \
                         -X POST \
-                        -d '{"config_version":"{{ target_config_version }}"}' \
-                        {{ url_root }}report
+                        --data-binary @/run/ignition.json \
+                        '{{ url_root }}report?version={{ target_config_version }}'
 
 [Install]
 WantedBy=multi-user.target
