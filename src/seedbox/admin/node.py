@@ -22,8 +22,8 @@ class NodeView(ModelView):
     form_excluded_columns = [
         'credentials',
         'target_config_version',
-        'current_config_version',
-        'current_ignition_config',
+        'active_config_version',
+        'active_ignition_config',
     ]
     column_formatters = {
         'credentials': macro('render_credentials'),
@@ -64,7 +64,7 @@ class NodeView(ModelView):
             self._issue_creds(model)
             model._coreos_channel = ''
             model._coreos_version = ''
-            model.current_ignition_config = ''
+            model.active_ignition_config = ''
         else:
             model.target_config_version += 1
 
@@ -80,12 +80,12 @@ class NodeView(ModelView):
         return redirect(return_url)
 
     @expose('/active-ignition.json')
-    def current_ignition_config_view(self):
+    def active_ignition_config_view(self):
         node = self.get_one(request.args.get('id'))
-        if not node.current_ignition_config:
+        if not node.active_ignition_config:
             abort(404)
 
-        data = json.loads(node.current_ignition_config)
+        data = json.loads(node.active_ignition_config)
         data = json.dumps(data, indent=2)
         return Response(data, mimetype='application/json')
 

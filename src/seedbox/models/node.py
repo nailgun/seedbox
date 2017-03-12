@@ -14,9 +14,8 @@ class Node(db.Model):
     credentials = db.relationship('CredentialsData')
 
     target_config_version = db.Column(db.Integer, default=1, nullable=False)
-    # TODO: rename to "active_"
-    current_config_version = db.Column(db.Integer, nullable=True)
-    current_ignition_config = db.Column(db.Text, nullable=False)
+    active_config_version = db.Column(db.Integer, nullable=True)
+    active_ignition_config = db.Column(db.Text, nullable=False)
 
     _coreos_channel = db.Column(db.String(80), nullable=False)
     _coreos_version = db.Column(db.String(80), nullable=False)
@@ -46,7 +45,7 @@ class Node(db.Model):
 
     @property
     def is_config_match(self):
-        return self.target_config_version == self.current_config_version
+        return self.target_config_version == self.active_config_version
 
     @property
     def credentials_error(self):

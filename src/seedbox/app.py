@@ -107,15 +107,15 @@ def credentials(cred_type):
 def report():
     node = get_node('Provision report')
 
-    node.current_config_version = request.args.get('version')
-    if node.current_config_version is None:
+    node.active_config_version = request.args.get('version')
+    if node.active_config_version is None:
         abort(400)
 
     ignition_config = request.get_json()
     if ignition_config is None:
         abort(400)
 
-    node.current_ignition_config = request.data
+    node.active_ignition_config = request.data
 
     models.db.session.add(node)
     models.db.session.commit()

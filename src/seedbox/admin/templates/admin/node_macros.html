@@ -18,8 +18,8 @@
 {% macro render_ignition_config(model, column) %}
     <a href="{{ url_for('node.target_ignition_config_view', id=model.id) }}">[target]</a>
 
-    {% if model.current_ignition_config %}
-        <a href="{{ url_for('node.current_ignition_config_view', id=model.id) }}">[active]</a>
+    {% if model.active_ignition_config %}
+        <a href="{{ url_for('node.active_ignition_config_view', id=model.id) }}">[active]</a>
     {% endif %}
 
     {% if model.is_config_match %}
