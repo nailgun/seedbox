@@ -30,7 +30,9 @@ def compare(path, v1, v2):
         return print('-', path, '\n\n')
 
     if type(v1) != type(v2):
-        return print('+-', path, 'types dont match', '\n\n')
+        print('-', path, 'type:', type(v1))
+        print('+', path, 'type:', type(v1))
+        return print('\n')
 
     if path == '/storage/files':
         v1src = v1
