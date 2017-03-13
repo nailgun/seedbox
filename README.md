@@ -19,7 +19,13 @@ controllers and workers without maintaining a bunch of long ignition files.
 
 ## Web UI
 
-TODO: screens
+![](docs/img/cluster-create.png)
+
+![](docs/img/node-create.png)
+
+![](docs/img/node-list.png)
+
+![](docs/img/user-list.png)
 
 ## PKI
 
