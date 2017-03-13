@@ -123,15 +123,17 @@ def validate_certificate_subject_name(cert_pem_data, subject_name):
 
 
 @wrap_subject_matching_errors
-def validate_certificate_host(cert_pem_data, host_name):
+def validate_certificate_hosts(cert_pem_data, host_names):
     cert = x509.load_pem_x509_certificate(cert_pem_data, default_backend())
-    _match_subject_name(cert, host_name, compare_func=ssl._dnsname_match)
+    for host_name in host_names:
+        _match_subject_name(cert, host_name, compare_func=ssl._dnsname_match)
 
 
 @wrap_subject_matching_errors
-def validate_certificate_host_ip(cert_pem_data, host_ip):
+def validate_certificate_host_ips(cert_pem_data, host_ips):
     cert = x509.load_pem_x509_certificate(cert_pem_data, default_backend())
-    _match_subject_ip(cert, host_ip)
+    for host_ip in host_ips:
+        _match_subject_ip(cert, host_ip)
 
 
 @wrap_subject_matching_errors

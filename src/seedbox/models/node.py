@@ -1,4 +1,4 @@
-from seedbox import pki
+from seedbox import pki, config
 from .db import db
 
 
@@ -52,7 +52,15 @@ class Node(db.Model):
     def credentials_error(self):
         try:
             pki.verify_certificate_chain(self.cluster.ca_credentials.cert, self.credentials.cert)
-            pki.validate_certificate_host(self.credentials.cert, self.fqdn)
+            hosts = [self.fqdn]
+            if self.is_k8s_apiserver:
+                hosts += [
+                    'kubernetes',
+                    'kubernetes.default',
+                    'kubernetes.default.svc',
+                    'kubernetes.default.svc.' + config.k8s_cluster_domain,
+                ]
+            pki.validate_certificate_hosts(self.credentials.cert, hosts)
             pki.validate_certificate_key_usage(self.credentials.cert)
         except pki.InvalidCertificate as e:
             return str(e)
@@ -60,7 +68,10 @@ class Node(db.Model):
     @property
     def credentials_warning(self):
         try:
-            pki.validate_certificate_host_ip(self.credentials.cert, self.ip)
+            ips = [self.ip]
+            if self.is_k8s_apiserver:
+                ips += [self.cluster.k8s_apiserver_service_ip]
+            pki.validate_certificate_host_ips(self.credentials.cert, ips)
         except pki.InvalidCertificate as e:
             return str(e)
 
