@@ -155,6 +155,19 @@ def validate_certificate_key_usage(cert_pem_data):
         raise InvalidCertificate("Not intented for Key Encipherment")
 
 
+@wrap_subject_matching_errors
+def validate_ca_certificate_constraints(cert_pem_data):
+    cert = x509.load_pem_x509_certificate(cert_pem_data, default_backend())
+    try:
+        constraints = cert.extensions.get_extension_for_oid(ExtensionOID.BASIC_CONSTRAINTS)
+        constraints = constraints.value
+    except x509.extensions.ExtensionNotFound:
+        return
+
+    if not constraints.ca:
+        raise InvalidCertificate("Not a CA certificate")
+
+
 # based on ssl.match_hostname code
 # https://github.com/python/cpython/blob/6f0eb93183519024cb360162bdd81b9faec97ba6/Lib/ssl.py#L279
 def _match_subject_name(cert, subject_name, compare_func=operator.eq):

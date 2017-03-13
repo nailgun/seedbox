@@ -35,6 +35,7 @@ class Cluster(db.Model):
     def ca_credentials_error(self):
         try:
             pki.validate_certificate_subject_name(self.ca_credentials.cert, self.name)
+            pki.validate_ca_certificate_constraints(self.ca_credentials.cert)
         except pki.InvalidCertificate as e:
             return str(e)
 
