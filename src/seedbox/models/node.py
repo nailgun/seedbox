@@ -57,5 +57,12 @@ class Node(db.Model):
             return str(e)
 
     @property
+    def credentials_warning(self):
+        try:
+            pki.validate_certificate_host_ip(self.credentials.cert, self.ip)
+        except pki.InvalidCertificate as e:
+            return str(e)
+
+    @property
     def root_partition(self):
         return self.root_disk + '1'

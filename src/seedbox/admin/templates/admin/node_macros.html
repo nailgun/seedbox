@@ -12,6 +12,11 @@
     {% set credentials_error=model.credentials_error %}
     {% if credentials_error %}
         <span class="glyphicon glyphicon-exclamation-sign text-danger" title="{{ credentials_error }}" style="cursor: pointer"></span>
+    {% else %}
+        {% set credentials_warning=model.credentials_warning %}
+        {% if credentials_warning %}
+            <span class="glyphicon glyphicon-exclamation-sign text-warning" title="{{ credentials_warning }}" style="cursor: pointer"></span>
+        {% endif %}
     {% endif %}
 {% endmacro %}
 
