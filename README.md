@@ -41,6 +41,17 @@ provision.
 Node notifies seedbox after successful boot and uploads active ignition config so seedbox can track
 current state of a cluster.
 
+## Ignition file compare
+
+If you afraid to launch clusters with new untested software you can use provided `ignition-compare`
+script to compare rendered configuration with yours. Copy your ignition config from a server (it is stored
+in `/run/ignition.json`). Next start to provision using seedbox. All nodes will report applied ignition
+config back to seedbox and you can download it from web UI. Next run
+`python ignition-compare.py your.json seedbox.json | colordiff | less` and see differences.
+
+Seedbox was developed by constantly checking differences with matchbox'es `k8s-controller` and `k8s-worker`
+example profiles. And changes are minimal.
+
 ## Roadmap
 
 * add k8s apiserver loadbalancers provision
