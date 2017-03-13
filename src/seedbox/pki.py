@@ -170,11 +170,11 @@ def _match_subject_name(cert, subject_name, compare_func=operator.eq):
 
     if not any(compare_func(name, subject_name) for name in names):
         if len(names) > 1:
-            raise InvalidCertificate("subject name %r doesn't match either of %s" % (subject_name, ', '.join(map(repr, names))))
+            raise InvalidCertificate("Subject name %r doesn't match either of %s" % (subject_name, ', '.join(map(repr, names))))
         elif len(names) == 1:
-            raise InvalidCertificate("subject name %r doesn't match %r" % (subject_name, names[0]))
+            raise InvalidCertificate("Subject name %r doesn't match %r" % (subject_name, names[0]))
         else:
-            raise InvalidCertificate("no appropriate commonName or subjectAltName DNSName fields were found")
+            raise InvalidCertificate("No appropriate commonName or subjectAltName DNSName fields were found")
 
 
 def _match_subject_ip(cert, subject_ip, compare_func=operator.eq):
@@ -184,11 +184,11 @@ def _match_subject_ip(cert, subject_ip, compare_func=operator.eq):
     subject_ip = ipaddress.ip_address(subject_ip)
     if not any(compare_func(ip, subject_ip) for ip in ips):
         if len(ips) > 1:
-            raise InvalidCertificate("subject ip %s doesn't match either of %s" % (subject_ip, ', '.join(map(repr, ips))))
+            raise InvalidCertificate("Subject ip %s doesn't match either of %s" % (subject_ip, ', '.join(map(repr, ips))))
         elif len(ips) == 1:
-            raise InvalidCertificate("subject ip %s doesn't match %s" % (subject_ip, ips[0]))
+            raise InvalidCertificate("Subject ip %s doesn't match %s" % (subject_ip, ips[0]))
         else:
-            raise InvalidCertificate("no appropriate subjectAltName IPAddress fields were found")
+            raise InvalidCertificate("No appropriate subjectAltName IPAddress fields were found")
 
 
 class InvalidCertificate(Exception):
