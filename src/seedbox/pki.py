@@ -134,6 +134,25 @@ def validate_certificate_host_ip(cert_pem_data, host_ip):
     _match_subject_ip(cert, host_ip)
 
 
+@wrap_subject_matching_errors
+def validate_certificate_key_usage(cert_pem_data):
+    cert = x509.load_pem_x509_certificate(cert_pem_data, default_backend())
+    try:
+        key_usage = cert.extensions.get_extension_for_oid(ExtensionOID.KEY_USAGE)
+        key_usage = key_usage.value
+    except x509.extensions.ExtensionNotFound:
+        raise InvalidCertificate("Key usage not specified")
+
+    if not key_usage.digital_signature:
+        raise InvalidCertificate("Not intented for Digital Signature")
+
+    if not key_usage.content_commitment:
+        raise InvalidCertificate("Not intented for Non Repudiation")
+
+    if not key_usage.key_encipherment:
+        raise InvalidCertificate("Not intented for Key Encipherment")
+
+
 # based on ssl.match_hostname code
 # https://github.com/python/cpython/blob/6f0eb93183519024cb360162bdd81b9faec97ba6/Lib/ssl.py#L279
 def _match_subject_name(cert, subject_name, compare_func=operator.eq):

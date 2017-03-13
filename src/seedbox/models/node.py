@@ -53,6 +53,7 @@ class Node(db.Model):
         try:
             pki.verify_certificate_chain(self.cluster.ca_credentials.cert, self.credentials.cert)
             pki.validate_certificate_host(self.credentials.cert, self.fqdn)
+            pki.validate_certificate_key_usage(self.credentials.cert)
         except pki.InvalidCertificate as e:
             return str(e)
 
