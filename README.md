@@ -5,11 +5,13 @@ clusters using PXE without installation. But it easily can be extended for any p
 
 ## What is wrong with CoreOS matchbox
 
-Actually it's based on example ignition config files from [CoreOS matchbox](https://github.com/coreos/matchbox).
+Actually seedbox is based on example ignition config files from [CoreOS matchbox](https://github.com/coreos/matchbox).
 But ignition config in seedbox is splet into mutiple files to increase readability. This also
 provides the most important feature: you can reuse parts of a configuration in different setups.
 When you use seedbox you just set checkboxes for which features you need on a cluster and nodes. And
-config renderer will generate ignition config file for you. In sources systemd unit files are grouped together
+config renderer will generate ignition config file for you.
+[In the source](https://github.com/nailgun/seedbox/tree/master/src/seedbox/config_renderer/ignition)
+systemd unit files are grouped together
 with any required files to help track dependencies. In matchbox some units described at beginning of an
 ignition file require files described at end of the file. This is hard to read and maintain.
 
