@@ -16,7 +16,7 @@ class KubeProxyPackage(BaseIgnitionPackage):
                 'path': '/etc/kubernetes/manifests/kube-proxy.yaml',
                 'mode': 0o644,
                 'contents': {
-                    'source': self.to_data_url(self.render_template('manifest.yaml')),
+                    'source': self.to_data_url(self.render_template('kube-proxy.yaml')),
                 },
             },
         ]
