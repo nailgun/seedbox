@@ -70,7 +70,7 @@ class IgnitionConfig(object):
                 EtcdServerPackage(self.cluster.etcd_version, self.node.fqdn, etcd_nodes),
             ]
 
-        if self.node.is_k8s_apiserver or self.node.is_k8s_schedulable:
+        if self.node.is_k8s_schedulable or self.node.is_k8s_apiserver:
             from .kubeconfig import KubeconfigPackage
             from .cni import CNIPackage
             from .kubelet import KubeletPackage
