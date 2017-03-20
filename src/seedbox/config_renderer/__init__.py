@@ -1,2 +1,2 @@
-from . import kernel
+from . import ipxe
 from . import ignition

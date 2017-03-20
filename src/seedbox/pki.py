@@ -68,6 +68,8 @@ def issue_certificate(cn, ca_cert, ca_key, san_dns=(), san_ips=(), key_size=2048
                                      decipher_only=False),
                        critical=False)
 
+    # TODO: add CA info
+
     sans = [x509.DNSName(name) for name in san_dns]
     sans += [x509.IPAddress(ipaddress.ip_address(ip)) for ip in san_ips]
     if sans:
