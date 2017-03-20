@@ -140,7 +140,7 @@ def prepare_vbox_ipxe(ipxe_script_name, seedbox_url):
         pass
 
     ipxe_script_path = os.path.join(vbox_tftp_dir, ipxe_script_name)
-    ipxe_script = '#!ipxe\nchain {}\n'.format(urllib.parse.urljoin(seedbox_url, 'ipxe'))
+    ipxe_script = '#!ipxe\ndhcp net1\nchain {}\n'.format(urllib.parse.urljoin(seedbox_url, 'ipxe'))
     with open(ipxe_script_path, 'w') as f:
         f.write(ipxe_script)
 
