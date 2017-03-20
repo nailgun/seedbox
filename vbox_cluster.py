@@ -22,8 +22,15 @@ def main():
     args = parse_args()
     logging.basicConfig(level='NOTSET')
 
+    seedbox_url = args.seedbox_url
+    if not seedbox_url:
+        seedbox_ip = get_hostonlyif_ipaddress(args.host_only_network)
+        if not seedbox_ip:
+            raise Exception("Can't get host-only network IP", args.host_only_network)
+        seedbox_url = 'http://{}:5000/'.format(seedbox_ip)
+
     ipxe_script_name = args.cluster_name + '.ipxe'
-    prepare_vbox_ipxe(ipxe_script_name, args.seedbox_url)
+    prepare_vbox_ipxe(ipxe_script_name, seedbox_url)
 
     instance_names = [format_instance_name(args.cluster_name, idx + 1) for idx in range(args.num_instances)]
 
@@ -62,10 +69,13 @@ def main():
                         '--nic1', 'nat',
                         '--nattftpfile1', ipxe_script_name,
                         '--nic2', 'hostonly',
-                        '--hostonlyadapter2', 'vboxnet0'],
+                        '--hostonlyadapter2', args.host_only_network],
                        check=True)
 
         config_path = get_vm_config_file_path(instance_name)
+        if not config_path:
+            raise Exception("Can't get VM config path", instance_name)
+
         base_path = os.path.dirname(config_path)
         disk_path = os.path.join(base_path, 'ide1.vdi')
 
@@ -128,8 +138,10 @@ def parse_args():
                             help='instance disk size in megabytes')
     arg_parser.add_argument('--start', action='store_true', default=False,
                             help='start instances after creation')
-    arg_parser.add_argument('seedbox_url',
-                            help='URL of your seedbox installation')
+    arg_parser.add_argument('--host-only-network', default='vboxnet0',
+                            help='VirtualBox host-only network name')
+    arg_parser.add_argument('--seedbox-url',
+                            help='URL of your seedbox installation (defaults to first IP of host-only network)')
     return arg_parser.parse_args()
 
 
@@ -165,6 +177,24 @@ def get_vm_config_file_path(vm_name):
         parts = line.split(b':', maxsplit=1)
         if len(parts) == 2 and parts[0] == b'Config file':
             return os.fsdecode(parts[1].strip())
+
+
+def get_hostonlyif_ipaddress(ifname):
+    stdout = subprocess.run(['VBoxManage', 'list', 'hostonlyifs'], check=True, stdout=subprocess.PIPE).stdout
+
+    current_if = None
+    for line in stdout.splitlines():
+        if not line:
+            current_if = None
+        else:
+            parts = line.split(b':', maxsplit=1)
+            key = parts[0]
+            value = parts[1].strip()
+            if key == b'Name':
+                current_if = value.decode()
+            elif current_if == ifname:
+                if key == b'IPAddress':
+                    return value.decode()
 
 
 if __name__ == '__main__':
