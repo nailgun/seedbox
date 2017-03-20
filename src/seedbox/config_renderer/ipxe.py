@@ -27,7 +27,7 @@ def get_kernel_arguments(node, url_root):
 
     # TODO: if enabled, won't boot with wiped partition table
     # TODO: if disabled, root will be in tmpfs and will eat RAM
-    # args.append('root=' + node.root_partition)
+    args.append('root=' + node.root_partition)
 
     if node.disable_ipv6:
         args.append('ipv6.disable=1')
