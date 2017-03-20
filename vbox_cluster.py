@@ -25,7 +25,7 @@ def main():
     ipxe_script_name = args.cluster_name + '.ipxe'
     prepare_vbox_ipxe(ipxe_script_name, args.seedbox_url)
 
-    instance_names = ['{}-{}'.format(args.cluster_name, idx + 1) for idx in range(args.num_instances)]
+    instance_names = [format_instance_name(args.cluster_name, idx + 1) for idx in range(args.num_instances)]
 
     if args.delete:
         wait = False
@@ -118,7 +118,7 @@ def parse_args():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-n', '--num-instances', type=int, default=1,
                             help='number of instances to create')
-    arg_parser.add_argument('-c', '--cluster-name', default='cluster',
+    arg_parser.add_argument('-c', '--cluster-name', default='cluster1',
                             help='cluster name')
     arg_parser.add_argument('-d', '--delete', action='store_true', default=False,
                             help='delete all VMs first')
@@ -131,6 +131,10 @@ def parse_args():
     arg_parser.add_argument('seedbox_url',
                             help='URL of your seedbox installation')
     return arg_parser.parse_args()
+
+
+def format_instance_name(cluster_name, idx):
+    return '{}-node{:02}'.format(cluster_name, idx)
 
 
 def prepare_vbox_ipxe(ipxe_script_name, seedbox_url):
