@@ -29,5 +29,7 @@
 
     {% if model.is_config_match %}
         <span class="fa fa-check-circle glyphicon glyphicon-ok-circle icon-ok-circle" title="Active config matches target config"></span>
+    {% else %}
+        <span class="fa fa-x-circle glyphicon glyphicon-remove-circle icon-ok-circle" title="Active config doesn't match target config"></span>
     {% endif %}
 {% endmacro %}
