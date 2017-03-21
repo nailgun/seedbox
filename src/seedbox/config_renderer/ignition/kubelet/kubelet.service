@@ -30,7 +30,7 @@ ExecStart=/usr/lib/coreos/kubelet-wrapper \
   {% if is_apiserver -%}
   --api-servers=http://127.0.0.1:{{ config.k8s_apiserver_insecure_port }} \
   {% else -%}
-  --api-servers={{ apiserver_endpoints|join(',') }}
+  --api-servers={{ apiserver_endpoints|join(',') }} \
   {% endif -%}
   --cni-conf-dir={{ config.k8s_cni_conf_path }} \
   --network-plugin=cni \
