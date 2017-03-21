@@ -59,6 +59,7 @@ def ipxe_boot(node):
     return Response(response, mimetype='text/plain')
 
 
+# TODO: if version is not in form 'x.x.x' - don't cache, just pass from upstream
 @route('/image/<channel>/<version>/<filename>', 'Image download', secure=False)
 def image(node, channel, version, filename):
     dirpath = os.path.join(config.cachedir, channel, version)
