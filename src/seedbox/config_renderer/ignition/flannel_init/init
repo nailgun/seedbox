@@ -16,10 +16,8 @@ function init_flannel {
           break
       fi
   done
-  RES=$(curl --fail --silent --show-error -X PUT -d "value={\"Network\":\"{{ pod_network }}\",\"Backend\":{\"Type\":\"vxlan\"}}" "$ACTIVE_ETCD/v2/keys/coreos.com/network/config?prevExist=false")
-  if [ -z "$(echo $RES | grep '"action":"create"')" ] && [ -z "$(echo $RES | grep 'Key already exists')" ]; then
-      echo "Unexpected error configuring flannel pod network: $RES"
-  fi
+
+  curl --fail --silent --show-error -X PUT -d "value={\"Network\":\"{{ pod_network }}\",\"Backend\":{\"Type\":\"vxlan\"}}" "$ACTIVE_ETCD/v2/keys/coreos.com/network/config"
 }
 
 init_flannel
