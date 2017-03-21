@@ -50,5 +50,5 @@ spec:
       path: {{ config.cluster_credentials_path }}
     name: ssl-certs-cluster
   - hostPath:
-      path: /usr/share/ca-certificates
+      path: {{ config.node_ca_certificates_path }}
     name: ssl-certs-host

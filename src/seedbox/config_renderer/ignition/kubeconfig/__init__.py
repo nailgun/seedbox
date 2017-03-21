@@ -7,7 +7,7 @@ class KubeconfigPackage(BaseIgnitionPackage):
         return [
             {
                 'filesystem': 'root',
-                'path': config.kubeconfig_path,
+                'path': config.k8s_kubeconfig_path,
                 'mode': 0o644,
                 'contents': {
                     'source': self.to_data_url(self.render_template('kubeconfig.yaml')),

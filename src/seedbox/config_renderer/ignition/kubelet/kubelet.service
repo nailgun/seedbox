@@ -10,7 +10,7 @@ Environment="RKT_OPTS=--uuid-file-save=/var/run/kubelet-pod.uuid \
   --volume ssl-cluster-credentials,kind=host,source={{ config.cluster_credentials_path }},readOnly=true \
   --mount volume=ssl-cluster-credentials,target={{ config.cluster_credentials_path }} \
   {% if cluster.k8s_runtime_name == 'rkt' -%}
-  --volume rkt,kind=host,source=/opt/bin/host-rkt \
+  --volume rkt,kind=host,source={{ config.node_host_rkt_path }} \
   --mount volume=rkt,target=/usr/bin/rkt \
   --volume var-lib-rkt,kind=host,source=/var/lib/rkt \
   --mount volume=var-lib-rkt,target=/var/lib/rkt \
@@ -24,7 +24,7 @@ Environment="RKT_OPTS=--uuid-file-save=/var/run/kubelet-pod.uuid \
   --volume var-log,kind=host,source=/var/log \
   --mount volume=var-log,target=/var/log"
 
-ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
+ExecStartPre=/usr/bin/mkdir -p {{ config.k8s_manifests_path }}
 ExecStartPre=/usr/bin/mkdir -p /var/log/containers
 ExecStartPre=/usr/bin/systemctl is-active flanneld.service
 ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
@@ -42,11 +42,11 @@ ExecStart=/usr/lib/coreos/kubelet-wrapper \
   --rkt-path=/usr/bin/rkt \
   --rkt-stage1-image=coreos.com/rkt/stage1-coreos \
   --allow-privileged=true \
-  --pod-manifest-path=/etc/kubernetes/manifests \
+  --pod-manifest-path={{ config.k8s_manifests_path }} \
   --hostname-override={{ node.fqdn }} \
   --cluster_dns={{ cluster.k8s_dns_service_ip }} \
   --cluster_domain={{ config.k8s_cluster_domain }} \
-  --kubeconfig={{ config.kubeconfig_path }}
+  --kubeconfig={{ config.k8s_kubeconfig_path }}
 
 ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
 

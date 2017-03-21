@@ -1,3 +1,4 @@
+from seedbox import config
 from seedbox.config_renderer.ignition.base import BaseIgnitionPackage
 
 
@@ -5,7 +6,7 @@ class RktRuntimePackage(BaseIgnitionPackage):
     def get_files(self):
         return [{
             'filesystem': 'root',
-            'path': '/opt/bin/host-rkt',
+            'path': config.node_host_rkt_path,
             'mode': 0o755,
             'contents': {
                 'source': self.to_data_url(self.render_template('host-rkt')),

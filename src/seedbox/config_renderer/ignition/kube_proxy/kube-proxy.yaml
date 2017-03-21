@@ -13,32 +13,32 @@ spec:
     command:
     - /hyperkube
     - proxy
-    - --kubeconfig=/etc/kubernetes/kubeconfig.yaml
+    - --kubeconfig=/etc/kubeconfig.conf
     securityContext:
       privileged: true
     volumeMounts:
-    - name: ssl-certs
-      mountPath: /etc/ssl/certs
+    - mountPath: /etc/ssl/certs
+      name: ssl-certs-host
       readOnly: true
-    - name: ssl-cluster-credentials
-      mountPath: {{ config.cluster_credentials_path }}
+    - mountPath: {{ config.cluster_credentials_path }}
+      name: ssl-certs-cluster
       readOnly: true
-    - name: kubeconfig
-      mountPath: /etc/kubernetes/kubeconfig.yaml
+    - mountPath: /etc/kubeconfig.conf
+      name: kubeconfig
       readOnly: true
-    - name: dbus
-      mountPath: /var/run/dbus
+    - mountPath: /var/run/dbus
+      name: dbus
       readOnly: false
   volumes:
-  - name: ssl-certs
-    hostPath:
-      path: /usr/share/ca-certificates
-  - name: ssl-cluster-credentials
-    hostPath:
+  - hostPath:
+      path: {{ config.node_ca_certificates_path }}
+    name: ssl-certs-host
+  - hostPath:
       path: {{ config.cluster_credentials_path }}
-  - name: kubeconfig
-    hostPath:
-      path: {{ config.kubeconfig_path }}
-  - name: dbus
-    hostPath:
+    name: ssl-certs-cluster
+  - hostPath:
+      path: {{ config.k8s_kubeconfig_path }}
+    name: kubeconfig
+  - hostPath:
       path: /var/run/dbus
+    name: dbus
