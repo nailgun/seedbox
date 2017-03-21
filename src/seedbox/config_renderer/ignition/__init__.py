@@ -81,7 +81,9 @@ class IgnitionConfig(object):
             packages += [
                 KubeconfigPackage(self.cluster.name),
                 CNIPackage(),
-                KubeletPackage(self.cluster.k8s_hyperkube_tag, self.node.fqdn, self.node.is_k8s_schedulable, self.node.is_k8s_apiserver, runtime.name, k8s_apiserver_nodes, self.cluster.k8s_dns_service_ip),
+                KubeletPackage(self.cluster.k8s_hyperkube_tag, self.node.fqdn, self.node.is_k8s_schedulable,
+                               self.node.is_k8s_apiserver, runtime.name, k8s_apiserver_nodes,
+                               self.cluster.k8s_dns_service_ip, self.cluster.manage_etc_hosts),
                 KubeProxyPackage(self.cluster.k8s_hyperkube_tag, self.get_single_k8s_apiserver_endpoint(), set_kubeconfig=not self.node.is_k8s_apiserver),
             ]
 
