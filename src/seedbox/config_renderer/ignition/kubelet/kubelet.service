@@ -7,6 +7,8 @@ Environment=KUBELET_VERSION={{ hyperkube_tag }}
 Environment="RKT_OPTS=--uuid-file-save=/var/run/kubelet-pod.uuid \
   --volume dns,kind=host,source=/etc/resolv.conf \
   --mount volume=dns,target=/etc/resolv.conf \
+  --volume etc-ssl-cluster,kind=host,source=/etc/ssl/cluster,readOnly=true \
+  --mount volume=etc-ssl-cluster,target=/etc/ssl/cluster \
   {% if runtime == 'rkt' -%}
   --volume rkt,kind=host,source=/opt/bin/host-rkt \
   --mount volume=rkt,target=/usr/bin/rkt \
