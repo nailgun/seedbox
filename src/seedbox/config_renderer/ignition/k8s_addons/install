@@ -3,19 +3,19 @@
 echo "Waiting for Kubernetes API..."
 baseurl="http://127.0.0.1:{{ config.k8s_apiserver_insecure_port }}/"
 
-until curl --fail --silent "${baseurl}version"; do
+until curl --fail --silent --show-error "${baseurl}version"; do
     sleep 5
 done
 
 echo "K8S: DNS addon"
-curl --fail --silent -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/kube-dns-deployment.yaml)" "${baseurl}apis/extensions/v1beta1/namespaces/kube-system/deployments"
-curl --fail --silent -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/kube-dns-svc.yaml)" "${baseurl}api/v1/namespaces/kube-system/services"
-curl --fail --silent -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/kube-dns-autoscaler-deployment.yaml)" "${baseurl}apis/extensions/v1beta1/namespaces/kube-system/deployments"
+curl --fail --silent --show-error -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/kube-dns-deployment.yaml)" "${baseurl}apis/extensions/v1beta1/namespaces/kube-system/deployments"
+curl --fail --silent --show-error -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/kube-dns-svc.yaml)" "${baseurl}api/v1/namespaces/kube-system/services"
+curl --fail --silent --show-error -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/kube-dns-autoscaler-deployment.yaml)" "${baseurl}apis/extensions/v1beta1/namespaces/kube-system/deployments"
 
 echo "K8S: Heapster addon"
-curl --fail --silent -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/heapster-deployment.yaml)" "${baseurl}apis/extensions/v1beta1/namespaces/kube-system/deployments"
-curl --fail --silent -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/heapster-svc.yaml)" "${baseurl}api/v1/namespaces/kube-system/services"
+curl --fail --silent --show-error -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/heapster-deployment.yaml)" "${baseurl}apis/extensions/v1beta1/namespaces/kube-system/deployments"
+curl --fail --silent --show-error -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/heapster-svc.yaml)" "${baseurl}api/v1/namespaces/kube-system/services"
 
 echo "K8S: Dashboard addon"
-curl --fail --silent -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/kube-dashboard-deployment.yaml)" "${baseurl}apis/extensions/v1beta1/namespaces/kube-system/deployments"
-curl --fail --silent -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/kube-dashboard-svc.yaml)" "${baseurl}api/v1/namespaces/kube-system/services"
+curl --fail --silent --show-error -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/kube-dashboard-deployment.yaml)" "${baseurl}apis/extensions/v1beta1/namespaces/kube-system/deployments"
+curl --fail --silent --show-error -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/kube-dashboard-svc.yaml)" "${baseurl}api/v1/namespaces/kube-system/services"
