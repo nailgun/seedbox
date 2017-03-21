@@ -3,7 +3,7 @@ import os
 dev_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 secret_key = '-'
-cachedir = os.path.join(dev_root, 'cache')
+cachedir = os.path.join(dev_root, 'tmp', 'cache')
 database_uri = 'sqlite:///' + os.path.join(dev_root, 'test.db')
 
 etcd_client_port = 2379
