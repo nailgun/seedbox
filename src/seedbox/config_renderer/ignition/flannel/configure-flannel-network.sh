@@ -17,7 +17,7 @@ function init_flannel {
       fi
   done
 
-  curl --fail --silent --show-error -X PUT -d "value={\"Network\":\"{{ pod_network }}\",\"Backend\":{\"Type\":\"vxlan\"}}" "$ACTIVE_ETCD/v2/keys/coreos.com/network/config"
+  curl --fail --silent --show-error -X PUT -d "value={\"Network\":\"{{ network_cidr }}\",\"Backend\":{\"Type\":\"vxlan\"}}" "$ACTIVE_ETCD/v2/keys/coreos.com/network/config"
 }
 
 init_flannel

@@ -52,10 +52,12 @@ class IgnitionConfig(object):
 
         from .system import SystemPackage
         from .credentials import CredentialsPackage
+        from .flannel import FlannelPackage
 
         packages = [
             SystemPackage(request.url_root, self.node.target_config_version, self.node.fqdn),
             CredentialsPackage(request.url_root),
+            FlannelPackage(etcd_nodes, self.cluster.k8s_pod_network, self.node.ip),
         ]
 
         if self.cluster.manage_etc_hosts:
@@ -78,7 +80,7 @@ class IgnitionConfig(object):
             runtime = models.Runtime(self.cluster.k8s_runtime)
             packages += [
                 KubeconfigPackage(self.cluster.name),
-                CNIPackage(etcd_nodes),
+                CNIPackage(),
                 KubeletPackage(self.cluster.k8s_hyperkube_tag, self.node.fqdn, self.node.is_k8s_schedulable, self.node.is_k8s_apiserver, runtime.name, k8s_apiserver_nodes, self.cluster.k8s_dns_service_ip),
                 KubeProxyPackage(self.cluster.k8s_hyperkube_tag, self.get_single_k8s_apiserver_endpoint(), set_kubeconfig=not self.node.is_k8s_apiserver),
             ]
@@ -90,11 +92,9 @@ class IgnitionConfig(object):
                 ]
 
         if self.node.is_k8s_apiserver:
-            from .flannel_init import FlannelInitPackage
             from .k8s_master_manifests import K8sMasterManifestsPackage
             from .k8s_addons import K8sAddonsPackage
             packages += [
-                FlannelInitPackage(etcd_nodes, self.cluster.k8s_pod_network),
                 K8sMasterManifestsPackage(self.cluster.k8s_hyperkube_tag, etcd_nodes, self.cluster.k8s_service_network),
                 K8sAddonsPackage(self.cluster.k8s_dns_service_ip),
             ]

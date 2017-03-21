@@ -3,10 +3,7 @@ from seedbox.config_renderer.ignition.base import BaseIgnitionPackage
 from seedbox.config_renderer.ignition.mixins import EtcdEndpointsMixin
 
 
-class CNIPackage(EtcdEndpointsMixin, BaseIgnitionPackage):
-    def __init__(self, etcd_nodes):
-        self.etcd_nodes = etcd_nodes
-
+class CNIPackage(BaseIgnitionPackage):
     def get_files(self):
         return [
             {
@@ -15,14 +12,6 @@ class CNIPackage(EtcdEndpointsMixin, BaseIgnitionPackage):
                 'mode': 0o644,
                 'contents': {
                     'source': self.to_data_url(self.render_template('cni.conf')),
-                },
-            },
-            {
-                'filesystem': 'root',
-                'path': '/etc/flannel/options.env',
-                'mode': 0o644,
-                'contents': {
-                    'source': self.to_data_url(self.render_template('options.env')),
                 },
             },
             {
@@ -37,6 +26,5 @@ class CNIPackage(EtcdEndpointsMixin, BaseIgnitionPackage):
 
     def get_units(self):
         return [
-            self.get_unit('flanneld.service', dropins=['40-add-options.conf']),
             self.get_unit('docker.service', dropins=['40-flannel.conf']),
         ]
