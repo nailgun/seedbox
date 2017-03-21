@@ -24,22 +24,22 @@ class BaseIgnitionPackage(object):
     def get_units(self):
         return ()
 
-    def get_unit(self, name, enable=False, dropins=None):
-        if dropins:
-            return {
-                'name': name,
-                'enable': enable,
-                'dropins': [{
-                    'name': dropin,
-                    'contents': self.render_template(dropin),
-                } for dropin in dropins],
-            }
-        else:
-            return {
-                'name': name,
-                'enable': enable,
-                'contents': self.render_template(name),
-            }
+    def get_unit(self, name, enable=False):
+        return {
+            'name': name,
+            'enable': enable,
+            'contents': self.render_template(name),
+        }
+
+    def get_unit_dropins(self, unitname, dropins, enableunit=False):
+        return {
+            'name': unitname,
+            'enable': enableunit,
+            'dropins': [{
+                'name': dropin,
+                'contents': self.render_template('{}.d/{}'.format(unitname, dropin)),
+            } for dropin in dropins],
+        }
 
     def get_full_template_context(self):
         context = {

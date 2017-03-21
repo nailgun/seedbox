@@ -25,5 +25,5 @@ class CNIPackage(BaseIgnitionPackage):
 
     def get_units(self):
         return [
-            self.get_unit('docker.service', dropins=['40-flannel.conf']),
+            self.get_unit_dropins('docker.service', ['40-flannel.conf']),
         ]

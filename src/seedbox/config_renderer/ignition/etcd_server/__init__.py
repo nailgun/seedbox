@@ -11,7 +11,7 @@ class EtcdServerPackage(BaseIgnitionPackage):
             raise Exception('Unknown etcd version', self.cluster.etcd_version)
 
         return [
-            self.get_unit(unit_name, enable=True, dropins=['40-etcd-cluster.conf']),
+            self.get_unit_dropins(unit_name, ['40-etcd-cluster.conf'], enableunit=True),
             # TODO: add support for etcd proxies
-            self.get_unit('locksmithd.service', dropins=['40-etcd-lock.conf']),
+            self.get_unit_dropins('locksmithd.service', ['40-etcd-lock.conf']),
         ]
