@@ -32,30 +32,21 @@ ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
 ExecStart=/usr/lib/coreos/kubelet-wrapper \
   {% if is_schedulable -%}
   --register-schedulable=true \
+  {% else %}
+  --register-schedulable=false \
   {% endif -%}
-  {% if is_apiserver -%}
-  --api-servers=http://127.0.0.1:{{ config.k8s_apiserver_insecure_port }} \
-  {% else -%}
   --api-servers={{ apiserver_endpoints|join(',') }} \
-  {% endif -%}
   --cni-conf-dir={{ config.k8s_cni_conf_path }} \
   --network-plugin=cni \
   --container-runtime={{ runtime }} \
   --rkt-path=/usr/bin/rkt \
   --rkt-stage1-image=coreos.com/rkt/stage1-coreos \
-  {% if not is_apiserver -%}
-  --register-node=true \
-  {% endif -%}
   --allow-privileged=true \
   --pod-manifest-path=/etc/kubernetes/manifests \
   --hostname-override={{ hostname }} \
   --cluster_dns={{ dns_service_ip }} \
   --cluster_domain={{ config.k8s_cluster_domain }} \
-  {% if not is_apiserver -%}
-  --kubeconfig={{ config.kubeconfig_path }} \
-  --tls-cert-file={{ config.node_cert_path }} \
-  --tls-private-key-file={{ config.node_key_path }} \
-  {% endif %}
+  --kubeconfig={{ config.kubeconfig_path }}
 
 ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
 
