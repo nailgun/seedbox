@@ -56,7 +56,8 @@ example profiles. And changes are minimal.
 
 ## Roadmap
 
-* add k8s apiserver loadbalancers provision
-* add [k8s authorization webhook](https://kubernetes.io/docs/admin/authorization/)
+* node disk partition management (via ignition)
+* add [k8s RBAC authorization UI](https://kubernetes.io/docs/admin/authorization/)
 * add support for persistent CoreOS installation
 * add support for bootkube
+* add k8s apiserver loadbalancers provision
