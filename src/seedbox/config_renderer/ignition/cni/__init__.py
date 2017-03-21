@@ -1,6 +1,5 @@
 from seedbox import config
 from seedbox.config_renderer.ignition.base import BaseIgnitionPackage
-from seedbox.config_renderer.ignition.mixins import EtcdEndpointsMixin
 
 
 class CNIPackage(BaseIgnitionPackage):

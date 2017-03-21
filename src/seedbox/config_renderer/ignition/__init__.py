@@ -1,9 +1,8 @@
 import json
 import itertools
-
 from flask import request
 
-from seedbox import config, models
+from seedbox import models
 
 
 # TODO: deploy addons separately via admin button
@@ -24,7 +23,7 @@ class IgnitionConfig(object):
             return json.dumps(content, separators=(',', ':'))
 
     def get_content(self):
-        packages = self.get_packages()
+        packages = [P(self.node, request.url_root) for P in self.get_package_classes()]
         files = list(itertools.chain.from_iterable(p.get_files() for p in packages))
         units = list(itertools.chain.from_iterable(p.get_units() for p in packages))
 
@@ -46,30 +45,27 @@ class IgnitionConfig(object):
             },
         }
 
-    def get_packages(self):
-        etcd_nodes = self.cluster.nodes.filter_by(is_etcd_server=True)
-        k8s_apiserver_nodes = self.cluster.nodes.filter_by(is_k8s_apiserver=True)
-
+    def get_package_classes(self):
         from .system import SystemPackage
         from .credentials import CredentialsPackage
         from .flannel import FlannelPackage
 
         packages = [
-            SystemPackage(request.url_root, self.node.target_config_version, self.node.fqdn),
-            CredentialsPackage(request.url_root),
-            FlannelPackage(etcd_nodes, self.cluster.k8s_pod_network, self.node.ip),
+            SystemPackage,
+            CredentialsPackage,
+            FlannelPackage,
         ]
 
         if self.cluster.manage_etc_hosts:
             from .etc_hosts import EtcHostsPackage
             packages += [
-                EtcHostsPackage(self.cluster.nodes.all()),
+                EtcHostsPackage,
             ]
 
         if self.node.is_etcd_server:
             from .etcd_server import EtcdServerPackage
             packages += [
-                EtcdServerPackage(self.cluster.etcd_version, self.node.fqdn, etcd_nodes),
+                EtcdServerPackage,
             ]
 
         if self.node.is_k8s_schedulable or self.node.is_k8s_apiserver:
@@ -77,28 +73,25 @@ class IgnitionConfig(object):
             from .cni import CNIPackage
             from .kubelet import KubeletPackage
             from .kube_proxy import KubeProxyPackage
-            runtime = models.Runtime(self.cluster.k8s_runtime)
             packages += [
-                KubeconfigPackage(self.cluster.name),
-                CNIPackage(),
-                KubeletPackage(self.cluster.k8s_hyperkube_tag, self.node.fqdn, self.node.is_k8s_schedulable,
-                               runtime.name, k8s_apiserver_nodes,
-                               self.cluster.k8s_dns_service_ip, self.cluster.manage_etc_hosts),
-                KubeProxyPackage(self.cluster.k8s_hyperkube_tag, self.get_single_k8s_apiserver_endpoint(), set_kubeconfig=not self.node.is_k8s_apiserver),
+                KubeconfigPackage,
+                CNIPackage,
+                KubeletPackage,
+                KubeProxyPackage,
             ]
 
-            if runtime == models.Runtime.rkt:
+            if self.cluster.k8s_runtime == models.Runtime.rkt:
                 from .rkt_runtime import RktRuntimePackage
                 packages += [
-                    RktRuntimePackage(),
+                    RktRuntimePackage,
                 ]
 
         if self.node.is_k8s_apiserver:
             from .k8s_master_manifests import K8sMasterManifestsPackage
             from .k8s_addons import K8sAddonsPackage
             packages += [
-                K8sMasterManifestsPackage(self.cluster.k8s_hyperkube_tag, etcd_nodes, self.cluster.k8s_service_network),
-                K8sAddonsPackage(self.cluster.k8s_dns_service_ip),
+                K8sMasterManifestsPackage,
+                K8sAddonsPackage,
             ]
 
         return packages
@@ -131,18 +124,3 @@ class IgnitionConfig(object):
 
     def get_ssh_keys(self):
         return [user.ssh_key for user in self.cluster.users.filter(models.User.ssh_key != '')]
-
-    def get_single_k8s_apiserver_endpoint(self):
-        if self.node.is_k8s_apiserver:
-            return 'http://127.0.0.1:{}'.format(config.k8s_apiserver_insecure_port)
-        else:
-            node = self.cluster.nodes.filter_by(is_k8s_apiserver_lb=True).first()
-            if node:
-                return 'https://{}:{}'.format(node.fqdn, config.k8s_apiserver_lb_port)
-            else:
-                node = self.cluster.nodes.filter_by(is_k8s_apiserver=True).first()
-
-            if not node:
-                raise Exception('no k8s apiserver node')
-
-            return 'https://{}:{}'.format(node.fqdn, config.k8s_apiserver_secure_port)

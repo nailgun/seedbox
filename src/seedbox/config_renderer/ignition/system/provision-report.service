@@ -12,7 +12,7 @@ ExecStart=/usr/bin/curl --fail \
                         -H 'Content-Type: application/json' \
                         -X POST \
                         --data-binary @/run/ignition.json \
-                        '{{ url_root }}report?version={{ target_config_version }}'
+                        '{{ url_root }}report?version={{ node.target_config_version }}'
 
 [Install]
 WantedBy=multi-user.target

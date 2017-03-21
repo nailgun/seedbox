@@ -3,9 +3,6 @@ from seedbox.config_renderer.ignition.base import BaseIgnitionPackage
 
 
 class CredentialsPackage(BaseIgnitionPackage):
-    def __init__(self, url_root):
-        self.url_root = url_root
-
     def get_files(self):
         return [
             {

@@ -13,6 +13,11 @@ class BaseIgnitionPackage(object):
     name = None
     template_context = {}
 
+    def __init__(self, node, url_root):
+        self.node = node
+        self.cluster = node.cluster
+        self.url_root = url_root
+
     def get_files(self):
         return ()
 
@@ -36,13 +41,21 @@ class BaseIgnitionPackage(object):
                 'contents': self.render_template(name),
             }
 
-    def get_template_context(self):
-        context = dict(self.template_context)
-        context.setdefault('config', config)
+    def get_full_template_context(self):
+        context = {
+            'config': config,
+            'node': self.node,
+            'cluster': self.cluster,
+            'url_root': self.url_root,
+        }
+        context.update(self.get_template_context())
         return context
 
+    def get_template_context(self):
+        return self.template_context
+
     def render_template(self, name):
-        return self.jinja_env.get_template(name).render(self.get_template_context())
+        return self.jinja_env.get_template(name).render(self.get_full_template_context())
 
     @locked_cached_property
     def jinja_env(self):

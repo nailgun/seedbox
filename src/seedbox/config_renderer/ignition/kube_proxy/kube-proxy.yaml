@@ -9,14 +9,11 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-proxy
-    image: quay.io/coreos/hyperkube:{{ hyperkube_tag }}
+    image: quay.io/coreos/hyperkube:{{ cluster.k8s_hyperkube_tag }}
     command:
     - /hyperkube
     - proxy
-    - --master={{ apiserver_endpoint }}
-    {% if set_kubeconfig -%}
     - --kubeconfig=/etc/kubernetes/kubeconfig.yaml
-    {% endif -%}
     securityContext:
       privileged: true
     volumeMounts:

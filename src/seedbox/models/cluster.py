@@ -1,4 +1,4 @@
-from seedbox import pki
+from seedbox import pki, config
 from .db import db
 from .runtime import Runtime
 
@@ -48,3 +48,40 @@ class Cluster(db.Model):
     def k8s_dns_service_ip(self):
         ip = self.k8s_service_network.split('/')[0]
         return ip.rsplit('.', maxsplit=1)[0] + '.10'
+
+    # TODO: improve after https://github.com/kubernetes/kubernetes/issues/18174
+    @property
+    def k8s_apiserver(self):
+        node = self.nodes.filter_by(is_k8s_apiserver_lb=True).first()
+        if not node:
+            node = self.nodes.filter_by(is_k8s_apiserver=True).first()
+        return node
+
+    @property
+    def k8s_apiserver_endpoint(self):
+        node = self.k8s_apiserver
+        if node.is_k8s_apiserver_lb:
+            port = config.k8s_apiserver_lb_port
+        else:
+            port = config.k8s_apiserver_secure_port
+        return 'https://{}:{}'.format(node.fqdn, port)
+
+    @property
+    def k8s_runtime_name(self):
+        return Runtime(self.k8s_runtime).name
+
+    @property
+    def k8s_apiserver_nodes(self):
+        return self.nodes.filter_by(is_k8s_apiserver=True)
+
+    @property
+    def k8s_apiserver_endpoints(self):
+        return ['https://{}:{}'.format(n.fqdn, config.k8s_apiserver_secure_port) for n in self.k8s_apiserver_nodes]
+
+    @property
+    def etcd_nodes(self):
+        return self.nodes.filter_by(is_etcd_server=True)
+
+    @property
+    def etcd_endpoints(self):
+        return ['http://{}:{}'.format(n.fqdn, config.etcd_client_port) for n in self.etcd_nodes]

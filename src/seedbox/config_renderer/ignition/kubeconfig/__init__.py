@@ -3,11 +3,6 @@ from seedbox.config_renderer.ignition.base import BaseIgnitionPackage
 
 
 class KubeconfigPackage(BaseIgnitionPackage):
-    def __init__(self, cluster_name):
-        self.template_context = {
-            'cluster_name': cluster_name,
-        }
-
     def get_files(self):
         return [
             {

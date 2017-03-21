@@ -2,11 +2,6 @@ from seedbox.config_renderer.ignition.base import BaseIgnitionPackage
 
 
 class K8sAddonsPackage(BaseIgnitionPackage):
-    def __init__(self, dns_service_ip):
-        self.template_context = {
-            'dns_service_ip': dns_service_ip
-        }
-
     def get_files(self):
         return [
             {

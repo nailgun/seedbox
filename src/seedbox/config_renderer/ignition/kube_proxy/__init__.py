@@ -2,13 +2,6 @@ from seedbox.config_renderer.ignition.base import BaseIgnitionPackage
 
 
 class KubeProxyPackage(BaseIgnitionPackage):
-    def __init__(self, hyperkube_tag, apiserver_endpoint, set_kubeconfig):
-        self.template_context = {
-            'hyperkube_tag': hyperkube_tag,
-            'apiserver_endpoint': apiserver_endpoint,
-            'set_kubeconfig': set_kubeconfig,
-        }
-
     def get_files(self):
         return [
             {

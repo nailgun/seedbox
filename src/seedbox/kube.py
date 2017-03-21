@@ -12,7 +12,7 @@ clusters:
 - name: {cluster_name}
   cluster:
     certificate-authority-data: {ca_cert}
-    server: https://{apiserver_host}:{apiserver_port}
+    server: {apiserver_endpoint}
 contexts:
 - context:
     cluster: {cluster_name}
@@ -22,11 +22,10 @@ current-context: default-context
 """
 
 
-def get_kubeconfig(cluster_name, apiserver_host, apiserver_port, ca_cert, user_name, user_cert, user_key):
+def get_kubeconfig(cluster_name, apiserver_endpoint, ca_cert, user_name, user_cert, user_key):
     return KUBECONFIG_TEMPLATE.format(
         cluster_name=cluster_name,
-        apiserver_host=apiserver_host,
-        apiserver_port=apiserver_port,
+        apiserver_endpoint=apiserver_endpoint,
         ca_cert=base64.b64encode(ca_cert).decode('ascii'),
         user_name=user_name,
         user_cert=base64.b64encode(user_cert).decode('ascii'),
