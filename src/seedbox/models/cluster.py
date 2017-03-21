@@ -3,7 +3,7 @@ from .db import db
 from .runtime import Runtime
 
 default_coreos_channel = 'stable'
-default_coreos_version = '1235.9.0'
+default_coreos_version = '1235.9.0'  # 'current' is also applicable
 default_etcd_version = 2
 
 
