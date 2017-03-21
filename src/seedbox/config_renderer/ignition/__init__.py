@@ -70,12 +70,10 @@ class IgnitionConfig(object):
 
         if self.node.is_k8s_schedulable or self.node.is_k8s_apiserver:
             from .kubeconfig import KubeconfigPackage
-            from .cni import CNIPackage
             from .kubelet import KubeletPackage
             from .kube_proxy import KubeProxyPackage
             packages += [
                 KubeconfigPackage,
-                CNIPackage,
                 KubeletPackage,
                 KubeProxyPackage,
             ]
@@ -84,6 +82,12 @@ class IgnitionConfig(object):
                 from .rkt_runtime import RktRuntimePackage
                 packages += [
                     RktRuntimePackage,
+                ]
+
+            if self.cluster.k8s_cni:
+                from .cni import CNIPackage
+                packages += [
+                    CNIPackage,
                 ]
 
         if self.node.is_k8s_apiserver:
