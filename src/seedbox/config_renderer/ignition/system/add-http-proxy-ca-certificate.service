@@ -1,0 +1,11 @@
+[Unit]
+Description=Add http proxy CA certificate to /etc/ssl/certs/ca-certificates.crt
+After=update-ca-certificates.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/rm /etc/ssl/certs/ca-certificates.crt
+ExecStart=/bin/sh -c 'cat /usr/share/ca-certificates/ca-certificates.crt {{ config.aci_proxy_ca_cert_path }} > /etc/ssl/certs/ca-certificates.crt'
+
+[Install]
+WantedBy=update-ca-certificates.service

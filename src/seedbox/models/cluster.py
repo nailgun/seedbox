@@ -22,6 +22,9 @@ class Cluster(db.Model):
     k8s_hyperkube_tag = db.Column(db.String(80), default=config.default_k8s_hyperkube_tag, nullable=False)
     k8s_cni = db.Column(db.Boolean, nullable=False)
 
+    aci_proxy_url = db.Column(db.String(80), default='', nullable=False)
+    aci_proxy_ca_cert = db.Column(db.Text, default='', nullable=False)
+
     def __repr__(self):
         return '<Cluster %r>' % self.name
 

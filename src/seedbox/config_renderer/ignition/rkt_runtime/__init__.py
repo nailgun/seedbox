@@ -14,7 +14,14 @@ class RktRuntimePackage(BaseIgnitionPackage):
         }]
 
     def get_units(self):
-        return [
+        units = [
             self.get_unit('rkt-api.service', enable=True),
             self.get_unit('load-rkt-stage1.service', enable=True),
         ]
+
+        if self.cluster.aci_proxy_url:
+            units += [
+                self.get_unit_dropins('rkt-api.service', ['30-proxy.conf']),
+            ]
+
+        return units

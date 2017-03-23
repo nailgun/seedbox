@@ -36,3 +36,6 @@ k8s_cni_conf_path = k8s_cni_path + '/net.d'
 
 node_host_rkt_path = '/opt/bin/host-rkt'
 node_ca_certificates_path = '/usr/share/ca-certificates'
+
+aci_proxy_ca_cert_path = '/etc/ssl/certs/aci-proxy-ca.pem'
+# TODO: cluster.base_boot_images_path with default
