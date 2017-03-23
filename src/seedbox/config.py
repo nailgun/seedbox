@@ -6,6 +6,16 @@ secret_key = '-'
 cachedir = os.path.join(dev_root, 'tmp', 'cache')
 database_uri = 'sqlite:///' + os.path.join(dev_root, 'test.db')
 
+default_coreos_channel = 'stable'
+default_coreos_version = '1235.9.0'  # 'current' is also applicable
+default_k8s_hyperkube_tag = 'v1.5.4_coreos.0'
+default_k8s_pod_network = '10.2.0.0/16'
+default_k8s_service_network = '10.3.0.0/24'
+default_etcd_version = 2
+
+default_root_disk = '/dev/sda'
+default_linux_consoles = 'tty0,ttyS0'
+
 etcd_client_port = 2379
 etcd_peer_port = 2380
 k8s_apiserver_lb_port = 443

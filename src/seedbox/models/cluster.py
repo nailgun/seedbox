@@ -2,10 +2,6 @@ from seedbox import pki, config
 from .db import db
 from .runtime import Runtime
 
-default_coreos_channel = 'stable'
-default_coreos_version = '1235.9.0'  # 'current' is also applicable
-default_etcd_version = 2
-
 
 class Cluster(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -14,16 +10,16 @@ class Cluster(db.Model):
     ca_credentials_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
     ca_credentials = db.relationship('CredentialsData')
 
-    coreos_channel = db.Column(db.String(80), default=default_coreos_channel, nullable=False)
-    coreos_version = db.Column(db.String(80), default=default_coreos_version, nullable=False)
-    etcd_version = db.Column(db.Integer, default=default_etcd_version, nullable=False)
+    coreos_channel = db.Column(db.String(80), default=config.default_coreos_channel, nullable=False)
+    coreos_version = db.Column(db.String(80), default=config.default_coreos_version, nullable=False)
+    etcd_version = db.Column(db.Integer, default=config.default_etcd_version, nullable=False)
     manage_etc_hosts = db.Column(db.Boolean, nullable=False)
     allow_insecure_provision = db.Column(db.Boolean, nullable=False)
 
     k8s_runtime = db.Column(db.Integer, default=Runtime.docker.value, nullable=False)
-    k8s_pod_network = db.Column(db.String(80), default='10.2.0.0/16', nullable=False)
-    k8s_service_network = db.Column(db.String(80), default='10.3.0.0/24', nullable=False)
-    k8s_hyperkube_tag = db.Column(db.String(80), default='v1.5.4_coreos.0', nullable=False)
+    k8s_pod_network = db.Column(db.String(80), default=config.default_k8s_pod_network, nullable=False)
+    k8s_service_network = db.Column(db.String(80), default=config.default_k8s_service_network, nullable=False)
+    k8s_hyperkube_tag = db.Column(db.String(80), default=config.default_k8s_hyperkube_tag, nullable=False)
     k8s_cni = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
