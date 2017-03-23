@@ -62,8 +62,6 @@ class NodeView(ModelView):
     def on_model_change(self, form, model, is_created):
         if is_created:
             self._issue_creds(model)
-            model._coreos_channel = ''
-            model._coreos_version = ''
             model.active_ignition_config = ''
         else:
             model.target_config_version += 1

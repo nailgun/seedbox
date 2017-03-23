@@ -3,7 +3,6 @@ import os
 dev_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 secret_key = '-'
-cachedir = os.path.join(dev_root, 'tmp', 'cache')
 database_uri = 'sqlite:///' + os.path.join(dev_root, 'test.db')
 
 default_coreos_channel = 'stable'
@@ -12,6 +11,8 @@ default_k8s_hyperkube_tag = 'v1.5.4_coreos.0'
 default_k8s_pod_network = '10.2.0.0/16'
 default_k8s_service_network = '10.3.0.0/24'
 default_etcd_version = 2
+default_boot_images_base_url = 'http://{}.release.core-os.net/amd64-usr/{}/'.format(default_coreos_channel,
+                                                                                    default_coreos_version)
 
 default_root_disk = '/dev/sda'
 default_linux_consoles = 'tty0,ttyS0'
@@ -38,4 +39,3 @@ node_host_rkt_path = '/opt/bin/host-rkt'
 node_ca_certificates_path = '/usr/share/ca-certificates'
 
 aci_proxy_ca_cert_path = '/etc/ssl/certs/aci-proxy-ca.pem'
-# TODO: cluster.base_boot_images_path with default

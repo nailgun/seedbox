@@ -59,33 +59,6 @@ def ipxe_boot(node):
     return Response(response, mimetype='text/plain')
 
 
-# TODO: if version is not in form 'x.x.x' - don't cache, just pass from upstream
-@route('/image/<channel>/<version>/<filename>', 'Image download', secure=False)
-def image(node, channel, version, filename):
-    dirpath = os.path.join(config.cachedir, channel, version)
-    filepath = os.path.join(dirpath, filename)
-
-    os.makedirs(dirpath, exist_ok=True)
-
-    lock = filelock.FileLock(filepath + '.lock')
-    with lock:
-        if not os.path.exists(filepath):
-            source_url = 'https://{}.release.core-os.net/amd64-usr/{}/{}'.format(channel, version, filename)
-            resp = requests.get(source_url, stream=True)
-            if resp.status_code == 404:
-                abort(404)
-            resp.raise_for_status()
-
-            with open(filepath + '.partial', 'wb') as f:
-                for chunk in resp.iter_content(chunk_size=1024):
-                    f.write(chunk)
-            os.rename(filepath + '.partial', filepath)
-
-        os.remove(filepath + '.lock')
-
-    return send_file(filepath)
-
-
 @route('/ignition', 'Ignition config')
 def ignition(node):
     response = config_renderer.ignition.render(node, 'indent' in request.args)

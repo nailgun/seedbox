@@ -10,8 +10,6 @@ class Cluster(db.Model):
     ca_credentials_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
     ca_credentials = db.relationship('CredentialsData')
 
-    coreos_channel = db.Column(db.String(80), default=config.default_coreos_channel, nullable=False)
-    coreos_version = db.Column(db.String(80), default=config.default_coreos_version, nullable=False)
     etcd_version = db.Column(db.Integer, default=config.default_etcd_version, nullable=False)
     manage_etc_hosts = db.Column(db.Boolean, nullable=False)
     allow_insecure_provision = db.Column(db.Boolean, nullable=False)
@@ -21,6 +19,8 @@ class Cluster(db.Model):
     k8s_service_network = db.Column(db.String(80), default=config.default_k8s_service_network, nullable=False)
     k8s_hyperkube_tag = db.Column(db.String(80), default=config.default_k8s_hyperkube_tag, nullable=False)
     k8s_cni = db.Column(db.Boolean, nullable=False)
+
+    boot_images_base_url = db.Column(db.String(80), default=config.default_boot_images_base_url, nullable=False)
 
     aci_proxy_url = db.Column(db.String(80), default='', nullable=False)
     aci_proxy_ca_cert = db.Column(db.Text, default='', nullable=False)
