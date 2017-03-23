@@ -24,6 +24,12 @@ class BaseIgnitionPackage(object):
     def get_units(self):
         return ()
 
+    def enable_unit(self, name):
+        return {
+            'name': name,
+            'enable': True,
+        }
+
     def get_unit(self, name, enable=False):
         return {
             'name': name,
