@@ -6,10 +6,12 @@ class FlannelPackage(BaseIgnitionPackage):
         dropins = [
             '40-etcd.conf',
             '40-network-config.conf',
-            # workaround for a VirtualBox environment issue
-            # https://github.com/coreos/flannel/issues/98
-            '40-iface.conf',
         ]
+
+        if self.cluster.explicitly_advertise_addresses:
+            dropins += [
+                '40-iface.conf',
+            ]
 
         if self.cluster.aci_proxy_url:
             dropins += [

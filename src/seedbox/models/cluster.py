@@ -14,6 +14,10 @@ class Cluster(db.Model):
     manage_etc_hosts = db.Column(db.Boolean, nullable=False)
     allow_insecure_provision = db.Column(db.Boolean, nullable=False)
 
+    # workaround for a VirtualBox environment issue
+    # https://github.com/coreos/flannel/issues/98
+    explicitly_advertise_addresses = db.Column(db.Boolean, nullable=False)
+
     k8s_runtime = db.Column(db.Integer, default=Runtime.docker.value, nullable=False)
     k8s_pod_network = db.Column(db.String(80), default=config.default_k8s_pod_network, nullable=False)
     k8s_service_network = db.Column(db.String(80), default=config.default_k8s_service_network, nullable=False)
