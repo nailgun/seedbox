@@ -24,7 +24,7 @@ class Node(db.Model):
 
     is_etcd_server = db.Column(db.Boolean, nullable=False)
     is_k8s_schedulable = db.Column(db.Boolean, default=True, nullable=False)
-    is_k8s_apiserver = db.Column(db.Boolean, nullable=False)
+    is_k8s_apiserver = db.Column(db.Boolean, nullable=False)        # TODO: rename to is_k8s_master
     is_k8s_apiserver_lb = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
