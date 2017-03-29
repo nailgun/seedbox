@@ -49,9 +49,11 @@ class IgnitionConfig(object):
         from .system import SystemPackage
         from .credentials import CredentialsPackage
         from .flannel import FlannelPackage
+        from .iptables import IptablesPackage
 
         packages = [
             SystemPackage,
+            IptablesPackage,
             CredentialsPackage,
             FlannelPackage,
         ]

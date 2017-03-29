@@ -1,0 +1,37 @@
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# Accept all loopback traffic:
+-A INPUT -i lo -j ACCEPT
+
+# Accept all traffic from all members of the cluster:
+{% for n in cluster.nodes.all() -%}
+-A INPUT -p tcp -s {{ n.ip }} -j ACCEPT
+{% endfor -%}
+
+# Keep existing connections alive:
+-A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+
+# Accept traffic to SSH, HTTP and HTTPS ports:
+-A INPUT -p tcp --dport 22 -j ACCEPT
+-A INPUT -p tcp --dport 80 -j ACCEPT
+-A INPUT -p tcp --dport 443 -j ACCEPT
+
+# Accept ICMP traffic:
+-A INPUT -p icmp --icmp-type 0 -j ACCEPT
+-A INPUT -p icmp --icmp-type 3 -j ACCEPT
+-A INPUT -p icmp --icmp-type 11 -j ACCEPT
+
+{% if node.is_k8s_apiserver -%}
+# Accept traffic to k8s apiserver port:
+-A INPUT -p tcp --dport {{ config.k8s_apiserver_secure_port }} -j ACCEPT
+{% endif -%}
+
+{% if node.is_k8s_apiserver_lb -%}
+# Accept traffic to k8s apiserver loadbalancer port:
+-A INPUT -p tcp --dport {{ config.k8s_apiserver_lb_port }} -j ACCEPT
+{% endif -%}
+
+COMMIT
