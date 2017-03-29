@@ -52,7 +52,7 @@ def main():
 
     if 'systemd' in ignition and 'units' in ignition['systemd']:
         units = ignition['systemd'].pop('units')
-        units_dir_path = os.path.join(dest_dir, 'root', 'etc', 'system', 'systemd')
+        units_dir_path = os.path.join(dest_dir, 'root', 'etc', 'systemd', 'system')
         os.makedirs(units_dir_path, exist_ok=True)
 
         for unit in units:
@@ -68,7 +68,7 @@ def main():
                     f.write(unit['contents'])
 
             if 'dropins' in unit:
-                unit_dropins_path = os.path.join(dest_dir, 'root', 'etc', 'system', 'systemd', unitname + '.d')
+                unit_dropins_path = os.path.join(dest_dir, 'root', 'etc', 'systemd', 'system', unitname + '.d')
                 os.makedirs(unit_dropins_path, exist_ok=True)
                 for dropin in unit['dropins']:
                     with open(os.path.join(unit_dropins_path, dropin['name']), 'w') as f:
