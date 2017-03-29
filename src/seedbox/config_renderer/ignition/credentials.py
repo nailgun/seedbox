@@ -24,7 +24,7 @@ class CredentialsPackage(BaseIgnitionPackage):
             {
                 'filesystem': 'root',
                 'path': config.node_key_path,
-                'mode': 0o400,
+                'mode': 0o444,
                 'contents': {
                     'source': self.url_root + 'credentials/node-key.pem',
                 },

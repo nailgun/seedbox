@@ -12,6 +12,4 @@ class EtcdServerPackage(BaseIgnitionPackage):
 
         return [
             self.get_unit_dropins(unit_name, ['40-etcd-cluster.conf'], enableunit=True),
-            # TODO: add support for etcd proxies
-            self.get_unit_dropins('locksmithd.service', ['40-etcd-lock.conf']),
         ]

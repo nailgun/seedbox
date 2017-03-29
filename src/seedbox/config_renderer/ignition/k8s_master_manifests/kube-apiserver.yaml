@@ -16,6 +16,9 @@ spec:
     - --advertise-address={{ node.ip }}
     {% endif -%}
     - --etcd-servers={{ cluster.etcd_endpoints|join(',') }}
+    - --etcd-cafile={{ config.ca_cert_path }}
+    - --etcd-certfile={{ config.node_cert_path }}
+    - --etcd-keyfile={{ config.node_key_path }}
     - --allow-privileged=true
     - --service-cluster-ip-range={{ cluster.k8s_service_network }}
     - --secure-port={{ config.k8s_apiserver_secure_port }}

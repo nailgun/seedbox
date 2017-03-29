@@ -88,4 +88,4 @@ class Cluster(db.Model):
 
     @property
     def etcd_endpoints(self):
-        return ['http://{}:{}'.format(n.fqdn, config.etcd_client_port) for n in self.etcd_nodes]
+        return ['https://{}:{}'.format(n.fqdn, config.etcd_client_port) for n in self.etcd_nodes]
