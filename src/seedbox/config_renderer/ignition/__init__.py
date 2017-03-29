@@ -78,12 +78,6 @@ class IgnitionConfig(object):
                 KubeProxyPackage,
             ]
 
-            if self.cluster.k8s_runtime == models.Runtime.rkt:
-                from .rkt_runtime import RktRuntimePackage
-                packages += [
-                    RktRuntimePackage,
-                ]
-
             if self.cluster.k8s_cni:
                 from .cni import CNIPackage
                 packages += [

@@ -1,6 +1,5 @@
 from seedbox import pki, config
 from .db import db
-from .runtime import Runtime
 
 
 class Cluster(db.Model):
@@ -18,7 +17,6 @@ class Cluster(db.Model):
     # https://github.com/coreos/flannel/issues/98
     explicitly_advertise_addresses = db.Column(db.Boolean, nullable=False)
 
-    k8s_runtime = db.Column(db.Integer, default=Runtime.docker.value, nullable=False)
     k8s_pod_network = db.Column(db.String(80), default=config.default_k8s_pod_network, nullable=False)
     k8s_service_network = db.Column(db.String(80), default=config.default_k8s_service_network, nullable=False)
     k8s_hyperkube_tag = db.Column(db.String(80), default=config.default_k8s_hyperkube_tag, nullable=False)
@@ -69,10 +67,6 @@ class Cluster(db.Model):
         else:
             port = config.k8s_apiserver_secure_port
         return 'https://{}:{}'.format(node.fqdn, port)
-
-    @property
-    def k8s_runtime_name(self):
-        return Runtime(self.k8s_runtime).name
 
     @property
     def k8s_apiserver_nodes(self):

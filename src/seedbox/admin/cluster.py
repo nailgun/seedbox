@@ -15,12 +15,6 @@ class ClusterView(ModelView):
     column_formatters = {
         'ca_credentials': macro('render_ca_credentials'),
     }
-    form_choices = {
-        'k8s_runtime': [
-            (str(models.Runtime.docker.value), 'Docker'),
-            (str(models.Runtime.rkt.value), 'rkt'),
-        ]
-    }
 
     def _issue_ca_creds(self, model):
         ca = models.CredentialsData()

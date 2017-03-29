@@ -9,14 +9,6 @@ Environment="RKT_RUN_ARGS=--uuid-file-save=/var/run/kubelet-pod.uuid \
   --mount volume=dns,target=/etc/resolv.conf \
   --volume ssl-cluster-credentials,kind=host,source={{ config.cluster_credentials_path }},readOnly=true \
   --mount volume=ssl-cluster-credentials,target={{ config.cluster_credentials_path }} \
-  {% if cluster.k8s_runtime_name == 'rkt' -%}
-  --volume rkt,kind=host,source={{ config.node_host_rkt_path }} \
-  --mount volume=rkt,target=/usr/bin/rkt \
-  --volume var-lib-rkt,kind=host,source=/var/lib/rkt \
-  --mount volume=var-lib-rkt,target=/var/lib/rkt \
-  --volume stage,kind=host,source=/tmp \
-  --mount volume=stage,target=/tmp \
-  {% endif -%}
   {% if cluster.manage_etc_hosts -%}
   --volume etc-hosts,kind=host,source=/etc/hosts,readOnly=true \
   --mount volume=etc-hosts,target=/etc/hosts \
@@ -40,9 +32,6 @@ ExecStart=/usr/lib/coreos/kubelet-wrapper \
   --cni-conf-dir={{ config.k8s_cni_conf_path }} \
   --network-plugin=cni \
   {% endif -%}
-  --container-runtime={{ cluster.k8s_runtime_name }} \
-  --rkt-path=/usr/bin/rkt \
-  --rkt-stage1-image=coreos.com/rkt/stage1-coreos \
   --allow-privileged=true \
   --pod-manifest-path={{ config.k8s_manifests_path }} \
   --hostname-override={{ node.fqdn }} \
