@@ -1,9 +1,5 @@
 flask
 flask_admin
 flask_sqlalchemy
-flask_script
-flask_migrate
-filelock
-requests
 cryptography
 pyopenssl

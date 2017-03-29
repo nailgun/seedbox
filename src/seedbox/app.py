@@ -1,9 +1,6 @@
-import os
 import logging
 
-import filelock
-import requests
-from flask import Flask, Response, request, abort, send_file, redirect
+from flask import Flask, Response, request, abort, redirect
 from flask_migrate import Migrate
 
 from seedbox import config, models, config_renderer
