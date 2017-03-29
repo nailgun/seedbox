@@ -40,6 +40,11 @@ class SystemPackage(BaseIgnitionPackage):
     def get_units(self):
         units = [
             self.get_unit('provision-report.service', enable=True),
+            self.get_unit_dropins('fleet.service', ['40-etcd-cluster.conf']),
+            self.get_unit_dropins('locksmithd.service', [
+                '40-etcd-cluster.conf',
+                '40-etcd-lock.conf',
+            ]),
         ]
 
         if self.cluster.aci_proxy_url:

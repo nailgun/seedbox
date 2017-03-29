@@ -4,7 +4,7 @@ from seedbox.config_renderer.ignition.base import BaseIgnitionPackage
 class FlannelPackage(BaseIgnitionPackage):
     def get_units(self):
         dropins = [
-            '40-etcd.conf',
+            '40-etcd-cluster.conf',
             '40-network-config.conf',
         ]
 
