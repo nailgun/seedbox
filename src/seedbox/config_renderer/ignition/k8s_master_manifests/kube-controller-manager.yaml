@@ -4,6 +4,7 @@ metadata:
   name: kube-controller-manager
   namespace: kube-system
 spec:
+  hostNetwork: true
   containers:
   - name: kube-controller-manager
     image: quay.io/coreos/hyperkube:{{ cluster.k8s_hyperkube_tag }}
@@ -11,9 +12,9 @@ spec:
     - /hyperkube
     - controller-manager
     - --master=http://127.0.0.1:{{ config.k8s_apiserver_insecure_port }}
-    - --leader-elect=true
-    - --service-account-private-key-file={{ config.node_key_path }}
     - --root-ca-file={{ config.ca_cert_path }}
+    - --service-account-private-key-file={{ config.node_key_path }}
+    - --leader-elect=true
     resources:
       requests:
         cpu: 200m
@@ -31,7 +32,6 @@ spec:
     - mountPath: /etc/ssl/certs
       name: ssl-certs-host
       readOnly: true
-  hostNetwork: true
   volumes:
   - hostPath:
       path: {{ config.cluster_credentials_path }}
