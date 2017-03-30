@@ -28,13 +28,13 @@ spec:
     - --service-cluster-ip-range={{ cluster.k8s_service_network }}
     - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota
     - --runtime-config=api/all=true
-    - --tls-cert-file={{ config.node_cert_path }}
-    - --tls-private-key-file={{ config.node_key_path }}
-    - --kubelet-client-certificate={{ config.node_cert_path }}
-    - --kubelet-client-key={{ config.node_key_path }}
-    - --service-account-key-file={{ config.node_cert_path }}
-    - --client-ca-file={{ config.ca_cert_path }}
-    - --anonymous-auth=false
+    - --service-account-key-file={{ config.node_key_path }}
+    - --anonymous-auth=false                                      # * -> apiserver
+    - --tls-cert-file={{ config.node_cert_path }}                 # * -> apiserver, auth cert
+    - --tls-private-key-file={{ config.node_key_path }}           # * -> apiserver, sign key
+    - --client-ca-file={{ config.ca_cert_path }}                  # * -> apiserver, ca
+    - --kubelet-client-certificate={{ config.node_cert_path }}    # apiserver -> kubelet, auth cert
+    - --kubelet-client-key={{ config.node_key_path }}             # apiserver -> kubelet, sign key
     livenessProbe:
       httpGet:
         host: 127.0.0.1

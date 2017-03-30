@@ -47,8 +47,8 @@ ExecStart=/usr/lib/coreos/kubelet-wrapper \
   {% endif -%}
   \
 
-# TODO: add this after https://github.com/kubernetes/kubernetes/issues/18174
-#  --require-kubeconfig \
+# --client-ca-file and --anonymous-auth arguments are for apiserver -> kubelet communication
+# TODO: add --require-kubeconfig after https://github.com/kubernetes/kubernetes/issues/18174
 
 ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
 
