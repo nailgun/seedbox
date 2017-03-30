@@ -24,6 +24,7 @@ class UserView(ModelView):
         creds.cert, creds.key = pki.issue_certificate(model.name,
                                                       ca_cert=ca_creds.cert,
                                                       ca_key=ca_creds.key,
+                                                      organizations=model.groups.split(','),
                                                       certify_days=365)
         self.session.add(creds)
         model.credentials = creds

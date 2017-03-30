@@ -40,13 +40,15 @@ def create_ca_certificate(cn, key_size=2048, certify_days=365):
     return cert, key
 
 
-def issue_certificate(cn, ca_cert, ca_key, san_dns=(), san_ips=(), key_size=2048, certify_days=365):
+def issue_certificate(cn, ca_cert, ca_key, organizations=(), san_dns=(), san_ips=(), key_size=2048, certify_days=365):
     ca_cert = x509.load_pem_x509_certificate(ca_cert, default_backend())
     ca_key = serialization.load_pem_private_key(ca_key, password=None, backend=default_backend())
 
     key = rsa.generate_private_key(public_exponent=65537, key_size=key_size, backend=default_backend())
 
-    subject = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, cn)])
+    subject_name_attributes = [x509.NameAttribute(NameOID.COMMON_NAME, cn)]
+    subject_name_attributes += [x509.NameAttribute(NameOID.ORGANIZATION_NAME, org) for org in organizations]
+    subject = x509.Name(subject_name_attributes)
 
     now = datetime.datetime.utcnow()
     cert = x509.CertificateBuilder() \

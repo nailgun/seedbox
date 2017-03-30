@@ -10,6 +10,7 @@ class User(db.Model):
     name = db.Column(db.String(80), nullable=False)  # TODO: unique together with cluster_id
     credentials_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
     credentials = db.relationship('CredentialsData')
+    groups = db.Column(db.String(255), nullable=False)      # TODO: rename to k8s_groups
     ssh_key = db.Column(db.Text, nullable=False)
 
     def __repr__(self):
