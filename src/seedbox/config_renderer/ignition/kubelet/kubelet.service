@@ -3,18 +3,20 @@ Description=Kubelet via Hyperkube ACI
 Wants=flanneld.service
 
 [Service]
-Environment=KUBELET_IMAGE_TAG={{ cluster.k8s_hyperkube_tag }}
+Environment="KUBELET_ACI=quay.io/coreos/hyperkube"
+Environment="KUBELET_IMAGE_TAG={{ cluster.k8s_hyperkube_tag }}"
 Environment="RKT_RUN_ARGS=--uuid-file-save=/var/run/kubelet-pod.uuid \
-  --volume dns,kind=host,source=/etc/resolv.conf \
-  --mount volume=dns,target=/etc/resolv.conf \
+  --volume resolv,kind=host,source=/etc/resolv.conf \
+  --mount volume=resolv,target=/etc/resolv.conf \
   --volume ssl-cluster-credentials,kind=host,source={{ config.cluster_credentials_path }},readOnly=true \
   --mount volume=ssl-cluster-credentials,target={{ config.cluster_credentials_path }} \
+  --volume var-log,kind=host,source=/var/log \
+  --mount volume=var-log,target=/var/log \
   {% if cluster.manage_etc_hosts -%}
   --volume etc-hosts,kind=host,source=/etc/hosts,readOnly=true \
   --mount volume=etc-hosts,target=/etc/hosts \
   {% endif -%}
-  --volume var-log,kind=host,source=/var/log \
-  --mount volume=var-log,target=/var/log"
+  "
 
 ExecStartPre=/usr/bin/mkdir -p {{ config.k8s_manifests_path }}
 ExecStartPre=/usr/bin/mkdir -p /var/log/containers
@@ -22,22 +24,28 @@ ExecStartPre=/usr/bin/systemctl is-active flanneld.service
 ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
 
 ExecStart=/usr/lib/coreos/kubelet-wrapper \
+  --kubeconfig={{ config.k8s_kubeconfig_path }} \
+  --api-servers={{ cluster.k8s_apiserver_endpoints|join(',') }} \
+  --client-ca-file={{ config.ca_cert_path }} \
+  --anonymous-auth=false \
+  {% if cluster.k8s_cni -%}
+  --cni-conf-dir={{ config.k8s_cni_conf_path }} \
+  --network-plugin=cni \
+  {% endif -%}
+  --pod-manifest-path={{ config.k8s_manifests_path }} \
+  --allow-privileged=true \
+  --hostname-override={{ node.fqdn }} \
+  {% if node.is_k8s_apiserver -%}
+  --node-labels=master=true \
+  {% endif -%}
+  --cluster-dns={{ cluster.k8s_dns_service_ip }} \
+  --cluster-domain={{ config.k8s_cluster_domain }} \
   {% if node.is_k8s_schedulable -%}
   --register-schedulable=true \
   {% else %}
   --register-schedulable=false \
   {% endif -%}
-  --api-servers={{ cluster.k8s_apiserver_endpoints|join(',') }} \
-  {% if cluster.k8s_cni -%}
-  --cni-conf-dir={{ config.k8s_cni_conf_path }} \
-  --network-plugin=cni \
-  {% endif -%}
-  --allow-privileged=true \
-  --pod-manifest-path={{ config.k8s_manifests_path }} \
-  --hostname-override={{ node.fqdn }} \
-  --cluster-dns={{ cluster.k8s_dns_service_ip }} \
-  --cluster-domain={{ config.k8s_cluster_domain }} \
-  --kubeconfig={{ config.k8s_kubeconfig_path }}
+  \
 
 ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
 
