@@ -19,6 +19,9 @@ spec:
     - --etcd-cafile={{ config.ca_cert_path }}
     - --etcd-certfile={{ config.node_cert_path }}
     - --etcd-keyfile={{ config.node_key_path }}
+    {% if cluster.etcd_version == 3 -%}
+    - --storage-backend=etcd3
+    {% endif -%}
     - --allow-privileged=true
     - --service-cluster-ip-range={{ cluster.k8s_service_network }}
     - --secure-port={{ config.k8s_apiserver_secure_port }}

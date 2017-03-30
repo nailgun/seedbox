@@ -10,7 +10,7 @@ default_coreos_version = '1298.6.0'  # 'current' is also applicable
 default_k8s_hyperkube_tag = 'v1.5.5_coreos.0'
 default_k8s_pod_network = '10.2.0.0/16'
 default_k8s_service_network = '10.3.0.0/24'
-default_etcd_version = 2
+default_etcd_version = 3
 default_boot_images_base_url = 'http://{}.release.core-os.net/amd64-usr/{}/'.format(default_coreos_channel,
                                                                                     default_coreos_version)
 
@@ -25,9 +25,12 @@ k8s_apiserver_insecure_port = 8080
 k8s_cluster_domain = 'cluster.local'
 
 cluster_credentials_path = '/etc/ssl/cluster'
-ca_cert_path = cluster_credentials_path + '/ca.pem'
-node_cert_path = cluster_credentials_path + '/node.pem'
-node_key_path = cluster_credentials_path + '/node-key.pem'
+ca_cert_filename = 'ca.pem'
+node_cert_filename = 'node.pem'
+node_key_filename = 'node-key.pem'
+ca_cert_path = cluster_credentials_path + '/' + ca_cert_filename
+node_cert_path = cluster_credentials_path + '/' + node_cert_filename
+node_key_path = cluster_credentials_path + '/' + node_key_filename
 
 k8s_config_path = '/etc/kubernetes'  # don't change. hardcoded in kubelet-wrapper
 k8s_manifests_path = k8s_config_path + '/manifests'

@@ -10,6 +10,16 @@ class EtcdServerPackage(BaseIgnitionPackage):
         else:
             raise Exception('Unknown etcd version', self.cluster.etcd_version)
 
+        dropins = [
+            '40-etcd-cluster.conf',
+            '40-ssl.conf',
+        ]
+
+        if self.cluster.etcd_version == 3:
+            dropins += [
+                '30-version.conf',
+            ]
+
         return [
-            self.get_unit_dropins(unit_name, ['40-etcd-cluster.conf'], enableunit=True),
+            self.get_unit_dropins(unit_name, dropins, enableunit=True),
         ]
