@@ -50,7 +50,14 @@ class Node(db.Model):
                     'kubernetes.default.svc.' + config.k8s_cluster_domain,
                 ]
             pki.validate_certificate_hosts(self.credentials.cert, hosts)
-            pki.validate_certificate_key_usage(self.credentials.cert)
+            orgs = ['system:nodes']
+            if self.is_k8s_apiserver:
+                orgs += [
+                    'system:masters',
+                    'kube-master',      # TODO: remove?
+                ]
+            pki.validate_certificate_organizations(self.credentials.cert, orgs)
+            pki.validate_certificate_key_usage(self.credentials.cert, is_web_server=True, is_web_client=True)
         except pki.InvalidCertificate as e:
             return str(e)
 

@@ -50,12 +50,22 @@ class NodeView(ModelView):
         san_dns.append(model.fqdn)
         san_ips.append(model.ip)
 
+        orgs = ['system:nodes']
+        if model.is_k8s_apiserver:
+            orgs += [
+                'system:masters',
+                'kube-master',      # TODO: remove?
+            ]
+
         creds.cert, creds.key = pki.issue_certificate(model.fqdn,
                                                       ca_cert=ca_creds.cert,
                                                       ca_key=ca_creds.key,
+                                                      organizations=orgs,
                                                       san_dns=san_dns,
                                                       san_ips=san_ips,
-                                                      certify_days=10000)
+                                                      certify_days=10000,
+                                                      is_web_server=True,
+                                                      is_web_client=True)
         self.session.add(creds)
         model.credentials = creds
 

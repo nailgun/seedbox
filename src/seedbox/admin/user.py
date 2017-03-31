@@ -25,7 +25,8 @@ class UserView(ModelView):
                                                       ca_cert=ca_creds.cert,
                                                       ca_key=ca_creds.key,
                                                       organizations=model.groups.split(','),
-                                                      certify_days=365)
+                                                      certify_days=365,
+                                                      is_web_client=True)
         self.session.add(creds)
         model.credentials = creds
 

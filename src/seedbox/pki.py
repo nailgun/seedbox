@@ -6,14 +6,14 @@ import ipaddress
 import subprocess
 from OpenSSL import crypto
 from cryptography import x509
-from cryptography.x509.oid import NameOID, ExtensionOID
+from cryptography.x509.oid import NameOID, ExtensionOID, ExtendedKeyUsageOID
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 
-def create_ca_certificate(cn, key_size=2048, certify_days=365):
+def create_ca_certificate(cn, key_size=4096, certify_days=365):
     key = rsa.generate_private_key(public_exponent=65537, key_size=key_size, backend=default_backend())
     key_id = x509.SubjectKeyIdentifier.from_public_key(key.public_key())
 
@@ -29,8 +29,21 @@ def create_ca_certificate(cn, key_size=2048, certify_days=365):
         .not_valid_before(now) \
         .not_valid_after(now + datetime.timedelta(days=certify_days)) \
         .add_extension(key_id, critical=False) \
-        .add_extension(x509.AuthorityKeyIdentifier(key_id.digest, [x509.DirectoryName(issuer)], serial), critical=False) \
-        .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=False) \
+        .add_extension(x509.AuthorityKeyIdentifier(key_id.digest,
+                                                   [x509.DirectoryName(issuer)],
+                                                   serial),
+                       critical=False) \
+        .add_extension(x509.BasicConstraints(ca=True, path_length=0), critical=True) \
+        .add_extension(x509.KeyUsage(digital_signature=True,
+                                     content_commitment=False,
+                                     key_encipherment=False,
+                                     data_encipherment=False,
+                                     key_agreement=False,
+                                     key_cert_sign=True,
+                                     crl_sign=True,
+                                     encipher_only=False,
+                                     decipher_only=False),
+                       critical=True) \
         .sign(key, hashes.SHA256(), default_backend())
 
     cert = cert.public_bytes(serialization.Encoding.PEM)
@@ -40,9 +53,17 @@ def create_ca_certificate(cn, key_size=2048, certify_days=365):
     return cert, key
 
 
-def issue_certificate(cn, ca_cert, ca_key, organizations=(), san_dns=(), san_ips=(), key_size=2048, certify_days=365):
+def issue_certificate(cn, ca_cert, ca_key,
+                      organizations=(),
+                      san_dns=(),
+                      san_ips=(),
+                      key_size=2048,
+                      certify_days=365,
+                      is_web_server=False,
+                      is_web_client=False):
     ca_cert = x509.load_pem_x509_certificate(ca_cert, default_backend())
     ca_key = serialization.load_pem_private_key(ca_key, password=None, backend=default_backend())
+    ca_key_id = x509.SubjectKeyIdentifier.from_public_key(ca_key.public_key())
 
     key = rsa.generate_private_key(public_exponent=65537, key_size=key_size, backend=default_backend())
 
@@ -58,9 +79,12 @@ def issue_certificate(cn, ca_cert, ca_key, organizations=(), san_dns=(), san_ips
         .serial_number(x509.random_serial_number()) \
         .not_valid_before(now) \
         .not_valid_after(now + datetime.timedelta(days=certify_days)) \
-        .add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=False) \
+        .add_extension(x509.AuthorityKeyIdentifier(ca_key_id.digest,
+                                                   [x509.DirectoryName(ca_cert.issuer)],
+                                                   ca_cert.serial_number),
+                       critical=False) \
         .add_extension(x509.KeyUsage(digital_signature=True,
-                                     content_commitment=True,
+                                     content_commitment=False,
                                      key_encipherment=True,
                                      data_encipherment=False,
                                      key_agreement=False,
@@ -68,7 +92,15 @@ def issue_certificate(cn, ca_cert, ca_key, organizations=(), san_dns=(), san_ips
                                      crl_sign=False,
                                      encipher_only=False,
                                      decipher_only=False),
-                       critical=False)
+                       critical=True)
+
+    extended_usages = []
+    if is_web_server:
+        extended_usages.append(ExtendedKeyUsageOID.SERVER_AUTH)
+    if is_web_client:
+        extended_usages.append(ExtendedKeyUsageOID.CLIENT_AUTH)
+    if extended_usages:
+        cert = cert.add_extension(x509.ExtendedKeyUsage(extended_usages), critical=False)
 
     sans = [x509.DNSName(name) for name in san_dns]
     sans += [x509.IPAddress(ipaddress.ip_address(ip)) for ip in san_ips]
@@ -139,7 +171,7 @@ def validate_certificate_host_ips(cert_pem_data, host_ips):
 
 
 @wrap_subject_matching_errors
-def validate_certificate_key_usage(cert_pem_data):
+def validate_certificate_key_usage(cert_pem_data, is_web_server, is_web_client):
     cert = x509.load_pem_x509_certificate(cert_pem_data, default_backend())
     try:
         key_usage = cert.extensions.get_extension_for_oid(ExtensionOID.KEY_USAGE)
@@ -150,11 +182,36 @@ def validate_certificate_key_usage(cert_pem_data):
     if not key_usage.digital_signature:
         raise InvalidCertificate("Not intented for Digital Signature")
 
-    if not key_usage.content_commitment:
-        raise InvalidCertificate("Not intented for Non Repudiation")
-
     if not key_usage.key_encipherment:
         raise InvalidCertificate("Not intented for Key Encipherment")
+
+    if is_web_server or is_web_client:
+        try:
+            exteneded_key_usage = cert.extensions.get_extension_for_oid(ExtensionOID.EXTENDED_KEY_USAGE)
+            exteneded_key_usage = exteneded_key_usage.value
+        except x509.extensions.ExtensionNotFound:
+            raise InvalidCertificate("Extended key usage not specified")
+
+        if is_web_server:
+            if ExtendedKeyUsageOID.SERVER_AUTH not in exteneded_key_usage:
+                raise InvalidCertificate("Not intented for TLS Web Server Authentication")
+
+        if is_web_client:
+            if ExtendedKeyUsageOID.CLIENT_AUTH not in exteneded_key_usage:
+                raise InvalidCertificate("Not intented for TLS Web Client Authentication")
+
+
+@wrap_subject_matching_errors
+def validate_certificate_organizations(cert_pem_data, organizations):
+    cert = x509.load_pem_x509_certificate(cert_pem_data, default_backend())
+    organization_names = cert.subject.get_attributes_for_oid(NameOID.ORGANIZATION_NAME)
+
+    organizations_required = organizations
+    organizations_present = set(o.value for o in organization_names)
+
+    for org in organizations_required:
+        if org not in organizations_present:
+            raise InvalidCertificate("Not member of organization {}".format(org))
 
 
 @wrap_subject_matching_errors
@@ -168,6 +225,9 @@ def validate_ca_certificate_constraints(cert_pem_data):
 
     if not constraints.ca:
         raise InvalidCertificate("Not a CA certificate")
+
+    if constraints.path_length != 0:
+        raise InvalidCertificate("Invalid pathlen")
 
 
 # based on ssl.match_hostname code
