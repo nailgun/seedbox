@@ -151,9 +151,9 @@ def wrap_subject_matching_errors(func):
 
 
 @wrap_subject_matching_errors
-def validate_certificate_subject_name(cert_pem_data, subject_name):
+def validate_certificate_common_name(cert_pem_data, subject_name):
     cert = x509.load_pem_x509_certificate(cert_pem_data, default_backend())
-    _match_subject_name(cert, subject_name)
+    _match_subject_name(cert, subject_name, alt_names=False)
 
 
 @wrap_subject_matching_errors
@@ -232,12 +232,15 @@ def validate_ca_certificate_constraints(cert_pem_data):
 
 # based on ssl.match_hostname code
 # https://github.com/python/cpython/blob/6f0eb93183519024cb360162bdd81b9faec97ba6/Lib/ssl.py#L279
-def _match_subject_name(cert, subject_name, compare_func=operator.eq):
-    try:
-        alt_names = cert.extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME)
-        names = alt_names.value.get_values_for_type(x509.DNSName)
-    except x509.extensions.ExtensionNotFound:
-        names = []
+def _match_subject_name(cert, subject_name, compare_func=operator.eq, alt_names=True):
+    names = []
+
+    if alt_names:
+        try:
+            alt_names = cert.extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME)
+            names = alt_names.value.get_values_for_type(x509.DNSName)
+        except x509.extensions.ExtensionNotFound:
+            pass
 
     if not names:
         common_names = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)

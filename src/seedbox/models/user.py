@@ -23,7 +23,7 @@ class User(db.Model):
     def credentials_error(self):
         try:
             pki.verify_certificate_chain(self.cluster.ca_credentials.cert, self.credentials.cert)
-            pki.validate_certificate_subject_name(self.credentials.cert, self.name)
+            pki.validate_certificate_common_name(self.credentials.cert, self.name)
             if self.groups:
                 pki.validate_certificate_organizations(self.credentials.cert, self.groups.split(','))
             pki.validate_certificate_key_usage(self.credentials.cert, is_web_server=False, is_web_client=True)
