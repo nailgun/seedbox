@@ -92,3 +92,22 @@ def report(node):
     models.db.session.commit()
 
     return Response('ok', mimetype='application/json')
+
+
+@app.route('/manifests/<cluster_name>/kube-system-role-binding.yaml')
+def k8s_manifest(cluster_name):
+    # TODO: not ready for multitenancy
+    cluster = models.Cluster.query.filter_by(name=cluster_name).first()
+    if cluster is None:
+        abort(404)
+    return Response(config_renderer.manifests.render_yaml(cluster, 'kube-system-role-binding.yaml'),
+                    mimetype='text/x-yaml')
+
+
+@app.route('/helm/<cluster_name>/k8s-addons.tar.gz')
+def k8s_addons_helm_chart(cluster_name):
+    # TODO: not ready for multitenancy
+    cluster = models.Cluster.query.filter_by(name=cluster_name).first()
+    if cluster is None:
+        abort(404)
+    return Response(config_renderer.charts.render_tgz(cluster, 'k8s_addons'), mimetype='application/tar+gzip')

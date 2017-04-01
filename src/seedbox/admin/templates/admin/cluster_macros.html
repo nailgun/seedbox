@@ -16,8 +16,22 @@
 {% endmacro %}
 
 {% macro render_info(model, column) %}
-    {% set etcd_servers_count = model.nodes.filter_by(is_etcd_server=True).count() %}
-    {% if etcd_servers_count % 2 == 0 %}
-        <span class="text-danger">Even etcd servers number</span>
-    {% endif %}
+    <ul>
+        <li>
+            Download kubeconfig and activate it:<br>
+            <code>$ export KUBECONFIG=/path/to/kubeconfig</code>
+        </li>
+        <li>
+            Install k8s addons:
+            <ul>
+                <li><code>$ kubectl create -f {{request.url_root }}manifests/{{ model.name }}/kube-system-role-binding.yaml</code></li>
+                <li><code>$ helm init</code></li>
+                <li><code>$ helm install {{request.url_root }}helm/{{ model.name }}/k8s-addons.tar.gz</code></li>
+            </ul>
+        </li>
+        {% set etcd_servers_count = model.nodes.filter_by(is_etcd_server=True).count() %}
+        {% if etcd_servers_count % 2 == 0 %}
+            <li class="text-danger">Even etcd servers number</li>
+        {% endif %}
+    </ul>
 {% endmacro %}

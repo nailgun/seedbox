@@ -6,6 +6,7 @@ metadata:
   labels:
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: "Heapster"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
   ports:
     - port: 80

@@ -6,6 +6,7 @@ metadata:
   labels:
     k8s-app: kube-dns-autoscaler
     kubernetes.io/cluster-service: "true"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
   template:
     metadata:

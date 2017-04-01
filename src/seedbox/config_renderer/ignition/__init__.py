@@ -1,5 +1,6 @@
-import json
 import itertools
+import json
+
 from flask import request
 
 from seedbox import models
@@ -86,10 +87,8 @@ class IgnitionConfig(object):
 
         if self.node.is_k8s_apiserver:
             from .k8s_master_manifests import K8sMasterManifestsPackage
-            from .k8s_addons import K8sAddonsPackage
             packages += [
                 K8sMasterManifestsPackage,
-                K8sAddonsPackage,
             ]
 
         return packages
