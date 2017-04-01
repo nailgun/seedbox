@@ -13,6 +13,7 @@ class Cluster(db.Model):
     manage_etc_hosts = db.Column(db.Boolean, nullable=False)
     allow_insecure_provision = db.Column(db.Boolean, nullable=False)
     apiservers_audit_log = db.Column(db.Boolean, nullable=False)
+    apiservers_swagger_ui = db.Column(db.Boolean, nullable=False)
 
     # workaround for a VirtualBox environment issue
     # https://github.com/coreos/flannel/issues/98

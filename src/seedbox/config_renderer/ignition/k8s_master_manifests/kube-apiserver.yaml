@@ -32,6 +32,9 @@ spec:
     {% if cluster.apiservers_audit_log -%}
     - --audit-log-path=/dev/stdout
     {% endif -%}
+    {% if cluster.apiservers_swagger_ui -%}
+    - --enable-swagger-ui
+    {% endif -%}
     - --anonymous-auth=false                                      # * -> apiserver
     - --tls-cert-file={{ config.node_cert_path }}                 # * -> apiserver, auth cert
     - --tls-private-key-file={{ config.node_key_path }}           # * -> apiserver, sign key
