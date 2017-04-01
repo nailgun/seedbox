@@ -11,21 +11,26 @@ class ClusterView(ModelView):
     column_list = ['name', 'ca_credentials']
     list_template = 'admin/cluster_list.html'
     details_template = 'admin/cluster_details.html'
-    form_excluded_columns = ['ca_credentials', 'nodes', 'users']
+    form_excluded_columns = ['ca_credentials', 'nodes', 'users', 'service_account_keypair']
     column_formatters = {
         'ca_credentials': macro('render_ca_credentials'),
     }
 
-    def _issue_ca_creds(self, model):
+    def _issue_creds(self, model):
         ca = models.CredentialsData()
         ca.cert, ca.key = pki.create_ca_certificate(model.name,
                                                     certify_days=10000)
         self.session.add(ca)
         model.ca_credentials = ca
 
+        service_account_keypair = models.CredentialsData()
+        service_account_keypair.cert, service_account_keypair.key = pki.generate_rsa_keypair()
+        self.session.add(service_account_keypair)
+        model.service_account_keypair = service_account_keypair
+
     def on_model_change(self, form, model, is_created):
         if is_created:
-            self._issue_ca_creds(model)
+            self._issue_creds(model)
         else:
             model.nodes.update({models.Node.target_config_version: models.Node.target_config_version + 1})
 
@@ -33,7 +38,7 @@ class ClusterView(ModelView):
     def reissue_ca_creds_view(self):
         model = self.get_one(request.args.get('id'))
         model.nodes.update({models.Node.target_config_version: models.Node.target_config_version + 1})
-        self._issue_ca_creds(model)
+        self._issue_creds(model)
         self.session.add(model)
         self.session.commit()
         return_url = get_redirect_target() or self.get_url('.index_view')

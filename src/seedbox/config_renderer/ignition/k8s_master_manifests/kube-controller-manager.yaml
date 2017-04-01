@@ -13,7 +13,7 @@ spec:
     - controller-manager
     - --master=http://127.0.0.1:{{ config.k8s_apiserver_insecure_port }}
     - --root-ca-file={{ config.ca_cert_path }}
-    - --service-account-private-key-file={{ config.node_key_path }}
+    - --service-account-private-key-file={{ config.k8s_service_account_private_key_path }}
     - --leader-elect=true
     resources:
       requests:
@@ -32,6 +32,9 @@ spec:
     - mountPath: /etc/ssl/certs
       name: ssl-certs-host
       readOnly: true
+    - mountPath: {{ config.k8s_secrets_path }}
+      name: k8s-secrets
+      readOnly: true
   volumes:
   - hostPath:
       path: {{ config.cluster_credentials_path }}
@@ -39,3 +42,6 @@ spec:
   - hostPath:
       path: {{ config.node_ca_certificates_path }}
     name: ssl-certs-host
+  - hostPath:
+      path: {{ config.k8s_secrets_path }}
+    name: k8s-secrets

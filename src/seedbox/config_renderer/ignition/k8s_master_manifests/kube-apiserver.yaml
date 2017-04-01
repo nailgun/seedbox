@@ -28,7 +28,7 @@ spec:
     - --service-cluster-ip-range={{ cluster.k8s_service_network }}
     - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota
     - --runtime-config=api/all=true
-    - --service-account-key-file={{ config.node_key_path }}
+    - --service-account-key-file={{ config.k8s_service_account_public_key_path }}
     {% if cluster.apiservers_audit_log -%}
     - --audit-log-path=/dev/stdout
     {% endif -%}
@@ -56,6 +56,9 @@ spec:
     - mountPath: /etc/ssl/certs
       name: ssl-certs-host
       readOnly: true
+    - mountPath: {{ config.k8s_secrets_path }}
+      name: k8s-secrets
+      readOnly: true
   volumes:
   - hostPath:
       path: {{ config.cluster_credentials_path }}
@@ -63,3 +66,6 @@ spec:
   - hostPath:
       path: {{ config.node_ca_certificates_path }}
     name: ssl-certs-host
+  - hostPath:
+      path: {{ config.k8s_secrets_path }}
+    name: k8s-secrets

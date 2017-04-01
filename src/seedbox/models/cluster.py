@@ -7,7 +7,7 @@ class Cluster(db.Model):
     name = db.Column(db.String(80), unique=True, nullable=False)
 
     ca_credentials_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
-    ca_credentials = db.relationship('CredentialsData')
+    ca_credentials = db.relationship('CredentialsData', foreign_keys=[ca_credentials_id])
 
     etcd_version = db.Column(db.Integer, default=config.default_etcd_version, nullable=False)
     manage_etc_hosts = db.Column(db.Boolean, nullable=False)
@@ -28,6 +28,9 @@ class Cluster(db.Model):
 
     aci_proxy_url = db.Column(db.String(80), default='', nullable=False)
     aci_proxy_ca_cert = db.Column(db.Text, default='', nullable=False)
+
+    service_account_keypair_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
+    service_account_keypair = db.relationship('CredentialsData', foreign_keys=[service_account_keypair_id])
 
     def __repr__(self):
         return '<Cluster %r>' % self.name

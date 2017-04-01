@@ -33,6 +33,9 @@ node_cert_path = cluster_credentials_path + '/' + node_cert_filename
 node_key_path = cluster_credentials_path + '/' + node_key_filename
 
 k8s_config_path = '/etc/kubernetes'  # don't change. hardcoded in kubelet-wrapper
+k8s_secrets_path = k8s_config_path + '/secrets'
+k8s_service_account_public_key_path = k8s_secrets_path + '/service-account.pub'
+k8s_service_account_private_key_path = k8s_secrets_path + '/service-account.priv'
 k8s_manifests_path = k8s_config_path + '/manifests'
 k8s_kubeconfig_path = k8s_config_path + '/kubeconfig.yaml'
 k8s_cni_path = k8s_config_path + '/cni'
