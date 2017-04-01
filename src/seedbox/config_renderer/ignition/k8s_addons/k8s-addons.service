@@ -3,7 +3,8 @@ Description=Kubernetes Addons
 
 [Service]
 Type=oneshot
-ExecStart=/opt/k8s-addons
+WorkingDirectory=/opt/kubernetes/addons
+ExecStart=/opt/kubernetes/addons/install.sh
 
 [Install]
 WantedBy=multi-user.target

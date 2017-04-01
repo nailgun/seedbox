@@ -6,7 +6,7 @@ class K8sAddonsPackage(BaseIgnitionPackage):
         return [
             {
                 'filesystem': 'root',
-                'path': '/srv/kubernetes/manifests/kube-system-default-sa.yaml',
+                'path': '/opt/kubernetes/addons/kube-system-default-sa.yaml',
                 'mode': 0o644,
                 'contents': {
                     'source': self.to_data_url(self.render_template('kube-system-default-sa.yaml')),
@@ -14,7 +14,7 @@ class K8sAddonsPackage(BaseIgnitionPackage):
             },
             {
                 'filesystem': 'root',
-                'path': '/srv/kubernetes/manifests/kube-dns-autoscaler-deployment.yaml',
+                'path': '/opt/kubernetes/addons/kube-dns-autoscaler-deployment.yaml',
                 'mode': 0o644,
                 'contents': {
                     'source': self.to_data_url(self.render_template('kube-dns-autoscaler-deployment.yaml')),
@@ -22,7 +22,7 @@ class K8sAddonsPackage(BaseIgnitionPackage):
             },
             {
                 'filesystem': 'root',
-                'path': '/srv/kubernetes/manifests/kube-dns-deployment.yaml',
+                'path': '/opt/kubernetes/addons/kube-dns-deployment.yaml',
                 'mode': 0o644,
                 'contents': {
                     'source': self.to_data_url(self.render_template('kube-dns-deployment.yaml')),
@@ -30,7 +30,7 @@ class K8sAddonsPackage(BaseIgnitionPackage):
             },
             {
                 'filesystem': 'root',
-                'path': '/srv/kubernetes/manifests/kube-dns-svc.yaml',
+                'path': '/opt/kubernetes/addons/kube-dns-svc.yaml',
                 'mode': 0o644,
                 'contents': {
                     'source': self.to_data_url(self.render_template('kube-dns-svc.yaml')),
@@ -38,7 +38,7 @@ class K8sAddonsPackage(BaseIgnitionPackage):
             },
             {
                 'filesystem': 'root',
-                'path': '/srv/kubernetes/manifests/heapster-deployment.yaml',
+                'path': '/opt/kubernetes/addons/heapster-deployment.yaml',
                 'mode': 0o644,
                 'contents': {
                     'source': self.to_data_url(self.render_template('heapster-deployment.yaml')),
@@ -46,7 +46,7 @@ class K8sAddonsPackage(BaseIgnitionPackage):
             },
             {
                 'filesystem': 'root',
-                'path': '/srv/kubernetes/manifests/heapster-svc.yaml',
+                'path': '/opt/kubernetes/addons/heapster-svc.yaml',
                 'mode': 0o644,
                 'contents': {
                     'source': self.to_data_url(self.render_template('heapster-svc.yaml')),
@@ -54,7 +54,7 @@ class K8sAddonsPackage(BaseIgnitionPackage):
             },
             {
                 'filesystem': 'root',
-                'path': '/srv/kubernetes/manifests/kube-dashboard-deployment.yaml',
+                'path': '/opt/kubernetes/addons/kube-dashboard-deployment.yaml',
                 'mode': 0o644,
                 'contents': {
                     'source': self.to_data_url(self.render_template('kube-dashboard-deployment.yaml')),
@@ -62,7 +62,7 @@ class K8sAddonsPackage(BaseIgnitionPackage):
             },
             {
                 'filesystem': 'root',
-                'path': '/srv/kubernetes/manifests/kube-dashboard-svc.yaml',
+                'path': '/opt/kubernetes/addons/kube-dashboard-svc.yaml',
                 'mode': 0o644,
                 'contents': {
                     'source': self.to_data_url(self.render_template('kube-dashboard-svc.yaml')),
@@ -70,10 +70,10 @@ class K8sAddonsPackage(BaseIgnitionPackage):
             },
             {
                 'filesystem': 'root',
-                'path': '/opt/k8s-addons',
+                'path': '/opt/kubernetes/addons/install.sh',
                 'mode': 0o755,
                 'contents': {
-                    'source': self.to_data_url(self.render_template('install')),
+                    'source': self.to_data_url(self.render_template('install.sh')),
                 },
             },
         ]
