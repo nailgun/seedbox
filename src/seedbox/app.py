@@ -110,4 +110,4 @@ def k8s_addons_helm_chart(cluster_name):
     cluster = models.Cluster.query.filter_by(name=cluster_name).first()
     if cluster is None:
         abort(404)
-    return Response(config_renderer.charts.render_tgz(cluster, 'k8s_addons'), mimetype='application/tar+gzip')
+    return Response(config_renderer.charts.render_tgz(cluster, 'k8s-addons'), mimetype='application/tar+gzip')
