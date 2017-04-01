@@ -7,6 +7,9 @@ until curl --fail --silent --show-error "${baseurl}version"; do
     sleep 5
 done
 
+echo "K8S: DNS ClusterRoleBinding"
+curl --fail --silent --show-error -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/kube-system-default-sa.yaml)" "${baseurl}apis/rbac.authorization.k8s.io/v1alpha1/clusterrolebindings"
+
 echo "K8S: DNS addon"
 curl --fail --silent --show-error -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/kube-dns-deployment.yaml)" "${baseurl}apis/extensions/v1beta1/namespaces/kube-system/deployments"
 curl --fail --silent --show-error -H "Content-Type: application/yaml" -XPOST -d"$(cat /srv/kubernetes/manifests/kube-dns-svc.yaml)" "${baseurl}api/v1/namespaces/kube-system/services"

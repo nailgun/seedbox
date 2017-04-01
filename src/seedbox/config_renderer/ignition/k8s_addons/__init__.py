@@ -6,6 +6,14 @@ class K8sAddonsPackage(BaseIgnitionPackage):
         return [
             {
                 'filesystem': 'root',
+                'path': '/srv/kubernetes/manifests/kube-system-default-sa.yaml',
+                'mode': 0o644,
+                'contents': {
+                    'source': self.to_data_url(self.render_template('kube-system-default-sa.yaml')),
+                },
+            },
+            {
+                'filesystem': 'root',
                 'path': '/srv/kubernetes/manifests/kube-dns-autoscaler-deployment.yaml',
                 'mode': 0o644,
                 'contents': {
