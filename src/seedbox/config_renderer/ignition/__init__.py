@@ -6,7 +6,6 @@ from flask import request
 from seedbox import models
 
 
-# TODO: deploy addons separately via admin button
 def render(node, indent=False):
     return IgnitionConfig(node).render(indent)
 
