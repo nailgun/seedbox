@@ -8,12 +8,13 @@ from .base import ModelView
 
 
 class ClusterView(ModelView):
-    column_list = ['name', 'ca_credentials']
+    column_list = ['name', 'ca_credentials', 'info']
     list_template = 'admin/cluster_list.html'
     details_template = 'admin/cluster_details.html'
     form_excluded_columns = ['ca_credentials', 'nodes', 'users', 'service_account_keypair']
     column_formatters = {
         'ca_credentials': macro('render_ca_credentials'),
+        'info': macro('render_info'),
     }
 
     def _issue_creds(self, model):

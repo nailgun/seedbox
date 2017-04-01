@@ -9,8 +9,15 @@
         </button>
     </form>
 
-    {% set ca_credentials_error=model.ca_credentials_error %}
+    {% set ca_credentials_error = model.ca_credentials_error %}
     {% if ca_credentials_error %}
         <span class="glyphicon glyphicon-exclamation-sign text-danger" title="{{ ca_credentials_error }}" style="cursor: pointer"></span>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_info(model, column) %}
+    {% set etcd_servers_count = model.nodes.filter_by(is_etcd_server=True).count() %}
+    {% if etcd_servers_count % 2 == 0 %}
+        <span class="text-danger">Even etcd servers number</span>
     {% endif %}
 {% endmacro %}
