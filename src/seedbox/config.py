@@ -2,8 +2,8 @@ import os
 
 dev_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
-secret_key = '-'
-database_uri = 'sqlite:///' + os.path.join(dev_root, 'test.db')
+secret_key = os.environ.get('SECRET_KEY', '-')
+database_uri = os.environ.get('DATABASE_URI', 'sqlite:///' + os.path.join(dev_root, 'test.db'))
 
 default_coreos_channel = 'stable'
 default_coreos_version = '1298.6.0'  # 'current' is also applicable

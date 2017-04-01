@@ -3,3 +3,4 @@ flask_admin
 flask_sqlalchemy
 cryptography
 pyopenssl
+psycopg2
