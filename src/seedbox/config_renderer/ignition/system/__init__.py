@@ -73,4 +73,18 @@ class SystemPackage(BaseIgnitionPackage):
                 self.get_unit('add-http-proxy-ca-certificate.service', enable=True)
             ]
 
+        for mountpoint in self.node.mountpoints.all():
+            enable = bool(mountpoint.wanted_by)
+
+            unit_name = mountpoint.where.replace('/', '-')
+            while unit_name[0] == '-':
+                unit_name = unit_name[1:]
+            unit_name += '.mount'
+
+            units += [
+                self.get_unit(unit_name, enable=enable, template_name='volume.mount', additional_context={
+                    'mountpoint': mountpoint,
+                })
+            ]
+
         return units

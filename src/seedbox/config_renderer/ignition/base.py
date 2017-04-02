@@ -30,11 +30,14 @@ class BaseIgnitionPackage(object):
             'enable': True,
         }
 
-    def get_unit(self, name, enable=False):
+    def get_unit(self, name, enable=False, template_name=None, additional_context=None):
+        if template_name is None:
+            template_name = name
+
         return {
             'name': name,
             'enable': enable,
-            'contents': self.render_template(name),
+            'contents': self.render_template(template_name, additional_context),
         }
 
     def get_unit_dropins(self, unitname, dropins, enableunit=False):
@@ -47,21 +50,26 @@ class BaseIgnitionPackage(object):
             } for dropin in dropins],
         }
 
-    def get_full_template_context(self):
+    def get_full_template_context(self, additional_context=None):
         context = {
             'config': config,
             'node': self.node,
             'cluster': self.cluster,
             'url_root': self.url_root,
         }
+
         context.update(self.get_template_context())
+
+        if additional_context:
+            context.update(additional_context)
+
         return context
 
     def get_template_context(self):
         return self.template_context
 
-    def render_template(self, name):
-        return self.jinja_env.get_template(name).render(self.get_full_template_context())
+    def render_template(self, name, additional_context=None):
+        return self.jinja_env.get_template(name).render(self.get_full_template_context(additional_context))
 
     @locked_cached_property
     def jinja_env(self):

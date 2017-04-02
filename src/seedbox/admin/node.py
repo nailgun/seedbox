@@ -29,6 +29,7 @@ class NodeView(ModelView):
         'credentials': macro('render_credentials'),
         'ignition_config': macro('render_ignition_config'),
     }
+    inline_models = [models.Mountpoint]
 
     def _issue_creds(self, model):
         with self.session.no_autoflush:

@@ -1,0 +1,6 @@
+[Mount]
+What={{ mountpoint.what }}
+Where={{ mountpoint.where }}
+
+[Install]
+WantedBy={{ mountpoint.wanted_by }}
