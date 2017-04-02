@@ -38,7 +38,7 @@ class NodeView(ModelView):
             ca_creds = model.cluster.ca_credentials
         creds = models.CredentialsData()
 
-        if model.is_k8s_apiserver:
+        if model.is_k8s_master:
             san_dns = [
                 'kubernetes',
                 'kubernetes.default',

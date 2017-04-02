@@ -72,7 +72,7 @@ class IgnitionConfig(object):
                 EtcdServerPackage,
             ]
 
-        if self.node.is_k8s_schedulable or self.node.is_k8s_apiserver:
+        if self.node.is_k8s_schedulable or self.node.is_k8s_master:
             from .kubeconfig import KubeconfigPackage
             from .kubelet import KubeletPackage
             from .kube_proxy import KubeProxyPackage
@@ -88,7 +88,7 @@ class IgnitionConfig(object):
                     CNIPackage,
                 ]
 
-        if self.node.is_k8s_apiserver:
+        if self.node.is_k8s_master:
             from .k8s_master_manifests import K8sMasterManifestsPackage
             packages += [
                 K8sMasterManifestsPackage,

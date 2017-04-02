@@ -63,7 +63,7 @@ class Cluster(db.Model):
     def k8s_apiserver(self):
         node = self.nodes.filter_by(is_k8s_apiserver_lb=True).first()
         if not node:
-            node = self.nodes.filter_by(is_k8s_apiserver=True).first()
+            node = self.nodes.filter_by(is_k8s_master=True).first()
         return node
 
     @property
@@ -77,7 +77,7 @@ class Cluster(db.Model):
 
     @property
     def k8s_apiserver_nodes(self):
-        return self.nodes.filter_by(is_k8s_apiserver=True)
+        return self.nodes.filter_by(is_k8s_master=True)
 
     @property
     def k8s_apiserver_endpoints(self):

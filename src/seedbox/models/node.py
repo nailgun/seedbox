@@ -28,7 +28,7 @@ class Node(db.Model):
 
     is_etcd_server = db.Column(db.Boolean, nullable=False)
     is_k8s_schedulable = db.Column(db.Boolean, default=True, nullable=False)
-    is_k8s_apiserver = db.Column(db.Boolean, nullable=False)        # TODO: rename to is_k8s_master
+    is_k8s_master = db.Column(db.Boolean, nullable=False)
     is_k8s_apiserver_lb = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
@@ -46,7 +46,7 @@ class Node(db.Model):
         try:
             pki.verify_certificate_chain(self.cluster.ca_credentials.cert, self.credentials.cert)
             hosts = [self.fqdn]
-            if self.is_k8s_apiserver:
+            if self.is_k8s_master:
                 hosts += [
                     'kubernetes',
                     'kubernetes.default',
@@ -64,7 +64,7 @@ class Node(db.Model):
     def credentials_warning(self):
         try:
             ips = [self.ip]
-            if self.is_k8s_apiserver:
+            if self.is_k8s_master:
                 ips += [self.cluster.k8s_apiserver_service_ip]
             pki.validate_certificate_host_ips(self.credentials.cert, ips)
         except pki.InvalidCertificate as e:

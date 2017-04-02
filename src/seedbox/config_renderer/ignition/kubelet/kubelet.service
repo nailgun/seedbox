@@ -35,7 +35,7 @@ ExecStart=/usr/lib/coreos/kubelet-wrapper \
   --pod-manifest-path={{ config.k8s_manifests_path }} \
   --allow-privileged=true \
   --hostname-override={{ node.fqdn }} \
-  {% if node.is_k8s_apiserver -%}
+  {% if node.is_k8s_master -%}
   --node-labels=master=true \
   {% endif -%}
   --cluster-dns={{ cluster.k8s_dns_service_ip }} \
