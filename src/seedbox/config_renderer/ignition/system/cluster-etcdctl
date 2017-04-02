@@ -1,0 +1,8 @@
+#!/bin/sh
+
+exec etcdctl \
+  --ca-file '{{ config.ca_cert_path }}' \
+  --cert-file '{{ config.node_cert_path }}' \
+  --key-file '{{ config.node_key_path }}' \
+  --endpoints {{ cluster.etcd_endpoints|join(',') }} \
+  "$@"

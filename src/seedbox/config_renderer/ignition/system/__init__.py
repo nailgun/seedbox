@@ -21,6 +21,14 @@ class SystemPackage(BaseIgnitionPackage):
                     'source': self.to_data_url(self.node.fqdn + '\n'),
                 },
             },
+            {
+                'filesystem': 'root',
+                'path': '/opt/bin/cluster-etcdctl',
+                'mode': 0o755,
+                'contents': {
+                    'source': self.to_data_url(self.render_template('cluster-etcdctl')),
+                },
+            },
         ]
 
         if self.cluster.aci_proxy_ca_cert:
