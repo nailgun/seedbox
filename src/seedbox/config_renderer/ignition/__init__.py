@@ -47,6 +47,10 @@ class IgnitionConfig(object):
 
     def get_package_classes(self):
         from .system import SystemPackage
+
+        if self.node.maintenance_mode:
+            return [SystemPackage]
+
         from .credentials import CredentialsPackage
         from .flannel import FlannelPackage
 

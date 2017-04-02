@@ -78,15 +78,17 @@ def credentials(node, cred_type):
 
 @route('/report', 'Provision report', methods=['POST'])
 def report(node):
-    node.active_config_version = request.args.get('version')
-    if node.active_config_version is None:
-        abort(400)
+    if not node.maintenance_mode:
+        node.active_config_version = request.args.get('version')
+        if node.active_config_version is None:
+            abort(400)
 
-    ignition_config = request.get_json()
-    if ignition_config is None:
-        abort(400)
+        ignition_config = request.get_json()
+        if ignition_config is None:
+            abort(400)
 
-    node.active_ignition_config = request.data
+        node.active_ignition_config = request.data
+
     node.wipe_root_disk_next_boot = False
 
     models.db.session.add(node)

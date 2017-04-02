@@ -14,6 +14,8 @@ class NodeView(ModelView):
         'cluster',
         'fqdn',
         'ip',
+        'maintenance_mode',
+        'wipe_root_disk_next_boot',
         'credentials',
         'ignition_config',
     ]
