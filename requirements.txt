@@ -4,3 +4,4 @@ flask_sqlalchemy
 cryptography
 pyopenssl
 psycopg2
+PyYAML

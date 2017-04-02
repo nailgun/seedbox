@@ -3,22 +3,20 @@ import base64
 
 KUBECONFIG_TEMPLATE = """apiVersion: v1
 kind: Config
+clusters:
+- name: {cluster_name}
+  cluster:
+    server: {apiserver_endpoint}
+    certificate-authority-data: {ca_cert}
 users:
 - name: {user_name}
   user:
     client-certificate-data: {user_cert}
     client-key-data: {user_key}
-clusters:
-- name: {cluster_name}
-  cluster:
-    certificate-authority-data: {ca_cert}
-    server: {apiserver_endpoint}
 contexts:
 - context:
     cluster: {cluster_name}
     user: {user_name}
-  name: default-context
-current-context: default-context
 """
 
 
