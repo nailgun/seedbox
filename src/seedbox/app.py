@@ -87,6 +87,7 @@ def report(node):
         abort(400)
 
     node.active_ignition_config = request.data
+    node.wipe_root_disk_next_boot = False
 
     models.db.session.add(node)
     models.db.session.commit()

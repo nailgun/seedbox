@@ -93,17 +93,7 @@ class IgnitionConfig(object):
         return packages
 
     def get_storage_config(self, files):
-        return {
-            'disks': [{
-                'device': self.node.root_disk,
-                'wipeTable': True,
-                'partitions': [{
-                    'label': 'ROOT',
-                    'number': 0,
-                    'start': 0,
-                    'size': 0,
-                }],
-            }],
+        config = {
             'filesystems': [{
                 'name': 'root',
                 'mount': {
@@ -117,6 +107,20 @@ class IgnitionConfig(object):
             }],
             'files': files,
         }
+
+        if self.node.wipe_root_disk_next_boot:
+            config['disks'] = [{
+                'device': self.node.root_disk,
+                'wipeTable': True,
+                'partitions': [{
+                    'label': 'ROOT',
+                    'number': 0,
+                    'start': 0,
+                    'size': self.node.root_disk_size_sectors or 0,
+                }],
+            }]
+
+        return config
 
     def get_ssh_keys(self):
         return [user.ssh_key for user in self.cluster.users.filter(models.User.ssh_key != '')]

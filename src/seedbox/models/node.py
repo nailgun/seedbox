@@ -19,6 +19,8 @@ class Node(db.Model):
 
     coreos_autologin = db.Column(db.Boolean, nullable=False)
     root_disk = db.Column(db.String(80), default=config.default_root_disk, nullable=False)
+    wipe_root_disk_next_boot = db.Column(db.Boolean, nullable=False)
+    root_disk_size_sectors = db.Column(db.Integer, nullable=True)
     linux_consoles = db.Column(db.String(80), default=config.default_linux_consoles, nullable=False)
     disable_ipv6 = db.Column(db.Boolean, nullable=False)
 
