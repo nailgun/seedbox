@@ -10,6 +10,7 @@ class Cluster(db.Model):
     ca_credentials = db.relationship('CredentialsData', foreign_keys=[ca_credentials_id])
 
     etcd_version = db.Column(db.Integer, default=config.default_etcd_version, nullable=False)
+    suppose_etcd_cluster_exists = db.Column(db.Boolean, nullable=False)
     manage_etc_hosts = db.Column(db.Boolean, nullable=False)
     allow_insecure_provision = db.Column(db.Boolean, nullable=False)
     apiservers_audit_log = db.Column(db.Boolean, nullable=False)
