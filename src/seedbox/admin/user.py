@@ -17,6 +17,14 @@ class UserView(ModelView):
         'credentials': macro('render_credentials'),
         'kubeconfig': macro('render_kubeconfig'),
     }
+    column_labels = {
+        'ssh_key': 'SSH key',
+    }
+    column_descriptions = {
+        'name': 'Will be used as CommonName in TLS certificate.',
+        'groups': 'Will be added as Organization(s) in TLS certificate. (Separate by comma.)',
+        'ssh_key': 'This key will be authorized on all nodes of the cluster (as `core` user).',
+    }
 
     def _issue_creds(self, model):
         with self.session.no_autoflush:

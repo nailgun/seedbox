@@ -31,7 +31,46 @@ class NodeView(ModelView):
         'credentials': macro('render_credentials'),
         'ignition_config': macro('render_ignition_config'),
     }
-    inline_models = [models.Mountpoint]
+    column_labels = {
+        'ip': "Public IP",
+        'fqdn': "Fully Qualified Domain Name",
+        'maintenance_mode': "Maintenance mode",
+        'coreos_autologin': "Enable terminal autologin",
+        'root_disk': "Root disk device",
+        'wipe_root_disk_next_boot': "Wipe root disk on next boot",
+        'root_disk_size_sectors': "Size of root partition (in sectors)",
+        'linux_consoles': "Linux console devices",
+        'disable_ipv6': "Disable IPv6 in Linux kernel",
+        'is_etcd_server': "etcd server",
+        'is_k8s_schedulable': "Kubernetes schedulable",
+        'is_k8s_master': "Kubernetes master",
+        'is_k8s_apiserver_lb': "Kubernetes apiserver loadbalancer",
+    }
+    column_descriptions = {
+        'maintenance_mode': "If this is enabled, node will be booted in minimal CoreOS environment without "
+                            "touching root partition.",
+        'coreos_autologin': "If this is set, main terminal will be logged-in with `core` user after boot. Useful "
+                            "for debugging. Don't enable in production.",
+        'root_disk': "First partition of this disk will be wiped on every boot. CoreOS will use it to store "
+                     "volatile data.",
+        'wipe_root_disk_next_boot': "If this is set, node's root disk partition table will be wiped on next boot. "
+                                    "This option will be automatically disabled on next provisiton report.",
+        'root_disk_size_sectors': "Used during root disk wiping. (Typically one sector is 512 bytes.)",
+        'linux_consoles': "Passed to kernel as `console` arguments. (Separate by comma.)",
+        'disable_ipv6': "Passed to kernel as `ipv6.disable=1` argument.",
+        'is_etcd_server': "Run etcd server on this node and connect other nodes to it.",
+        'is_k8s_schedulable': "Run kubelet on this node and register it as schedulable.",
+        'is_k8s_master': "Run kubelet on this node and add persistent kube-apiserver, kube-controller-manager, "
+                         "kube-scheduler pods to it.",
+        'is_k8s_apiserver_lb': "NOT SUPPORTED YET.",
+    }
+    inline_models = [(models.Mountpoint, {
+        'column_descriptions': {
+            'what': 'Device to mount.',
+            'where': 'Mount path.',
+            'wanted_by': 'WantedBy systemd unit.',
+        }
+    })]
 
     def _issue_creds(self, model):
         with self.session.no_autoflush:
