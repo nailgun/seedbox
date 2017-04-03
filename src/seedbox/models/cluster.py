@@ -13,8 +13,8 @@ class Cluster(db.Model):
     suppose_etcd_cluster_exists = db.Column(db.Boolean, nullable=False)
     manage_etc_hosts = db.Column(db.Boolean, nullable=False)
     allow_insecure_provision = db.Column(db.Boolean, nullable=False)
-    apiservers_audit_log = db.Column(db.Boolean, nullable=False)
-    apiservers_swagger_ui = db.Column(db.Boolean, nullable=False)
+    apiservers_audit_log = db.Column(db.Boolean, nullable=False)    # TODO: add k8s_ prefix
+    apiservers_swagger_ui = db.Column(db.Boolean, nullable=False)   # TODO: add k8s_ prefix
 
     # workaround for a VirtualBox environment issue
     # https://github.com/coreos/flannel/issues/98
