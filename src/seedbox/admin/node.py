@@ -2,6 +2,7 @@ import json
 
 from flask import request, abort, Response, flash, redirect
 from flask_admin import expose
+from flask_admin.form import rules
 from flask_admin.helpers import get_redirect_target
 from flask_admin.model.template import macro
 
@@ -71,6 +72,27 @@ class NodeView(ModelView):
             'wanted_by': 'WantedBy systemd unit.',
         }
     })]
+    form_rules = [
+        rules.Field('cluster'),
+        rules.Field('ip'),
+        rules.Field('fqdn'),
+        rules.FieldSet([
+            'maintenance_mode',
+            'coreos_autologin',
+            'root_disk',
+            'wipe_root_disk_next_boot',
+            'root_disk_size_sectors',
+            'linux_consoles',
+            'disable_ipv6',
+            'mountpoints',
+        ], 'Boot'),
+        rules.FieldSet([
+            'is_etcd_server',
+            'is_k8s_schedulable',
+            'is_k8s_master',
+            'is_k8s_apiserver_lb',
+        ], 'Components'),
+    ]
 
     def _issue_creds(self, model):
         with self.session.no_autoflush:

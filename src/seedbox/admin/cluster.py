@@ -1,5 +1,6 @@
 from flask import request, flash, redirect
 from flask_admin import expose
+from flask_admin.form import rules
 from flask_admin.helpers import get_redirect_target
 from flask_admin.model.template import macro
 
@@ -11,7 +12,12 @@ class ClusterView(ModelView):
     column_list = ['name', 'ca_credentials', 'info']
     list_template = 'admin/cluster_list.html'
     details_template = 'admin/cluster_details.html'
-    form_excluded_columns = ['ca_credentials', 'nodes', 'users', 'service_account_keypair']
+    form_excluded_columns = [
+        'ca_credentials',
+        'nodes',
+        'users',
+        'service_account_keypair',
+    ]
     column_formatters = {
         'ca_credentials': macro('render_ca_credentials'),
         'info': macro('render_info'),
@@ -22,13 +28,13 @@ class ClusterView(ModelView):
         'suppose_etcd_cluster_exists': "Suppose etcd cluster already exists",
         'manage_etc_hosts': "Manage /etc/hosts",
         'allow_insecure_provision': "Allow insecure node provisioning",
-        'apiservers_audit_log': "Enable audit log on Kubernetes apiservers",
-        'apiservers_swagger_ui': "Enable Swagger-UI on Kubernetes apiservers",
+        'apiservers_audit_log': "Enable audit log on apiservers",
+        'apiservers_swagger_ui': "Enable Swagger-UI on apiservers",
         'explicitly_advertise_addresses': "Explicitly advertise addresses",
-        'k8s_pod_network': "Kubernetes pod network CIDR",
-        'k8s_service_network': "Kubernetes service network CIDR",
-        'k8s_hyperkube_tag': "Kubernetes hyperkube image tag",
-        'k8s_cni': "Use CNI in Kubernetes cluster",
+        'k8s_pod_network': "Pod network CIDR",
+        'k8s_service_network': "Service network CIDR",
+        'k8s_hyperkube_tag': "Hyperkube image tag",
+        'k8s_cni': "Use CNI",
         'boot_images_base_url': "Base HTTP URL of CoreOS images",
         'aci_proxy_url': "ACI proxy URL",
         'aci_proxy_ca_cert': "ACI proxy CA certificate (PEM)",
@@ -39,17 +45,42 @@ class ClusterView(ModelView):
         'suppose_etcd_cluster_exists': "This will set `initial-cluster-state` to `existing` for newly provisioned "
                                        "etcd members. Use it to add etcd members to existing cluster.",
         'manage_etc_hosts': "If this is set, /etc/hosts on each node will be populated with FQDNs and IPs of all "
-                            "cluster nodes. Useful for virtual environments.",
+                            "cluster nodes.",
         'allow_insecure_provision': "Allow nodes to download CoreOS Ignition config and credentials via "
-                                    "non-encrypted connection. Useful for virtual environments.",
+                                    "non-encrypted connection.",
         'explicitly_advertise_addresses': "If this is set, cluster components will explicitly advertise "
-                                          "node IP as it set in seedbox. Useful for virtual environments.",
+                                          "node IP as it set in seedbox.",
         'boot_images_base_url': "Will speedup PXE boot if set to location in your datacenter.",
         'aci_proxy_url': "Docker and rkt will use this proxy to download container images.",
         'aci_proxy_ca_cert': "Docker and rkt download images via HTTPS. If your proxy intercepts "
                              "HTTPS connections you should add proxy CA certificate here. It will be "
                              "added to system root CA certificates on each node.",
     }
+    form_rules = [
+        rules.Field('name'),
+        rules.FieldSet([
+            'etcd_version',
+            'suppose_etcd_cluster_exists',
+        ], 'etcd'),
+        rules.FieldSet([
+            'apiservers_audit_log',
+            'apiservers_swagger_ui',
+            'k8s_pod_network',
+            'k8s_service_network',
+            'k8s_hyperkube_tag',
+            'k8s_cni',
+        ], 'Kubernetes'),
+        rules.FieldSet([
+            'boot_images_base_url',
+            'aci_proxy_url',
+            'aci_proxy_ca_cert',
+        ], 'Images'),
+        rules.FieldSet([
+            'manage_etc_hosts',
+            'allow_insecure_provision',
+            'explicitly_advertise_addresses',
+        ], 'Virtual environment'),
+    ]
 
     def _issue_creds(self, model):
         ca = models.CredentialsData()

@@ -1,5 +1,6 @@
 from flask import request, Response, flash, redirect
 from flask_admin import expose
+from flask_admin.form import rules
 from flask_admin.actions import action
 from flask_admin.helpers import get_redirect_target
 from flask_admin.model.template import macro
@@ -12,7 +13,9 @@ class UserView(ModelView):
     column_list = ['cluster', 'name', 'credentials', 'kubeconfig']
     list_template = 'admin/user_list.html'
     details_template = 'admin/user_details.html'
-    form_excluded_columns = ['credentials']
+    form_excluded_columns = [
+        'credentials',
+    ]
     column_formatters = {
         'credentials': macro('render_credentials'),
         'kubeconfig': macro('render_kubeconfig'),
@@ -25,6 +28,12 @@ class UserView(ModelView):
         'groups': 'Will be added as Organization(s) in TLS certificate. (Separate by comma.)',
         'ssh_key': 'This key will be authorized on all nodes of the cluster (as `core` user).',
     }
+    form_rules = [
+        rules.Field('cluster'),
+        rules.Field('name'),
+        rules.Field('groups'),
+        rules.Field('ssh_key'),
+    ]
 
     def _issue_creds(self, model):
         with self.session.no_autoflush:
