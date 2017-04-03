@@ -60,10 +60,10 @@ class IgnitionConfig(object):
             FlannelPackage,
         ]
 
-        if self.cluster.manage_etc_hosts:
-            from .etc_hosts import EtcHostsPackage
+        if self.cluster.install_dnsmasq:
+            from .dnsmasq import DnsmasqPackage
             packages += [
-                EtcHostsPackage,
+                DnsmasqPackage,
             ]
 
         if self.node.is_etcd_server:

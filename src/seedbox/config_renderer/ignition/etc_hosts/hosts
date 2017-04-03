@@ -1,6 +1,0 @@
-127.0.0.1       localhost
-::1             localhost
-
-{% for n in cluster.nodes.all() %}
-{{ n.ip }}  {{ n.fqdn }}
-{% endfor %}

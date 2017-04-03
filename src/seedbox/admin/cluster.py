@@ -26,7 +26,7 @@ class ClusterView(ModelView):
         'ca_credentials': "CA credentials",
         'etcd_version': "etcd version",
         'suppose_etcd_cluster_exists': "Suppose etcd cluster already exists",
-        'manage_etc_hosts': "Manage /etc/hosts",
+        'install_dnsmasq': "Install dnsmasq on cluster nodes",
         'allow_insecure_provision': "Allow insecure node provisioning",
         'apiservers_audit_log': "Enable audit log on apiservers",
         'apiservers_swagger_ui': "Enable Swagger-UI on apiservers",
@@ -44,8 +44,8 @@ class ClusterView(ModelView):
         'etcd_version': "2 or 3.",
         'suppose_etcd_cluster_exists': "This will set `initial-cluster-state` to `existing` for newly provisioned "
                                        "etcd members. Use it to add etcd members to existing cluster.",
-        'manage_etc_hosts': "If this is set, /etc/hosts on each node will be populated with FQDNs and IPs of all "
-                            "cluster nodes.",
+        'install_dnsmasq': "If this is set, dnsmasq will be run on each node to resolve cluster nodes and "
+                           "components.",
         'allow_insecure_provision': "Allow nodes to download CoreOS Ignition config and credentials via "
                                     "non-encrypted connection.",
         'explicitly_advertise_addresses': "If this is set, cluster components will explicitly advertise "
@@ -76,7 +76,7 @@ class ClusterView(ModelView):
             'aci_proxy_ca_cert',
         ], 'Images'),
         rules.FieldSet([
-            'manage_etc_hosts',
+            'install_dnsmasq',
             'allow_insecure_provision',
             'explicitly_advertise_addresses',
         ], 'Virtual environment'),
