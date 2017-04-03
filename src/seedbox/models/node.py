@@ -29,7 +29,6 @@ class Node(db.Model):
     is_etcd_server = db.Column(db.Boolean, nullable=False)
     is_k8s_schedulable = db.Column(db.Boolean, default=True, nullable=False)
     is_k8s_master = db.Column(db.Boolean, nullable=False)
-    is_k8s_apiserver_lb = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
         return '<Node %r>' % self.fqdn

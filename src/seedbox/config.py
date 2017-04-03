@@ -20,7 +20,6 @@ default_linux_consoles = 'tty0,ttyS0'
 etcd_client_port = 2379
 etcd_peer_port = 2380
 etcd3_image_tag = 'v3.1.5'
-k8s_apiserver_lb_port = 443
 k8s_apiserver_secure_port = 6443
 k8s_apiserver_insecure_port = 8080
 k8s_cluster_domain = 'cluster.local'

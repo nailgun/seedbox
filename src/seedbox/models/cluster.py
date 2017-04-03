@@ -61,19 +61,11 @@ class Cluster(db.Model):
     # TODO: improve after https://github.com/kubernetes/kubernetes/issues/18174
     @property
     def k8s_apiserver(self):
-        node = self.nodes.filter_by(is_k8s_apiserver_lb=True).first()
-        if not node:
-            node = self.nodes.filter_by(is_k8s_master=True).first()
-        return node
+        return self.nodes.filter_by(is_k8s_master=True).first()
 
     @property
     def k8s_apiserver_endpoint(self):
-        node = self.k8s_apiserver
-        if node.is_k8s_apiserver_lb:
-            port = config.k8s_apiserver_lb_port
-        else:
-            port = config.k8s_apiserver_secure_port
-        return 'https://{}:{}'.format(node.fqdn, port)
+        return 'https://{}:{}'.format(self.k8s_apiserver.fqdn, config.k8s_apiserver_secure_port)
 
     @property
     def k8s_apiserver_nodes(self):

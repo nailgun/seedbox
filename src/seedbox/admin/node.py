@@ -45,7 +45,6 @@ class NodeView(ModelView):
         'is_etcd_server': "etcd server",
         'is_k8s_schedulable': "Kubernetes schedulable",
         'is_k8s_master': "Kubernetes master",
-        'is_k8s_apiserver_lb': "Kubernetes apiserver loadbalancer",
     }
     column_descriptions = {
         'maintenance_mode': "If this is enabled, node will be booted in minimal CoreOS environment without "
@@ -63,7 +62,6 @@ class NodeView(ModelView):
         'is_k8s_schedulable': "Run kubelet on this node and register it as schedulable.",
         'is_k8s_master': "Run kubelet on this node and add persistent kube-apiserver, kube-controller-manager, "
                          "kube-scheduler pods to it.",
-        'is_k8s_apiserver_lb': "NOT SUPPORTED YET.",
     }
     inline_models = [(models.Mountpoint, {
         'column_descriptions': {
@@ -90,7 +88,6 @@ class NodeView(ModelView):
             'is_etcd_server',
             'is_k8s_schedulable',
             'is_k8s_master',
-            'is_k8s_apiserver_lb',
         ], 'Components'),
     ]
 
