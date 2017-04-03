@@ -16,22 +16,76 @@
 {% endmacro %}
 
 {% macro render_info(model, column) %}
-    <ul>
-        <li>
-            Download kubeconfig and activate it:<br>
-            <code>$ export KUBECONFIG=/path/to/kubeconfig</code>
-        </li>
-        <li>
-            Install k8s addons:
+    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingOne">
+          <h4 class="panel-title">
+            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              Components
+            </a>
+          </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+          <div class="panel-body">
             <ul>
-                <li><code>$ kubectl create -f {{request.url_root }}manifests/{{ model.name }}/kube-system-role-binding.yaml</code></li>
-                <li><code>$ helm init</code></li>
-                <li><code>$ helm install {{request.url_root }}helm/{{ model.name }}/k8s-addons.tar.gz</code></li>
+                <li>
+                    <strong>etcd servers:</strong>
+                    <ul>
+                        {% for node in model.nodes.filter_by(is_etcd_server=True) %}
+                            <li>{{ node.fqdn }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li>
+                    <strong>Kubernetes master nodes:</strong>
+                    <ul>
+                        {% for node in model.nodes.filter_by(is_k8s_master=True) %}
+                            <li>{{ node.fqdn }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li>
+                    <strong>Kubernetes schedulable nodes:</strong>
+                    <ul>
+                        {% for node in model.nodes.filter_by(is_k8s_schedulable=True) %}
+                            <li>{{ node.fqdn }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
             </ul>
-        </li>
-        {% set etcd_servers_count = model.nodes.filter_by(is_etcd_server=True).count() %}
-        {% if etcd_servers_count % 2 == 0 %}
-            <li class="text-danger">Even etcd servers number</li>
-        {% endif %}
-    </ul>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingTwo">
+          <h4 class="panel-title">
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+              Addons installation
+            </a>
+          </h4>
+        </div>
+        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+          <div class="panel-body">
+            <ul>
+                <li>
+                    Download kubeconfig and activate it:<br>
+                    <code>$ export KUBECONFIG=/path/to/kubeconfig</code>
+                </li>
+                <li>
+                    Install k8s addons:
+                    <ul>
+                        <li><code>$ kubectl create -f {{request.url_root }}manifests/{{ model.name }}/kube-system-role-binding.yaml</code></li>
+                        <li><code>$ helm init</code></li>
+                        <li><code>$ helm install {{request.url_root }}helm/{{ model.name }}/k8s-addons.tar.gz</code></li>
+                    </ul>
+                </li>
+                {% set etcd_servers_count = model.nodes.filter_by(is_etcd_server=True).count() %}
+                {% if etcd_servers_count % 2 == 0 %}
+                    <li class="text-danger">Even etcd servers number</li>
+                {% endif %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
 {% endmacro %}
