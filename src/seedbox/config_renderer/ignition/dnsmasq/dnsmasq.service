@@ -14,7 +14,17 @@ ExecStart=/usr/bin/rkt run \
     --log-facility=- \
     {% for n in cluster.nodes.all() -%}
     --host-record={{ n.fqdn }},{{ n.ip }} \
-    {% endfor %}
+    {% endfor -%}
+    {% if cluster.etcd_nodes_dns_name -%}
+        {% for n in cluster.nodes.filter_by(is_etcd_server=True) -%}
+            --host-record={{ cluster.etcd_nodes_dns_name }},{{ n.ip }} \
+        {% endfor -%}
+    {% endif -%}
+    {% if cluster.k8s_apiservers_dns_name -%}
+        {% for n in cluster.nodes.filter_by(is_k8s_master=True) -%}
+            --host-record={{ cluster.k8s_apiservers_dns_name }},{{ n.ip }} \
+        {% endfor -%}
+    {% endif %}
 
 [Install]
 WantedBy=multi-user.target

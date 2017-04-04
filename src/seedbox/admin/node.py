@@ -96,27 +96,12 @@ class NodeView(ModelView):
             ca_creds = model.cluster.ca_credentials
         creds = models.CredentialsData()
 
-        if model.is_k8s_master:
-            san_dns = [
-                'kubernetes',
-                'kubernetes.default',
-                'kubernetes.default.svc',
-                'kubernetes.default.svc.' + config.k8s_cluster_domain,
-            ]
-            san_ips = [model.cluster.k8s_apiserver_service_ip]
-        else:
-            san_dns = []
-            san_ips = []
-
-        san_dns.append(model.fqdn)
-        san_ips.append(model.ip)
-
         creds.cert, creds.key = pki.issue_certificate('system:node:' + model.fqdn,
                                                       ca_cert=ca_creds.cert,
                                                       ca_key=ca_creds.key,
                                                       organizations=['system:nodes'],
-                                                      san_dns=san_dns,
-                                                      san_ips=san_ips,
+                                                      san_dns=model.certificate_alternative_dns_names,
+                                                      san_ips=model.certificate_alternative_ips,
                                                       certify_days=10000,
                                                       is_web_server=True,
                                                       is_web_client=True)

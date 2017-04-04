@@ -26,6 +26,7 @@ class ClusterView(ModelView):
         'ca_credentials': "CA credentials",
         'etcd_version': "etcd version",
         'suppose_etcd_cluster_exists': "Suppose etcd cluster already exists",
+        'etcd_nodes_dns_name': "DNS name of any etcd node",
         'install_dnsmasq': "Install dnsmasq on cluster nodes",
         'allow_insecure_provision': "Allow insecure node provisioning",
         'apiservers_audit_log': "Enable audit log on apiservers",
@@ -35,6 +36,7 @@ class ClusterView(ModelView):
         'k8s_service_network': "Service network CIDR",
         'k8s_hyperkube_tag': "Hyperkube image tag",
         'k8s_cni': "Use CNI",
+        'k8s_apiservers_dns_name': "DNS name of any master node",
         'boot_images_base_url': "Base HTTP URL of CoreOS images",
         'aci_proxy_url': "ACI proxy URL",
         'aci_proxy_ca_cert': "ACI proxy CA certificate (PEM)",
@@ -44,13 +46,18 @@ class ClusterView(ModelView):
         'etcd_version': "2 or 3.",
         'suppose_etcd_cluster_exists': "This will set `initial-cluster-state` to `existing` for newly provisioned "
                                        "etcd members. Use it to add etcd members to existing cluster.",
+        'etcd_nodes_dns_name': "Must be round-robin DNS record. If this is set it will be used by "
+                               "all components to access etcd instead of hardcoded node list. You can "
+                               "add/remove nodes at any time just by updating DNS record.",
         'install_dnsmasq': "If this is set, dnsmasq will be run on each node to resolve cluster nodes and "
                            "components.",
         'allow_insecure_provision': "Allow nodes to download CoreOS Ignition config and credentials via "
                                     "non-encrypted connection.",
         'explicitly_advertise_addresses': "If this is set, cluster components will explicitly advertise "
                                           "node IP as it set in seedbox.",
-        'boot_images_base_url': "Will speedup PXE boot if set to location in your datacenter.",
+        'k8s_apiservers_dns_name': "Must be round-robin DNS record. If this is set it will be used by "
+                                   "all components to access apiserver instead of hardcoded node list. You can "
+                                   "add/remove nodes at any time just by updating DNS record.",
         'aci_proxy_url': "Docker and rkt will use this proxy to download container images.",
         'aci_proxy_ca_cert': "Docker and rkt download images via HTTPS. If your proxy intercepts "
                              "HTTPS connections you should add proxy CA certificate here. It will be "
@@ -61,6 +68,7 @@ class ClusterView(ModelView):
         rules.FieldSet([
             'etcd_version',
             'suppose_etcd_cluster_exists',
+            'etcd_nodes_dns_name',
         ], 'etcd'),
         rules.FieldSet([
             'apiservers_audit_log',
@@ -69,6 +77,7 @@ class ClusterView(ModelView):
             'k8s_service_network',
             'k8s_hyperkube_tag',
             'k8s_cni',
+            'k8s_apiservers_dns_name',
         ], 'Kubernetes'),
         rules.FieldSet([
             'boot_images_base_url',

@@ -11,6 +11,8 @@ class Cluster(db.Model):
 
     etcd_version = db.Column(db.Integer, default=config.default_etcd_version, nullable=False)
     suppose_etcd_cluster_exists = db.Column(db.Boolean, nullable=False)
+    etcd_nodes_dns_name = db.Column(db.String(80), default='', nullable=False)
+
     install_dnsmasq = db.Column(db.Boolean, nullable=False)
     allow_insecure_provision = db.Column(db.Boolean, nullable=False)
     apiservers_audit_log = db.Column(db.Boolean, nullable=False)    # TODO: add k8s_ prefix
@@ -24,6 +26,7 @@ class Cluster(db.Model):
     k8s_service_network = db.Column(db.String(80), default=config.default_k8s_service_network, nullable=False)
     k8s_hyperkube_tag = db.Column(db.String(80), default=config.default_k8s_hyperkube_tag, nullable=False)
     k8s_cni = db.Column(db.Boolean, nullable=False)
+    k8s_apiservers_dns_name = db.Column(db.String(80), default='', nullable=False)
 
     boot_images_base_url = db.Column(db.String(80), default=config.default_boot_images_base_url, nullable=False)
 
@@ -60,25 +63,37 @@ class Cluster(db.Model):
 
     # TODO: improve after https://github.com/kubernetes/kubernetes/issues/18174
     @property
-    def k8s_apiserver(self):
+    def k8s_apiserver_node(self):
         return self.nodes.filter_by(is_k8s_master=True).first()
-
-    @property
-    def k8s_apiserver_endpoint(self):
-        return 'https://{}:{}'.format(self.k8s_apiserver.fqdn, config.k8s_apiserver_secure_port)
 
     @property
     def k8s_apiserver_nodes(self):
         return self.nodes.filter_by(is_k8s_master=True)
 
     @property
+    def k8s_apiserver_endpoint(self):
+        if self.k8s_apiservers_dns_name:
+            host = self.k8s_apiservers_dns_name
+        else:
+            host = self.k8s_apiserver_node.fqdn
+        return 'https://{}:{}'.format(host, config.k8s_apiserver_secure_port)
+
+    @property
     def k8s_apiserver_endpoints(self):
-        return ['https://{}:{}'.format(n.fqdn, config.k8s_apiserver_secure_port) for n in self.k8s_apiserver_nodes]
+        if self.k8s_apiservers_dns_name:
+            hosts = [self.k8s_apiservers_dns_name]
+        else:
+            hosts = [n.fqdn for n in self.k8s_apiserver_nodes]
+        return ['https://{}:{}'.format(host, config.k8s_apiserver_secure_port) for host in hosts]
 
     @property
     def etcd_nodes(self):
         return self.nodes.filter_by(is_etcd_server=True)
 
     @property
-    def etcd_endpoints(self):
-        return ['https://{}:{}'.format(n.fqdn, config.etcd_client_port) for n in self.etcd_nodes]
+    def etcd_client_endpoints(self):
+        if self.etcd_nodes_dns_name:
+            hosts = [self.etcd_nodes_dns_name]
+        else:
+            hosts = [n.fqdn for n in self.etcd_nodes]
+        return ['https://{}:{}'.format(host, config.etcd_client_port) for host in hosts]

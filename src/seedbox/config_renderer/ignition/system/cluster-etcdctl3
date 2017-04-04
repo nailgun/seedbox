@@ -18,6 +18,6 @@ export ETCDCTL_CACERT=$ETCDCTL_CA_FILE
 export ETCDCTL_CERT=$ETCDCTL_CERT_FILE
 export ETCDCTL_KEY=$ETCDCTL_KEY_FILE
 
-export ETCDCTL_ENDPOINTS={{ cluster.etcd_endpoints|join(',') }}
+export ETCDCTL_ENDPOINTS={{ cluster.etcd_client_endpoints|join(',') }}
 
 exec /usr/lib/coreos/etcd-wrapper etcdctl "$@"

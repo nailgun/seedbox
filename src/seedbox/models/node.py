@@ -41,19 +41,44 @@ class Node(db.Model):
         return self.target_config_version == self.active_config_version
 
     @property
+    def certificate_alternative_dns_names(self):
+        names = [self.fqdn]
+
+        if self.is_etcd_server and self.cluster.etcd_nodes_dns_name:
+            names += [
+                self.cluster.etcd_nodes_dns_name,
+            ]
+
+        if self.is_k8s_master:
+            if self.cluster.k8s_apiservers_dns_name:
+                names += [
+                    self.cluster.k8s_apiservers_dns_name,
+                ]
+
+            names += [
+                'kubernetes',
+                'kubernetes.default',
+                'kubernetes.default.svc',
+                'kubernetes.default.svc.' + config.k8s_cluster_domain,
+            ]
+
+        return names
+
+    @property
+    def certificate_alternative_ips(self):
+        ips = [self.ip]
+
+        if self.is_k8s_master:
+            ips += [self.cluster.k8s_apiserver_service_ip]
+
+        return ips
+
+    @property
     def credentials_error(self):
         try:
             pki.verify_certificate_chain(self.cluster.ca_credentials.cert, self.credentials.cert)
-            hosts = [self.fqdn]
-            if self.is_k8s_master:
-                hosts += [
-                    'kubernetes',
-                    'kubernetes.default',
-                    'kubernetes.default.svc',
-                    'kubernetes.default.svc.' + config.k8s_cluster_domain,
-                ]
             pki.validate_certificate_common_name(self.credentials.cert, 'system:node:' + self.fqdn)
-            pki.validate_certificate_hosts(self.credentials.cert, hosts)
+            pki.validate_certificate_hosts(self.credentials.cert, self.certificate_alternative_dns_names)
             pki.validate_certificate_organizations(self.credentials.cert, ['system:nodes'])
             pki.validate_certificate_key_usage(self.credentials.cert, is_web_server=True, is_web_client=True)
         except pki.InvalidCertificate as e:
@@ -62,10 +87,7 @@ class Node(db.Model):
     @property
     def credentials_warning(self):
         try:
-            ips = [self.ip]
-            if self.is_k8s_master:
-                ips += [self.cluster.k8s_apiserver_service_ip]
-            pki.validate_certificate_host_ips(self.credentials.cert, ips)
+            pki.validate_certificate_host_ips(self.credentials.cert, self.certificate_alternative_ips)
         except pki.InvalidCertificate as e:
             return str(e)
 
