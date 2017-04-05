@@ -5,7 +5,7 @@ clusters using PXE without installation. But it easily can be extended to render
 different deployments.
 
 
-## Comparsion to other projects
+## Comparison to other projects
 
 * [CoreOS matchbox](https://github.com/coreos/matchbox). It doesn't provide complete config rendering facility.
   There are examples, but they are hard to read and not modularized.
