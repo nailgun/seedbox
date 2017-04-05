@@ -39,10 +39,14 @@ class UserView(ModelView):
         with self.session.no_autoflush:
             ca_creds = model.cluster.ca_credentials
         creds = models.CredentialsData()
+        if model.groups:
+            orgs = model.groups.split(',')
+        else:
+            orgs = []
         creds.cert, creds.key = pki.issue_certificate(model.name,
                                                       ca_cert=ca_creds.cert,
                                                       ca_key=ca_creds.key,
-                                                      organizations=model.groups.split(','),
+                                                      organizations=orgs,
                                                       certify_days=365,
                                                       is_web_client=True)
         self.session.add(creds)

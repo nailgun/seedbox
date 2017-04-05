@@ -65,7 +65,8 @@ class NodeView(ModelView):
         'is_k8s_master': "Run kubelet on this node and add persistent kube-apiserver, kube-controller-manager, "
                          "kube-scheduler pods to it.",
     }
-    inline_models = [
+    # TODO: with `inline_models` `on_model_change` doesn't get called pre save
+    inline_models_disabled = [
         (models.Mountpoint, {
             'column_descriptions': {
                 'what': 'Device to mount.',
