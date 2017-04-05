@@ -1,11 +1,11 @@
-from flask import request, Response, flash, redirect
+from flask import request, Response, flash, redirect, abort
 from flask_admin import expose
 from flask_admin.form import rules
 from flask_admin.actions import action
 from flask_admin.helpers import get_redirect_target
 from flask_admin.model.template import macro
 
-from seedbox import pki, models, config_renderer
+from seedbox import pki, models, config_renderer, exceptions
 from .base import ModelView
 
 
@@ -69,9 +69,16 @@ class UserView(ModelView):
     @expose('/kubeconfig')
     def kubeconfig_view(self):
         user = self.get_one(request.args.get('id'))
-        return Response(config_renderer.kubeconfig.render([user]), mimetype='text/x-yaml')
+        return Response(render_kubeconfig([user]), mimetype='text/x-yaml')
 
     @action('kubeconfig', 'Get kubeconfig')
     def kubeconfig_action(self, ids):
         users = models.User.query.filter(models.User.id.in_(ids))
-        return Response(config_renderer.kubeconfig.render(users), mimetype='text/x-yaml')
+        return Response(render_kubeconfig(users), mimetype='text/x-yaml')
+
+
+def render_kubeconfig(users):
+    try:
+        return config_renderer.kubeconfig.render(users)
+    except exceptions.K8sNoClusterApiserver:
+        abort(404, 'No node with k8s apiserver.')

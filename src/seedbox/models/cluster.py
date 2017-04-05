@@ -1,4 +1,4 @@
-from seedbox import pki, config
+from seedbox import pki, config, exceptions
 from .db import db
 
 
@@ -75,7 +75,10 @@ class Cluster(db.Model):
         if self.k8s_apiservers_dns_name:
             host = self.k8s_apiservers_dns_name
         else:
-            host = self.k8s_apiserver_node.fqdn
+            apiserver = self.k8s_apiserver_node
+            if apiserver is None:
+                raise exceptions.K8sNoClusterApiserver()
+            host = apiserver.fqdn
         return 'https://{}:{}'.format(host, config.k8s_apiserver_secure_port)
 
     @property
