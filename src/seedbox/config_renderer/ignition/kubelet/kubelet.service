@@ -12,10 +12,17 @@ Environment="RKT_RUN_ARGS=--uuid-file-save=/var/run/kubelet-pod.uuid \
   --mount volume=ssl-cluster-credentials,target={{ config.cluster_credentials_path }} \
   --volume var-log,kind=host,source=/var/log \
   --mount volume=var-log,target=/var/log \
+  {% if cluster.k8s_cni -%}
+  --volume var-lib-cni,kind=host,source=/var/lib/cni \
+  --mount volume=var-lib-cni,target=/var/lib/cni \
+  {% endif -%}
   "
 
 ExecStartPre=/usr/bin/mkdir -p {{ config.k8s_manifests_path }}
 ExecStartPre=/usr/bin/mkdir -p /var/log/containers
+{% if cluster.k8s_cni -%}
+ExecStartPre=/usr/bin/mkdir -p /var/lib/cni
+{% endif -%}
 ExecStartPre=/usr/bin/systemctl is-active flanneld.service
 ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
 

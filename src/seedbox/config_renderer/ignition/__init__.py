@@ -82,12 +82,6 @@ class IgnitionConfig(object):
                 KubeProxyPackage,
             ]
 
-            if self.cluster.k8s_cni:
-                from .cni import CNIPackage
-                packages += [
-                    CNIPackage,
-                ]
-
         if self.node.is_k8s_master:
             from .k8s_master_manifests import K8sMasterManifestsPackage
             packages += [

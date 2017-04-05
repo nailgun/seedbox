@@ -38,8 +38,7 @@ k8s_service_account_public_key_path = k8s_secrets_path + '/service-account.pub'
 k8s_service_account_private_key_path = k8s_secrets_path + '/service-account.priv'
 k8s_manifests_path = k8s_config_path + '/manifests'
 k8s_kubeconfig_path = k8s_config_path + '/kubeconfig.yaml'
-k8s_cni_path = k8s_config_path + '/cni'
-k8s_cni_conf_path = k8s_cni_path + '/net.d'
+k8s_cni_conf_path = k8s_config_path + '/cni/net.d'
 
 node_ca_certificates_path = '/usr/share/ca-certificates'
 
