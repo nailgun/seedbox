@@ -1,5 +1,22 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
-  <p>Hello world</p>
+  <h1>Usage manual</h1>
+
+  <ol>
+    <li>Define a cluster in <em>Cluster</em> tab.</li>
+    <li>Add some nodes to cluster in <em>Node</em> tab. You will need at least one node with etcd server (three
+    for fault tolerance), one k8s master (two for HA) and one k8s schedulable node. For testing purposes
+    this can be a single node.</li>
+    <li>Add a user with <code>system:masters</code> group and download generated kubeconfig.</li>
+    <li>Configure your cluster servers for iPXE boot with this script:
+<pre>
+#!ipxe
+chain http://seedbox_host:seedbox_port/ipxe
+</pre>
+    </li>
+    <li>Startup the servers.</li>
+    <li>After some time required to bootstrap full k8s cluster, you will be able to access it using
+    <code>kubectl</code> and downloaded kubeconfig.</li>
+  </ol>
 {% endblock %}
