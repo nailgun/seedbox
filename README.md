@@ -41,7 +41,7 @@ say this about seedbox as well. 😀 But I'm not sure of that.
 ## PKI
 
 You will have PKI out of the box. It's simple but powerful enough. It provides one CA per cluster and will
-automatically issue certificates for nodes and users. It also will warn you if there is something
+automatically issue certificates for nodes and users. Also it will warn you if there is something
 wrong with certificates (expired, changed name, etc).
 
 Credentials are automatically transferred to nodes in most secure manner possible for automatic provision.
