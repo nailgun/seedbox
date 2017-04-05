@@ -45,6 +45,7 @@ class NodeView(ModelView):
         'is_etcd_server': "etcd server",
         'is_k8s_schedulable': "Kubernetes schedulable",
         'is_k8s_master': "Kubernetes master",
+        'mountpoints': 'Additional mountpoints',
     }
     column_descriptions = {
         'maintenance_mode': "If this is enabled, node will be booted in minimal CoreOS environment without "
@@ -63,13 +64,15 @@ class NodeView(ModelView):
         'is_k8s_master': "Run kubelet on this node and add persistent kube-apiserver, kube-controller-manager, "
                          "kube-scheduler pods to it.",
     }
-    inline_models = [(models.Mountpoint, {
-        'column_descriptions': {
-            'what': 'Device to mount.',
-            'where': 'Mount path.',
-            'wanted_by': 'WantedBy systemd unit.',
-        }
-    })]
+    inline_models = [
+        (models.Mountpoint, {
+            'column_descriptions': {
+                'what': 'Device to mount.',
+                'where': 'Mount path.',
+                'wanted_by': 'WantedBy systemd unit.',
+            }
+        }),
+    ]
     form_rules = [
         rules.Field('cluster'),
         rules.Field('ip'),
