@@ -26,6 +26,7 @@ class IgnitionConfig(object):
         packages = [P(self.node, request.url_root) for P in self.get_package_classes()]
         files = list(itertools.chain.from_iterable(p.get_files() for p in packages))
         units = list(itertools.chain.from_iterable(p.get_units() for p in packages))
+        networkd_units = list(itertools.chain.from_iterable(p.get_networkd_units() for p in packages))
 
         return {
             'ignition': {
@@ -33,7 +34,9 @@ class IgnitionConfig(object):
                 'config': {},
             },
             'storage': self.get_storage_config(files),
-            'networkd': {},
+            'networkd': {
+                'units': networkd_units
+            },
             'passwd': {
                 'users': [{
                     'name': 'core',

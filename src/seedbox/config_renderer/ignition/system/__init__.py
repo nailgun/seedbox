@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from seedbox import config
 from seedbox.config_renderer.ignition.base import BaseIgnitionPackage
 
@@ -88,3 +90,18 @@ class SystemPackage(BaseIgnitionPackage):
             ]
 
         return units
+
+    def get_networkd_units(self):
+        interfaces = defaultdict(list)
+        for address in self.node.addresses.all():
+            interfaces[address.interface].append(address)
+
+        return [
+            self.get_unit('aa-{}-addresses.network'.format(interface),
+                          template_name='addresses.network',
+                          additional_context={
+                              'interface': interface,
+                              'addresses': addresses,
+                          })
+            for interface, addresses in interfaces.items()
+        ]

@@ -46,6 +46,7 @@ class NodeView(ModelView):
         'is_k8s_schedulable': "Kubernetes schedulable",
         'is_k8s_master': "Kubernetes master",
         'mountpoints': 'Additional mountpoints',
+        'addresses': 'Additional IP addresses',
     }
     column_descriptions = {
         'maintenance_mode': "If this is enabled, node will be booted in minimal CoreOS environment without "
@@ -72,6 +73,12 @@ class NodeView(ModelView):
                 'wanted_by': 'WantedBy systemd unit.',
             }
         }),
+        (models.Address, {
+            'column_descriptions': {
+                'interface': 'Network interface.',
+                'ip': 'IP address.',
+            }
+        }),
     ]
     form_rules = [
         rules.Field('cluster'),
@@ -86,6 +93,7 @@ class NodeView(ModelView):
             'linux_consoles',
             'disable_ipv6',
             'mountpoints',
+            'addresses',
         ], 'Boot'),
         rules.FieldSet([
             'is_etcd_server',

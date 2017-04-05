@@ -1,0 +1,12 @@
+[Match]
+Name={{ interface }}
+
+[Network]
+DHCP=yes
+{% for addr in addresses -%}
+Address={{ addr.ip }}/32
+{% endfor %}
+
+[DHCP]
+UseMTU=true
+UseDomains=true

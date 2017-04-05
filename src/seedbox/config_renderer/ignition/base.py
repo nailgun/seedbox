@@ -24,6 +24,9 @@ class BaseIgnitionPackage(object):
     def get_units(self):
         return ()
 
+    def get_networkd_units(self):
+        return ()
+
     def enable_unit(self, name):
         return {
             'name': name,
@@ -33,22 +36,25 @@ class BaseIgnitionPackage(object):
     def get_unit(self, name, enable=False, template_name=None, additional_context=None):
         if template_name is None:
             template_name = name
-
-        return {
+        unit = {
             'name': name,
-            'enable': enable,
             'contents': self.render_template(template_name, additional_context),
         }
+        if enable:
+            unit['enable'] = True
+        return unit
 
     def get_unit_dropins(self, unitname, dropins, enableunit=False):
-        return {
+        dropin = {
             'name': unitname,
-            'enable': enableunit,
             'dropins': [{
                 'name': dropin,
                 'contents': self.render_template('{}.d/{}'.format(unitname, dropin)),
             } for dropin in dropins],
         }
+        if enableunit:
+            dropin['enable'] = True
+        return dropin
 
     def get_full_template_context(self, additional_context=None):
         context = {
