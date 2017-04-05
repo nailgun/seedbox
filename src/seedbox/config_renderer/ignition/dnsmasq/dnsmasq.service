@@ -24,7 +24,8 @@ ExecStart=/usr/bin/rkt run \
         {% for n in cluster.nodes.filter_by(is_k8s_master=True) -%}
             --host-record={{ cluster.k8s_apiservers_dns_name }},{{ n.ip }} \
         {% endfor -%}
-    {% endif %}
+    {% endif -%}
+    \
 
 [Install]
 WantedBy=multi-user.target
