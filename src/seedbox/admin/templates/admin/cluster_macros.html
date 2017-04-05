@@ -31,6 +31,10 @@
                 <li>
                     <strong>etcd servers:</strong>
                     <ul>
+                        {% set etcd_servers_count = model.nodes.filter_by(is_etcd_server=True).count() %}
+                        {% if etcd_servers_count and etcd_servers_count % 2 == 0 %}
+                            <li class="text-danger">Even etcd servers number!</li>
+                        {% endif %}
                         {% for node in model.nodes.filter_by(is_etcd_server=True) %}
                             <li>{{ node.fqdn }}</li>
                         {% endfor %}
@@ -79,10 +83,6 @@
                         <li><code>$ helm install {{request.url_root }}helm/{{ model.name }}/k8s-addons.tar.gz</code></li>
                     </ul>
                 </li>
-                {% set etcd_servers_count = model.nodes.filter_by(is_etcd_server=True).count() %}
-                {% if etcd_servers_count % 2 == 0 %}
-                    <li class="text-danger">Even etcd servers number</li>
-                {% endif %}
             </ul>
           </div>
         </div>
