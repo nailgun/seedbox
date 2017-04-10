@@ -17,18 +17,20 @@ ExecStart=/usr/bin/rkt run \
     --listen-address=127.0.0.1 \
     --no-hosts \
     --server=/cluster.local/{{ cluster.k8s_dns_service_ip }} \
-    {% for n in cluster.nodes.all() -%}
-    --host-record={{ n.fqdn }},{{ n.ip }} \
-    {% endfor -%}
-    {% if cluster.etcd_nodes_dns_name -%}
-        {% for n in cluster.nodes.filter_by(is_etcd_server=True) -%}
-            --host-record={{ cluster.etcd_nodes_dns_name }},{{ n.ip }} \
+    {% if cluster.dnsmasq_static_records -%}
+        {% for n in cluster.nodes.all() -%}
+        --host-record={{ n.fqdn }},{{ n.ip }} \
         {% endfor -%}
-    {% endif -%}
-    {% if cluster.k8s_apiservers_dns_name -%}
-        {% for n in cluster.nodes.filter_by(is_k8s_master=True) -%}
-            --host-record={{ cluster.k8s_apiservers_dns_name }},{{ n.ip }} \
-        {% endfor -%}
+        {% if cluster.etcd_nodes_dns_name -%}
+            {% for n in cluster.nodes.filter_by(is_etcd_server=True) -%}
+                --host-record={{ cluster.etcd_nodes_dns_name }},{{ n.ip }} \
+            {% endfor -%}
+        {% endif -%}
+        {% if cluster.k8s_apiservers_dns_name -%}
+            {% for n in cluster.nodes.filter_by(is_k8s_master=True) -%}
+                --host-record={{ cluster.k8s_apiservers_dns_name }},{{ n.ip }} \
+            {% endfor -%}
+        {% endif -%}
     {% endif -%}
     \
 

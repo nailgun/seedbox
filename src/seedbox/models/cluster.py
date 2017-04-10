@@ -8,15 +8,16 @@ class Cluster(db.Model):
 
     ca_credentials_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
     ca_credentials = db.relationship('CredentialsData', foreign_keys=[ca_credentials_id])
+    install_dnsmasq = db.Column(db.Boolean, nullable=False, default=True)
 
     etcd_version = db.Column(db.Integer, default=config.default_etcd_version, nullable=False)
     suppose_etcd_cluster_exists = db.Column(db.Boolean, nullable=False)
     etcd_nodes_dns_name = db.Column(db.String(80), default='', nullable=False)
 
-    install_dnsmasq = db.Column(db.Boolean, nullable=False)
     allow_insecure_provision = db.Column(db.Boolean, nullable=False)
     apiservers_audit_log = db.Column(db.Boolean, nullable=False)    # TODO: add k8s_ prefix
     apiservers_swagger_ui = db.Column(db.Boolean, nullable=False)   # TODO: add k8s_ prefix
+    dnsmasq_static_records = db.Column(db.Boolean, nullable=False)
 
     # workaround for a VirtualBox environment issue
     # https://github.com/coreos/flannel/issues/98

@@ -31,6 +31,7 @@ class ClusterView(ModelView):
         'allow_insecure_provision': "Allow insecure node provisioning",
         'apiservers_audit_log': "Enable audit log on apiservers",
         'apiservers_swagger_ui': "Enable Swagger-UI on apiservers",
+        'dnsmasq_static_records': "Add static records to dnsmasq",
         'explicitly_advertise_addresses': "Explicitly advertise addresses",
         'k8s_pod_network': "Pod network CIDR",
         'k8s_service_network': "Service network CIDR",
@@ -49,10 +50,12 @@ class ClusterView(ModelView):
         'etcd_nodes_dns_name': "Must be round-robin DNS record. If this is set it will be used by "
                                "all components to access etcd instead of hardcoded node list. You can "
                                "add/remove nodes at any time just by updating DNS record.",
-        'install_dnsmasq': "If this is set, dnsmasq will be run on each node to resolve cluster nodes and "
-                           "components.",
+        'install_dnsmasq': "If this is set, dnsmasq will be run on each node for resolving cluster.local zone "
+                           "using k8s DNS and for DNS caching.",
         'allow_insecure_provision': "Allow nodes to download CoreOS Ignition config and credentials via "
                                     "non-encrypted connection.",
+        'dnsmasq_static_records': "Hosts' dnsmasq will serve cluster nodes' FQDNs and cluster components "
+                                  "like etcd and apiserver.",
         'explicitly_advertise_addresses': "If this is set, cluster components will explicitly advertise "
                                           "node IP as it set in seedbox.",
         'k8s_apiservers_dns_name': "Must be round-robin DNS record. If this is set it will be used by "
@@ -65,6 +68,7 @@ class ClusterView(ModelView):
     }
     form_rules = [
         rules.Field('name'),
+        rules.Field('install_dnsmasq'),
         rules.FieldSet([
             'etcd_version',
             'suppose_etcd_cluster_exists',
@@ -85,7 +89,7 @@ class ClusterView(ModelView):
             'aci_proxy_ca_cert',
         ], 'Images'),
         rules.FieldSet([
-            'install_dnsmasq',
+            'dnsmasq_static_records',
             'allow_insecure_provision',
             'explicitly_advertise_addresses',
         ], 'Virtual environment'),
