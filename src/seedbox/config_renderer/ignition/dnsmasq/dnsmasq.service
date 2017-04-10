@@ -16,6 +16,7 @@ ExecStart=/usr/bin/rkt run \
     --log-facility=- \
     --listen-address=127.0.0.1 \
     --no-hosts \
+    --server=/cluster.local/{{ cluster.k8s_dns_service_ip }} \
     {% for n in cluster.nodes.all() -%}
     --host-record={{ n.fqdn }},{{ n.ip }} \
     {% endfor -%}
