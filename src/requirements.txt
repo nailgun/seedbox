@@ -1,6 +1,7 @@
 flask
 flask_admin
 flask_sqlalchemy
+Flask-Migrate
 cryptography
 pyopenssl
 psycopg2
