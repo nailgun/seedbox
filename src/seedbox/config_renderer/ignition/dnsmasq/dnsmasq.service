@@ -7,11 +7,15 @@ RestartSec=10
 ExecStart=/usr/bin/rkt run \
     --insecure-options=image \
     --net=host \
+    --volume resolv,kind=host,source=/etc/resolv.conf \
+    --mount volume=resolv,target=/etc/resolv.conf \
     quay.io/coreos/dnsmasq \
     -- \
     --keep-in-foreground \
     --user=root \
     --log-facility=- \
+    --listen-address=127.0.0.1 \
+    --no-hosts \
     {% for n in cluster.nodes.all() -%}
     --host-record={{ n.fqdn }},{{ n.ip }} \
     {% endfor -%}
