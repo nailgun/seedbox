@@ -1,8 +1,30 @@
-version: '3'
+---
+version: '2'
+
 services:
+  seedbox:
+    build: ./src/
+    image: seedbox
+    command: runserver --host 0.0.0.0 --port 5000 --debug
+    ports:
+      - '5000:5000'
+    volumes:
+      - './src/seedbox:/usr/src/app/seedbox'
+
   postgres:
     image: postgres:9.6
     ports:
       - '5432:5432'
     environment:
       - POSTGRES_USER=seedbox
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.102.4.0/24
+          gateway: 10.102.4.1
