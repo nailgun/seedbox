@@ -7,7 +7,7 @@ services:
     build: ./src/
     command: runserver --host 0.0.0.0 --port 5000 --debug
     environment:
-      - DATABASE_URI=postgres://seedbox:password@postgres:5432
+      - DATABASE_URI=postgres://seedbox:password@postgres:5432/seedbox
     ports:
       - '5000:5000'
     volumes:
