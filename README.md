@@ -1,6 +1,6 @@
 # seedbox
 
-Baremetal CoreOS cluster provisioner with web UI. Currently it's primary goal is to boot CoreOS
+Baremetal CoreOS cluster provisioner with web UI. Currently its primary goal is to boot CoreOS
 clusters using PXE without installation. But it easily can be extended to render kubernetes assets for
 different deployments.
 
