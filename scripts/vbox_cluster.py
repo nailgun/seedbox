@@ -11,7 +11,7 @@ import urllib.parse
 
 
 log = logging.getLogger('main')
-tmp_dir = os.path.join(os.path.dirname(__file__), 'tmp')
+tmp_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'tmp')
 ipxe_iso = os.path.join(tmp_dir, 'ipxe.iso')
 
 if sys.platform == 'darwin':
