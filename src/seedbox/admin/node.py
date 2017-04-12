@@ -57,7 +57,8 @@ class NodeView(ModelView):
                      "volatile data.",
         'wipe_root_disk_next_boot': "If this is set, node's root disk partition table will be wiped on next boot. "
                                     "This option will be automatically disabled on next provisiton report.",
-        'root_disk_size_sectors': "Used during root disk wiping. (Typically one sector is 512 bytes.)",
+        'root_disk_size_sectors': "Used during root disk wiping. (Typically one sector is 512 bytes.) All disk space "
+                                  "will be used if this is empty.",
         'linux_consoles': "Passed to kernel as `console` arguments. (Separate by comma.)",
         'disable_ipv6': "Passed to kernel as `ipv6.disable=1` argument.",
         'is_etcd_server': "Run etcd server on this node and connect other nodes to it.",
