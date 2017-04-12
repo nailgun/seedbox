@@ -36,6 +36,7 @@ class NodeView(ModelView):
         'ip': "Public IP",
         'fqdn': "Fully Qualified Domain Name",
         'maintenance_mode': "Maintenance mode",
+        'debug_boot': "Debug boot",
         'coreos_autologin': "Enable terminal autologin",
         'root_disk': "Root disk device",
         'wipe_root_disk_next_boot': "Wipe root disk on next boot",
@@ -51,6 +52,7 @@ class NodeView(ModelView):
     column_descriptions = {
         'maintenance_mode': "If this is enabled, node will be booted in minimal CoreOS environment without "
                             "touching root partition.",
+        'debug_boot': "Forward all system journal messages to kmsg for troubleshooting.",
         'coreos_autologin': "If this is set, main terminal will be logged-in with `core` user after boot. Useful "
                             "for debugging. Don't enable in production.",
         'root_disk': "First partition of this disk will be wiped on every boot. CoreOS will use it to store "
@@ -88,6 +90,7 @@ class NodeView(ModelView):
         rules.Field('fqdn'),
         rules.FieldSet([
             'maintenance_mode',
+            'debug_boot',
             'coreos_autologin',
             'root_disk',
             'wipe_root_disk_next_boot',

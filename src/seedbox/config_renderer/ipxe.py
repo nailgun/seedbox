@@ -30,4 +30,10 @@ def get_kernel_arguments(node, url_root):
     if node.disable_ipv6:
         args.append('ipv6.disable=1')
 
+    if node.debug_boot:
+        args += [
+            'systemd.journald.forward_to_kmsg=1',
+            'systemd.journald.max_level_kmsg=debug',   # requires systemd-232
+        ]
+
     return args
