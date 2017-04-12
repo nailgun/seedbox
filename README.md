@@ -65,3 +65,9 @@ Credentials are automatically transferred to nodes in most secure manner possibl
 
 Nodes notify seedbox after successful boot and upload active ignition config, so seedbox can track
 current state of a cluster.
+
+
+## Toubleshooting
+
+Due to some CoreOS bug host hangs on boot without any error messages if root partition doesn't exist. If this happens to
+you, just set "Wipe root disk on next boot" checkbox in node admin.
