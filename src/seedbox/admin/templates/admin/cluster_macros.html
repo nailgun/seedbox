@@ -16,16 +16,16 @@
 {% endmacro %}
 
 {% macro render_info(model, column) %}
-    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    <div class="panel-group" id="accordion-{{ model.id }}" role="tablist" aria-multiselectable="true">
       <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="headingOne">
+        <div class="panel-heading" role="tab">
           <h4 class="panel-title">
-            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            <a role="button" data-toggle="collapse" data-parent="#accordion-{{ model.id }}" href="#collapse-components-{{ model.id }}" aria-expanded="true" aria-controls="collapse-components-{{ model.id }}">
               Components
             </a>
           </h4>
         </div>
-        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+        <div id="collapse-components-{{ model.id }}" class="panel-collapse collapse in" role="tabpanel">
           <div class="panel-body">
             <ul>
                 <li>
@@ -61,14 +61,14 @@
         </div>
       </div>
       <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="headingTwo">
+        <div class="panel-heading" role="tab">
           <h4 class="panel-title">
-            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion-{{ model.id }}" href="#collapse-addons-{{ model.id }}" aria-expanded="false" aria-controls="collapse-addons-{{ model.id }}">
               Addons installation
             </a>
           </h4>
         </div>
-        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+        <div id="collapse-addons-{{ model.id }}" class="panel-collapse collapse" role="tabpanel">
           <div class="panel-body">
             <ul>
                 <li>
