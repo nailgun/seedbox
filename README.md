@@ -5,6 +5,20 @@ clusters using PXE without installation. But it easily can be extended to render
 different deployments.
 
 
+## TL;DR
+
+```
+$ docker-compose up
+$ docker-compose exec seedbox python -m seedbox db upgrade
+```
+
+Open http://10.102.4.3:5000/admin
+
+> **Note:**
+>   This IP is defined according to the `network` block specified in `docker-compose.yml`
+>
+
+
 ## Comparison with other projects
 
 * [CoreOS matchbox](https://github.com/coreos/matchbox). It doesn't provide complete config rendering facility.
