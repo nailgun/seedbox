@@ -9,15 +9,6 @@ from jinja2 import Environment
 from seedbox import config
 
 NOT_SPECIFIED = object()
-_inline_vars = {}
-
-
-def inline_var(name, value=NOT_SPECIFIED):
-    if value is NOT_SPECIFIED:
-        value = _inline_vars[name]
-    else:
-        _inline_vars[name] = value
-    return value
 
 
 class Addon:
@@ -30,7 +21,6 @@ class Addon:
 
 
 class SaltPillarEmulator:
-
     def __init__(self, cluster):
         self.cluster = cluster
 
@@ -54,16 +44,19 @@ addons = {
         '1.5': Addon(['https://github.com/kubernetes/kubernetes/raw/release-1.5/cluster/addons/dns/' + name for name in [
             'skydns-rc.yaml.sed',
             'skydns-svc.yaml.sed',
-        ]], inline_var('dns_vars_map', {
+        ]], {
             'DNS_DOMAIN': 'config.k8s_cluster_domain',
             'DNS_SERVER_IP': 'cluster.k8s_dns_service_ip',
-        })),
+        }),
         '1.6': Addon(['https://github.com/kubernetes/kubernetes/raw/release-1.6/cluster/addons/dns/' + name for name in [
             'kubedns-cm.yaml',
             'kubedns-sa.yaml',
             'kubedns-controller.yaml.sed',
             'kubedns-svc.yaml.sed',
-        ]], inline_var('dns_vars_map')),
+        ]], {
+            'DNS_DOMAIN': 'config.k8s_cluster_domain',
+            'DNS_SERVER_IP': 'cluster.k8s_dns_service_ip',
+        }),
     },
     'dns-horizontal-autoscaler': {
         '1.5': Addon(['https://github.com/kubernetes/kubernetes/raw/release-1.5/cluster/addons/dns-horizontal-autoscaler/dns-horizontal-autoscaler.yaml']),
