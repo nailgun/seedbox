@@ -80,7 +80,7 @@
                     <ul>
                         <li><code>$ kubectl create -f {{request.url_root }}manifests/{{ model.name }}/kube-system-role-binding.yaml</code></li>
                         <li><code>$ helm init</code></li>
-                        <li><code>$ helm install {{request.url_root }}helm/{{ model.name }}/k8s-addons.tar.gz</code></li>
+                        <li><code>$ helm install -n k8s-addons {{request.url_root }}helm/{{ model.name }}/k8s-addons.tar.gz</code></li>
                     </ul>
                 </li>
             </ul>
