@@ -9,10 +9,13 @@ from jinja2 import Environment
 from seedbox import config
 
 NOT_SPECIFIED = object()
+jinja_var_env = Environment(autoescape=False)
+jinja_env = Environment(keep_trailing_newline=True, autoescape=False)
 
 
 class Addon:
     base_url = 'https://github.com/kubernetes/kubernetes/raw/release-{version}/cluster/addons/{path}/'
+    encoding = 'utf-8'
 
     def __init__(self, name, version, manifest_files, vars_map=None, is_salt_template=False, path=None, base_url=None):
         if vars_map is None:
@@ -34,6 +37,47 @@ class Addon:
 
         self.vars_map = vars_map
         self.is_salt_template = is_salt_template
+
+    def render_files(self, cluster):
+        yield 'Chart.yaml', self.render_chart_yaml()
+        yield 'values.yaml', self.render_values_yaml(cluster)
+
+        for url in self.manifest_files:
+            filename, content = self.render_manifest_file(cluster, url)
+            yield os.path.join('templates', filename), content
+
+    def render_chart_yaml(self):
+        return 'name: {}\nversion: {}\n'.format(self.name, self.version).encode(self.encoding)
+
+    def render_values_yaml(self, cluster):
+        return ''.join('{}: {}\n'.format(var_name, jinja_var_env.from_string(var_tpl).render({
+            'config': config,
+            'cluster': cluster,
+        })) for var_name, var_tpl in self.vars_map.items()).encode(self.encoding)
+
+    def render_manifest_file(self, cluster, url):
+        pillar = SaltPillarEmulator(cluster)
+
+        resp = requests.get(url)
+        resp.raise_for_status()
+
+        content = resp.content
+        if self.is_salt_template:
+            t = jinja_env.from_string(content.decode(self.encoding))
+            content = t.render({
+                'pillar': pillar,
+            }).encode(self.encoding)
+        else:
+            for var_name in self.vars_map.keys():
+                var_name = var_name.encode(self.encoding)
+                content = content.replace(b'$' + var_name, b'{{ .Values.%s }}' % var_name)
+
+        filename = os.path.basename(url)
+        m = re.match(r'(.*\.yaml).*', filename)
+        if m:
+            filename = m.group(1)
+
+        return filename, content
 
 
 class SaltPillarEmulator:
@@ -108,48 +152,9 @@ class TarFile(tarfile.TarFile):
         self.addfile(info, io.BytesIO(data))
 
 
-# TODO: refactor
 def render_addon_tgz(cluster, addon):
-    pillar = SaltPillarEmulator(cluster)
-
     tgz_fp = io.BytesIO()
-
     with TarFile.open(fileobj=tgz_fp, mode='w:gz') as tgz:
-        chart = 'name: {}\nversion: {}\n'.format(addon.name, addon.version).encode('ascii')
-        tgz.adddata(os.path.join(addon.name, 'Chart.yaml'), chart)
-        for manifest_url in addon.manifest_files:
-            manifest_file_name = os.path.basename(manifest_url)
-            m = re.match(r'(.*\.yaml).*', manifest_file_name)
-            if m:
-                manifest_file_name = m.group(1)
-            resp = requests.get(manifest_url)
-            resp.raise_for_status()
-
-            manifest_content = resp.content
-            if addon.is_salt_template:
-                jinja_env = Environment(keep_trailing_newline=True, autoescape=False)
-                t = jinja_env.from_string(manifest_content.decode('ascii'))
-                manifest_content = t.render({
-                    'pillar': pillar,
-                }).encode('ascii')
-            else:
-                for var_name in addon.vars_map.keys():
-                    var_name = var_name.encode('ascii')
-                    manifest_content = manifest_content.replace(b'$' + var_name, b'{{ .Values.%s }}' % var_name)
-
-            tgz.adddata(os.path.join(addon.name, 'templates', manifest_file_name), manifest_content)
-
-        jinja_env = Environment(autoescape=False)
-        values = ''
-        for var_name, var_value in addon.vars_map.items():
-            values += var_name
-            values += ': '
-            t = jinja_env.from_string(var_value)
-            values += t.render({
-                'config': config,
-                'cluster': cluster,
-            })
-            values += '\n'
-        tgz.adddata(os.path.join(addon.name, 'values.yaml'), values.encode('ascii'))
-
+        for path, content in addon.render_files(cluster):
+            tgz.adddata(os.path.join(addon.name, path), content)
     return tgz_fp.getvalue()
