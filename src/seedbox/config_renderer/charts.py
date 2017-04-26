@@ -150,6 +150,16 @@ addons = {
             'heapster-service.yaml',
         ], is_salt_template=True, path='cluster-monitoring/standalone'),
     },
+    'fluentd-elasticsearch': {
+        '1.6': Addon('fluentd-elasticsearch', '1.6', [
+            'es-controller.yaml',
+            'es-service.yaml',
+            'fluentd-es-ds.yaml',
+            'kibana-controller.yaml',
+            'kibana-service.yaml',
+        ], notes='Documentation: '
+                 'https://kubernetes.io/docs/tasks/debug-application-cluster/logging-elasticsearch-kibana/'),
+    },
 }
 
 
