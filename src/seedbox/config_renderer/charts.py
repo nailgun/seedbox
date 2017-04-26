@@ -17,7 +17,8 @@ class Addon:
     base_url = 'https://github.com/kubernetes/kubernetes/raw/release-{version}/cluster/addons/{path}/'
     encoding = 'utf-8'
 
-    def __init__(self, name, version, manifest_files, vars_map=None, is_salt_template=False, path=None, base_url=None):
+    def __init__(self, name, version, manifest_files, vars_map=None, is_salt_template=False, path=None, base_url=None,
+                 notes=None):
         if vars_map is None:
             vars_map = {}
 
@@ -37,6 +38,7 @@ class Addon:
 
         self.vars_map = vars_map
         self.is_salt_template = is_salt_template
+        self.notes = notes
 
     def render_files(self, cluster):
         yield 'Chart.yaml', self.render_chart_yaml()
@@ -45,6 +47,9 @@ class Addon:
         for url in self.manifest_files:
             filename, content = self.render_manifest_file(cluster, url)
             yield os.path.join('templates', filename), content
+
+        if self.notes:
+            yield os.path.join('templates', 'NOTES.txt'), self.notes.encode(self.encoding)
 
     def render_chart_yaml(self):
         return 'name: {}\nversion: {}\n'.format(self.name, self.version).encode(self.encoding)
@@ -97,8 +102,11 @@ class SaltPillarEmulator:
     def _num_nodes(self):
         return self.cluster.nodes.count()
 
+dashboard_notes = '''1. Start kube proxy:
+  $ kubectl proxy
+2. Open dashboard in a browser: http://localhost:8001/ui/
+'''
 
-# TODO: add notes
 addons = {
     'dns': {
         '1.5': Addon('dns', '1.5', [
@@ -126,11 +134,11 @@ addons = {
         '1.5': Addon('dashboard', '1.5', [
             'dashboard-controller.yaml',
             'dashboard-service.yaml',
-        ]),
+        ], notes=dashboard_notes),
         '1.6': Addon('dashboard', '1.6', [
             'dashboard-controller.yaml',
             'dashboard-service.yaml',
-        ]),
+        ], notes=dashboard_notes),
     },
     'heapster': {
         '1.5': Addon('heapster', '1.5', [
