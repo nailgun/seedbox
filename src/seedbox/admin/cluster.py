@@ -4,7 +4,7 @@ from flask_admin.form import rules
 from flask_admin.helpers import get_redirect_target
 from flask_admin.model.template import macro
 
-from seedbox import pki, models
+from seedbox import pki, models, config_renderer
 from .base import ModelView
 
 
@@ -123,3 +123,7 @@ class ClusterView(ModelView):
         return_url = get_redirect_target() or self.get_url('.index_view')
         flash('The credentials successfully reissued', 'success')
         return redirect(return_url)
+
+    @property
+    def k8s_addons_dict(self):
+        return config_renderer.charts.addons

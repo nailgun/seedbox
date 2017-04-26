@@ -1,4 +1,0 @@
-apiVersion: v1
-description: "Kubernetes Addons: dns, dashboard, heapster"
-name: k8s-addons
-version: 1.0.0

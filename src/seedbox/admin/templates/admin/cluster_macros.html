@@ -64,26 +64,41 @@
         <div class="panel-heading" role="tab">
           <h4 class="panel-title">
             <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion-{{ model.id }}" href="#collapse-addons-{{ model.id }}" aria-expanded="false" aria-controls="collapse-addons-{{ model.id }}">
-              Addons installation
+              Kubernetes addons
             </a>
           </h4>
         </div>
         <div id="collapse-addons-{{ model.id }}" class="panel-collapse collapse" role="tabpanel">
           <div class="panel-body">
-            <ul>
+            <ol>
                 <li>
                     Download kubeconfig and activate it:<br>
                     <code>$ export KUBECONFIG=/path/to/kubeconfig</code>
                 </li>
                 <li>
-                    Install k8s addons:
+                    Install required role binding:<br>
+                    <code>$ kubectl create -f {{ request.url_root }}manifests/{{ model.name }}/kube-system-role-binding.yaml</code>
+                </li>
+                <li>
+                    Init helm:<br>
+                    <code>$ helm init</code>
+                </li>
+                <li>
+                    Install any addons:<br>
+                    <code>$ helm install -n RELEASE_NAME CHART_URL</code>.<br>
+                    Where RELEASE_NAME is any name you like, and CHART_URL is one of the following:
                     <ul>
-                        <li><code>$ kubectl create -f {{request.url_root }}manifests/{{ model.name }}/kube-system-role-binding.yaml</code></li>
-                        <li><code>$ helm init</code></li>
-                        <li><code>$ helm install -n k8s-addons {{request.url_root }}helm/{{ model.name }}/k8s-addons.tar.gz</code></li>
+                        {% for addon_name, addon_versions in admin_view.k8s_addons_dict.items() %}
+                            <li>
+                                <strong>{{ addon_name }}</strong>
+                                {% for addon_version in addon_versions.keys() %}
+                                <a href="/addons/{{ model.name }}/{{ addon_name }}-{{ addon_version }}.tar.gz">{{ addon_version }}</a>
+                                {% endfor %}
+                            </li>
+                        {% endfor %}
                     </ul>
                 </li>
-            </ul>
+            </ol>
           </div>
         </div>
       </div>

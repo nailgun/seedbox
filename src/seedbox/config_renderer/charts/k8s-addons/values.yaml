@@ -1,2 +1,0 @@
-dnsServiceIp: {{ cluster.k8s_dns_service_ip }}
-clusterDomain: {{ config.k8s_cluster_domain }}

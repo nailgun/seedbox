@@ -107,10 +107,17 @@ def k8s_manifest(cluster_name):
                     mimetype='text/x-yaml')
 
 
-@app.route('/helm/<cluster_name>/k8s-addons.tar.gz')
-def k8s_addons_helm_chart(cluster_name):
+@app.route('/addons/<cluster_name>/<addon_name>-<addon_version>.tar.gz')
+def k8s_addons_helm_chart(cluster_name, addon_name, addon_version):
     # TODO: not ready for multitenancy
     cluster = models.Cluster.query.filter_by(name=cluster_name).first()
     if cluster is None:
-        abort(404)
-    return Response(config_renderer.charts.render_tgz(cluster, 'k8s-addons'), mimetype='application/tar+gzip')
+        return abort(404)
+
+    try:
+        addon = config_renderer.charts.addons[addon_name][addon_version]
+    except KeyError:
+        return abort(404)
+
+    return Response(config_renderer.charts.render_addon_tgz(cluster, addon, addon_name, addon_version),
+                    mimetype='application/tar+gzip')

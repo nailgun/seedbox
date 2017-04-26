@@ -1,5 +1,0 @@
-Kube DNS, kube dashboard and heapster are successfully installed!
-Instructions to access dashboard:
-1. Start kube proxy:
-  $ kubectl proxy
-2. Open dashboard in browser: http://localhost:8001/ui/
