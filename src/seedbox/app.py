@@ -119,5 +119,5 @@ def k8s_addons_helm_chart(cluster_name, addon_name, addon_version):
     except KeyError:
         return abort(404)
 
-    return Response(config_renderer.charts.render_addon_tgz(cluster, addon, addon_name, addon_version),
+    return Response(config_renderer.charts.render_addon_tgz(cluster, addon),
                     mimetype='application/tar+gzip')
