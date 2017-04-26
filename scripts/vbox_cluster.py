@@ -128,15 +128,15 @@ def main():
 
 def parse_args():
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('-n', '--num-instances', type=int, default=1,
-                            help='number of instances to create')
-    arg_parser.add_argument('-c', '--cluster-name', default='cluster1',
+    arg_parser.add_argument('cluster_name',
                             help='cluster name')
+    arg_parser.add_argument('num_instances', type=int,
+                            help='number of instances to create')
     arg_parser.add_argument('-d', '--delete', action='store_true', default=False,
                             help='delete all VMs first')
     arg_parser.add_argument('--memory', type=int, default=1024,
                             help='amount of RAM on an instance')
-    arg_parser.add_argument('--disk-size', type=int, default=8000,
+    arg_parser.add_argument('--disk-size', type=int, default=262144,
                             help='instance disk size in megabytes')
     arg_parser.add_argument('--start', action='store_true', default=False,
                             help='start instances after creation')
