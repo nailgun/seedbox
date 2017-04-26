@@ -8,7 +8,16 @@ from jinja2 import Environment
 
 from seedbox import config
 
-basedir = os.path.dirname(__file__)
+NOT_SPECIFIED = object()
+_inline_vars = {}
+
+
+def inline_var(name, value=NOT_SPECIFIED):
+    if value is NOT_SPECIFIED:
+        value = _inline_vars[name]
+    else:
+        _inline_vars[name] = value
+    return value
 
 
 class Addon:
@@ -20,33 +29,16 @@ class Addon:
         self.is_salt_template = is_salt_template
 
 
-# TODO: replace with something better
-class Ref:
-    def __init__(self, path):
-        self.path = path
-
-    @property
-    def value(self):
-        obj = addons
-        for path_part in self.path.split('|'):
-            try:
-                obj = obj[path_part]
-            except TypeError:
-                obj = getattr(obj, path_part)
-        return obj
-
-
 class SaltPillarEmulator:
-    NO_DEFAULT = object()
 
     def __init__(self, cluster):
         self.cluster = cluster
 
-    def get(self, var_name, default=NO_DEFAULT):
+    def get(self, var_name, default=NOT_SPECIFIED):
         try:
             return getattr(self, '_' + var_name)
         except AttributeError:
-            if default is self.NO_DEFAULT:
+            if default is NOT_SPECIFIED:
                 raise
             else:
                 return default
@@ -62,16 +54,16 @@ addons = {
         '1.5': Addon(['https://github.com/kubernetes/kubernetes/raw/release-1.5/cluster/addons/dns/' + name for name in [
             'skydns-rc.yaml.sed',
             'skydns-svc.yaml.sed',
-        ]], {
+        ]], inline_var('dns_vars_map', {
             'DNS_DOMAIN': 'config.k8s_cluster_domain',
             'DNS_SERVER_IP': 'cluster.k8s_dns_service_ip',
-        }),
+        })),
         '1.6': Addon(['https://github.com/kubernetes/kubernetes/raw/release-1.6/cluster/addons/dns/' + name for name in [
             'kubedns-cm.yaml',
             'kubedns-sa.yaml',
             'kubedns-controller.yaml.sed',
             'kubedns-svc.yaml.sed',
-        ]], Ref('dns|1.5|vars_map')),
+        ]], inline_var('dns_vars_map')),
     },
     'dns-horizontal-autoscaler': {
         '1.5': Addon(['https://github.com/kubernetes/kubernetes/raw/release-1.5/cluster/addons/dns-horizontal-autoscaler/dns-horizontal-autoscaler.yaml']),
@@ -82,7 +74,10 @@ addons = {
             'dashboard-controller.yaml',
             'dashboard-service.yaml',
         ]]),
-        '1.6': Ref('dashboard|1.5'),
+        '1.6': Addon(['https://github.com/kubernetes/kubernetes/raw/release-1.6/cluster/addons/dashboard/' + name for name in [
+            'dashboard-controller.yaml',
+            'dashboard-service.yaml',
+        ]]),
     },
     'heapster': {
         '1.5': Addon(['https://github.com/kubernetes/kubernetes/raw/release-1.5/cluster/addons/cluster-monitoring/standalone/' + name for name in [
@@ -107,23 +102,13 @@ class TarFile(tarfile.TarFile):
 # TODO: refactor
 def render_addon_tgz(cluster, addon, name, version):
     pillar = SaltPillarEmulator(cluster)
-    if isinstance(addon, Ref):
-        addon = addon.value
-
-    manifest_files = addon.manifest_files
-    if isinstance(manifest_files, Ref):
-        manifest_files = manifest_files.value
-
-    vars_map = addon.vars_map
-    if isinstance(vars_map, Ref):
-        vars_map = vars_map.value
 
     tgz_fp = io.BytesIO()
 
     with TarFile.open(fileobj=tgz_fp, mode='w:gz') as tgz:
         chart = 'name: {}\nversion: {}\n'.format(name, version).encode('ascii')
         tgz.adddata(os.path.join(name, 'Chart.yaml'), chart)
-        for manifest_url in manifest_files:
+        for manifest_url in addon.manifest_files:
             manifest_file_name = os.path.basename(manifest_url)
             m = re.match(r'(.*\.yaml).*', manifest_file_name)
             if m:
@@ -139,7 +124,7 @@ def render_addon_tgz(cluster, addon, name, version):
                     'pillar': pillar,
                 }).encode('ascii')
             else:
-                for var_name in vars_map.keys():
+                for var_name in addon.vars_map.keys():
                     var_name = var_name.encode('ascii')
                     manifest_content = manifest_content.replace(b'$' + var_name, b'{{ .Values.%s }}' % var_name)
 
@@ -147,7 +132,7 @@ def render_addon_tgz(cluster, addon, name, version):
 
         jinja_env = Environment(autoescape=False)
         values = ''
-        for var_name, var_path in vars_map.items():
+        for var_name, var_path in addon.vars_map.items():
             values += var_name
             values += ': '
             t = jinja_env.from_string("'{{ " + var_path + " }}'")
