@@ -146,7 +146,7 @@ class NodeView(ModelView):
     def active_ignition_config_view(self):
         node = self.get_one(request.args.get('id'))
         if not node.active_ignition_config:
-            abort(404)
+            return abort(404)
 
         data = json.loads(node.active_ignition_config)
         data = json.dumps(data, indent=2)

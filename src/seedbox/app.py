@@ -23,7 +23,7 @@ def get_node(node_ip):
     node = models.Node.query.filter_by(ip=node_ip).first()
     if node is None:
         log.error('Node %s is unknown', node_ip)
-        abort(403)
+        return abort(403)
     return node
 
 
@@ -39,7 +39,7 @@ def route(rule, request_name, secure=True, **route_kwargs):
                 if request.method in ('POST', 'PUT', 'PATCH'):
                     # request body already sent in insecure manner
                     # return error in this case to notify cluster admin
-                    abort(400)
+                    return abort(400)
                 else:
                     return redirect(request.url.replace('http://', 'https://', 1))
 
@@ -73,7 +73,7 @@ def credentials(node, cred_type):
     if cred_type == 'node-key':
         return Response(node.credentials.key, mimetype='text/plain')
 
-    abort(404)
+    return abort(404)
 
 
 @route('/report', 'Provision report', methods=['POST'])
@@ -81,11 +81,11 @@ def report(node):
     if not node.maintenance_mode:
         node.active_config_version = request.args.get('version')
         if node.active_config_version is None:
-            abort(400)
+            return abort(400)
 
         ignition_config = request.get_json()
         if ignition_config is None:
-            abort(400)
+            return abort(400)
 
         node.active_ignition_config = request.data
 
@@ -102,7 +102,7 @@ def k8s_manifest(cluster_name):
     # TODO: not ready for multitenancy
     cluster = models.Cluster.query.filter_by(name=cluster_name).first()
     if cluster is None:
-        abort(404)
+        return abort(404)
     return Response(config_renderer.manifests.render_yaml(cluster, 'kube-system-role-binding.yaml'),
                     mimetype='text/x-yaml')
 

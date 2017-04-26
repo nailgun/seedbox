@@ -81,4 +81,4 @@ def render_kubeconfig(users):
     try:
         return config_renderer.kubeconfig.render(users)
     except exceptions.K8sNoClusterApiserver:
-        abort(404, 'No node with k8s apiserver.')
+        return abort(404, 'No node with k8s apiserver.')
