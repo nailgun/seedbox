@@ -14,7 +14,6 @@ ExecStart=/usr/bin/rkt run \
     --keep-in-foreground \
     --user=root \
     --log-facility=- \
-    --listen-address=127.0.0.1 \
     --no-hosts \
     --server=/cluster.local/{{ cluster.k8s_dns_service_ip }} \
     {% if cluster.dnsmasq_static_records -%}
