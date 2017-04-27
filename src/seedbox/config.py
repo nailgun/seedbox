@@ -10,6 +10,7 @@ default_coreos_version = '1353.7.0'  # 'current' is also applicable
 default_k8s_hyperkube_tag = 'v1.5.6_coreos.0'
 default_k8s_pod_network = '10.2.0.0/16'
 default_k8s_service_network = '10.3.0.0/24'
+default_k8s_admission_control = 'NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota'
 default_etcd_version = 3
 default_boot_images_base_url = 'http://{}.release.core-os.net/amd64-usr/{}/'.format(default_coreos_channel,
                                                                                     default_coreos_version)

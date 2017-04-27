@@ -26,7 +26,7 @@ spec:
     {% endif -%}
     - --allow-privileged=true
     - --service-cluster-ip-range={{ cluster.k8s_service_network }}
-    - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota
+    - --admission-control={{ cluster.k8s_admission_control }}
     - --runtime-config=api/all=true
     - --service-account-key-file={{ config.k8s_service_account_public_key_path }}
     {% if cluster.apiservers_audit_log -%}
