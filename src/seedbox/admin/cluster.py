@@ -38,6 +38,7 @@ class ClusterView(ModelView):
         'k8s_hyperkube_tag': "Hyperkube image tag",
         'k8s_cni': "Use CNI",
         'k8s_apiservers_dns_name': "DNS name of any master node",
+        'k8s_is_rbac_enabled': "Enable RBAC",
         'boot_images_base_url': "Base HTTP URL of CoreOS images",
         'aci_proxy_url': "ACI proxy URL",
         'aci_proxy_ca_cert': "ACI proxy CA certificate (PEM)",
@@ -61,6 +62,7 @@ class ClusterView(ModelView):
         'k8s_apiservers_dns_name': "Must be round-robin DNS record. If this is set it will be used by "
                                    "all components to access apiserver instead of hardcoded node list. You can "
                                    "add/remove nodes at any time just by updating DNS record.",
+        'k8s_is_rbac_enabled': "Set kube-apiserver authentication mode to RBAC. Otherwise it will be AlwaysAllow.",
         'aci_proxy_url': "Docker and rkt will use this proxy to download container images.",
         'aci_proxy_ca_cert': "Docker and rkt download images via HTTPS. If your proxy intercepts "
                              "HTTPS connections you should add proxy CA certificate here. It will be "
@@ -82,6 +84,7 @@ class ClusterView(ModelView):
             'k8s_hyperkube_tag',
             'k8s_cni',
             'k8s_apiservers_dns_name',
+            'k8s_is_rbac_enabled',
         ], 'Kubernetes'),
         rules.FieldSet([
             'boot_images_base_url',

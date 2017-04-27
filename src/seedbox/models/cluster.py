@@ -28,6 +28,7 @@ class Cluster(db.Model):
     k8s_hyperkube_tag = db.Column(db.String(80), default=config.default_k8s_hyperkube_tag, nullable=False)
     k8s_cni = db.Column(db.Boolean, nullable=False)
     k8s_apiservers_dns_name = db.Column(db.String(80), default='', nullable=False)
+    k8s_is_rbac_enabled = db.Column(db.Boolean, nullable=False, default=True)
 
     boot_images_base_url = db.Column(db.String(80), default=config.default_boot_images_base_url, nullable=False)
 

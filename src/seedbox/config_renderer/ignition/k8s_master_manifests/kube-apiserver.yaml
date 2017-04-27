@@ -41,7 +41,11 @@ spec:
     - --client-ca-file={{ config.ca_cert_path }}                  # * -> apiserver, ca
     - --kubelet-client-certificate={{ config.node_cert_path }}    # apiserver -> kubelet, auth cert
     - --kubelet-client-key={{ config.node_key_path }}             # apiserver -> kubelet, sign key
+    {% if cluster.k8s_is_rbac_enabled -%}
     - --authorization-mode=RBAC
+    {% else -%}
+    - --authorization-mode=AlwaysAllow
+    {% endif -%}
     livenessProbe:
       httpGet:
         host: 127.0.0.1
