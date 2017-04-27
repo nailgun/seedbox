@@ -85,11 +85,17 @@ class IgnitionConfig(object):
                 KubeProxyPackage,
             ]
 
-        if self.node.is_k8s_master:
-            from .k8s_master_manifests import K8sMasterManifestsPackage
-            packages += [
-                K8sMasterManifestsPackage,
-            ]
+            if self.node.is_k8s_master:
+                from .k8s_master_manifests import K8sMasterManifestsPackage
+                packages += [
+                    K8sMasterManifestsPackage,
+                ]
+
+            if self.cluster.hosts_use_k8s_dns:
+                from .host_k8s_dns import HostK8sDnsPackage
+                packages += [
+                    HostK8sDnsPackage,
+                ]
 
         return packages
 

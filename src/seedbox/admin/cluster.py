@@ -31,7 +31,6 @@ class ClusterView(ModelView):
         'allow_insecure_provision': "Allow insecure node provisioning",
         'apiservers_audit_log': "Enable audit log on apiservers",
         'apiservers_swagger_ui': "Enable Swagger-UI on apiservers",
-        'dnsmasq_static_records': "Add static records to dnsmasq",
         'explicitly_advertise_addresses': "Explicitly advertise addresses",
         'k8s_pod_network': "Pod network CIDR",
         'k8s_service_network': "Service network CIDR",
@@ -40,6 +39,7 @@ class ClusterView(ModelView):
         'k8s_apiservers_dns_name': "DNS name of any master node",
         'k8s_is_rbac_enabled': "Enable RBAC",
         'k8s_admission_control': "Admission control",
+        'hosts_use_k8s_dns': "Use k8s dns on hosts",
         'boot_images_base_url': "Base HTTP URL of CoreOS images",
         'aci_proxy_url': "ACI proxy URL",
         'aci_proxy_ca_cert': "ACI proxy CA certificate (PEM)",
@@ -52,12 +52,10 @@ class ClusterView(ModelView):
         'etcd_nodes_dns_name': "Must be round-robin DNS record. If this is set it will be used by "
                                "all components to access etcd instead of hardcoded node list. You can "
                                "add/remove nodes at any time just by updating DNS record.",
-        'install_dnsmasq': "If this is set, dnsmasq will be run on each node for resolving cluster.local zone "
-                           "using k8s DNS and for DNS caching.",
+        'install_dnsmasq': "If this is set, dnsmasq will be run on each node to resolve cluster nodes and "
+                           "components.",
         'allow_insecure_provision': "Allow nodes to download CoreOS Ignition config and credentials via "
                                     "non-encrypted connection.",
-        'dnsmasq_static_records': "Hosts' dnsmasq will serve cluster nodes' FQDNs and cluster components "
-                                  "like etcd and apiserver.",
         'explicitly_advertise_addresses': "If this is set, cluster components will explicitly advertise "
                                           "node IP as it set in seedbox.",
         'k8s_apiservers_dns_name': "Must be round-robin DNS record. If this is set it will be used by "
@@ -65,6 +63,8 @@ class ClusterView(ModelView):
                                    "add/remove nodes at any time just by updating DNS record.",
         'k8s_is_rbac_enabled': "Set kube-apiserver authentication mode to RBAC. Otherwise it will be AlwaysAllow.",
         'k8s_admission_control': "Ordered list of plug-ins to do admission control of resources into cluster.",
+        'hosts_use_k8s_dns': "If set, host OS will be able to resolve cluster.local zone. (Kubernetes DNS "
+                             " will be added to /etc/resolv.conf on all nodes.)",
         'aci_proxy_url': "Docker and rkt will use this proxy to download container images.",
         'aci_proxy_ca_cert': "Docker and rkt download images via HTTPS. If your proxy intercepts "
                              "HTTPS connections you should add proxy CA certificate here. It will be "
@@ -72,7 +72,6 @@ class ClusterView(ModelView):
     }
     form_rules = [
         rules.Field('name'),
-        rules.Field('install_dnsmasq'),
         rules.FieldSet([
             'etcd_version',
             'suppose_etcd_cluster_exists',
@@ -88,6 +87,7 @@ class ClusterView(ModelView):
             'k8s_apiservers_dns_name',
             'k8s_is_rbac_enabled',
             'k8s_admission_control',
+            'hosts_use_k8s_dns',
         ], 'Kubernetes'),
         rules.FieldSet([
             'boot_images_base_url',
@@ -95,7 +95,7 @@ class ClusterView(ModelView):
             'aci_proxy_ca_cert',
         ], 'Images'),
         rules.FieldSet([
-            'dnsmasq_static_records',
+            'install_dnsmasq',
             'allow_insecure_provision',
             'explicitly_advertise_addresses',
         ], 'Virtual environment'),
