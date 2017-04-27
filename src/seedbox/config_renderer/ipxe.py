@@ -33,7 +33,7 @@ def get_kernel_arguments(node, url_root):
     if node.debug_boot:
         args += [
             'systemd.journald.forward_to_kmsg=1',
-            'systemd.journald.max_level_kmsg=debug',   # requires systemd-232
+            'systemd.journald.max_level_kmsg=debug',
         ]
 
     return args
