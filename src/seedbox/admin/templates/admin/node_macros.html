@@ -21,15 +21,15 @@
 {% endmacro %}
 
 {% macro render_ignition_config(model, column) %}
-    <a href="{{ url_for('node.target_ignition_config_view', id=model.id) }}">[target]</a>
-
-    {% if model.active_ignition_config %}
-        <a href="{{ url_for('node.active_ignition_config_view', id=model.id) }}">[active]</a>
-    {% endif %}
-
     {% if model.is_config_match %}
         <span class="fa fa-check-circle glyphicon glyphicon-ok-circle icon-ok-circle" title="Active config matches target config"></span>
     {% else %}
         <span class="fa fa-x-circle glyphicon glyphicon-remove-circle icon-ok-circle" title="Active config doesn't match target config"></span>
+    {% endif %}
+
+    <a href="{{ url_for('node.target_ignition_config_view', id=model.id) }}">[target]</a>
+
+    {% if model.active_ignition_config %}
+        <a href="{{ url_for('node.active_ignition_config_view', id=model.id) }}">[active]</a>
     {% endif %}
 {% endmacro %}
