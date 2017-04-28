@@ -11,7 +11,7 @@ class Cluster(db.Model):
     install_dnsmasq = db.Column(db.Boolean, nullable=False, default=True)
 
     etcd_image_tag = db.Column(db.String(80), default=config.default_etcd_image_tag, nullable=False)
-    suppose_etcd_cluster_exists = db.Column(db.Boolean, nullable=False)
+    suppose_etcd_cluster_exists = db.Column(db.Boolean, nullable=False)  # TODO: rename to assert_...
     etcd_nodes_dns_name = db.Column(db.String(80), default='', nullable=False)
 
     allow_insecure_provision = db.Column(db.Boolean, nullable=False)
@@ -103,3 +103,14 @@ class Cluster(db.Model):
         else:
             hosts = [n.fqdn for n in self.etcd_nodes]
         return ['https://{}:{}'.format(host, config.etcd_client_port) for host in hosts]
+
+    @property
+    def is_configured(self):
+        from .node import Node
+        return not self.nodes.filter(Node.target_config_version != Node.active_config_version).count()
+
+    @property
+    def are_etcd_nodes_configured(self):
+        from .node import Node
+        return not self.nodes.filter(Node.is_etcd_server,
+                                     Node.target_config_version != Node.active_config_version).count()

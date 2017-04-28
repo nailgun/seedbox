@@ -9,7 +9,7 @@ from .base import ModelView
 
 
 class ClusterView(ModelView):
-    column_list = ['name', 'ca_credentials', 'info']
+    column_list = ['name', 'ca_credentials', 'is_configured', 'suppose_etcd_cluster_exists', 'info']
     list_template = 'admin/cluster_list.html'
     details_template = 'admin/cluster_details.html'
     form_excluded_columns = [

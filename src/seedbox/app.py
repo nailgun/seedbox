@@ -93,8 +93,12 @@ def report(node):
     node.wipe_root_disk_next_boot = False
 
     models.db.session.add(node)
-    models.db.session.commit()
 
+    if node.cluster.are_etcd_nodes_configured:
+        node.cluster.suppose_etcd_cluster_exists = True
+        models.db.session.add(node.cluster)
+
+    models.db.session.commit()
     return Response('ok', mimetype='application/json')
 
 
