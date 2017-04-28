@@ -6,7 +6,7 @@ from flask_admin.form import rules
 from flask_admin.helpers import get_redirect_target
 from flask_admin.model.template import macro
 
-from seedbox import config, pki, models, config_renderer
+from seedbox import pki, models, config_renderer
 from .base import ModelView
 
 
@@ -68,8 +68,7 @@ class NodeView(ModelView):
         'is_k8s_master': "Run kubelet on this node and add persistent kube-apiserver, kube-controller-manager, "
                          "kube-scheduler pods to it.",
     }
-    # TODO: with `inline_models` `on_model_change` doesn't get called pre save
-    inline_models_disabled = [
+    inline_models = [
         (models.Mountpoint, {
             'column_descriptions': {
                 'what': 'Device to mount.',
@@ -108,6 +107,12 @@ class NodeView(ModelView):
         ], 'Components'),
     ]
 
+    # without this, Node is saved to database before on_model_change() gets called
+    # and this happens only when there is inline_models
+    def create_model(self, *args, **kwargs):
+        with self.session.no_autoflush:
+            return super().create_model(*args, **kwargs)
+
     def _issue_creds(self, model):
         with self.session.no_autoflush:
             ca_creds = model.cluster.ca_credentials
@@ -131,6 +136,10 @@ class NodeView(ModelView):
             model.active_ignition_config = ''
         else:
             model.target_config_version += 1
+
+    def on_model_delete(self, model):
+        model.mountpoints.delete()
+        model.addresses.delete()
 
     @expose('/reissue-credentials', methods=['POST'])
     def reissue_creds_view(self):
