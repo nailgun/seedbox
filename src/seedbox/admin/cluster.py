@@ -118,6 +118,10 @@ class ClusterView(ModelView):
         else:
             model.nodes.update({models.Node.target_config_version: models.Node.target_config_version + 1})
 
+    def after_model_delete(self, model):
+        models.CredentialsData.query.filter_by(id=model.ca_credentials_id).delete()
+        models.CredentialsData.query.filter_by(id=model.service_account_keypair_id).delete()
+
     @expose('/reissue-ca-credentials', methods=['POST'])
     def reissue_ca_creds_view(self):
         model = self.get_one(request.args.get('id'))

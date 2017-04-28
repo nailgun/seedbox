@@ -141,6 +141,9 @@ class NodeView(ModelView):
         model.mountpoints.delete()
         model.addresses.delete()
 
+    def after_model_delete(self, model):
+        models.CredentialsData.query.filter_by(id=model.credentials_id).delete()
+
     @expose('/reissue-credentials', methods=['POST'])
     def reissue_creds_view(self):
         model = self.get_one(request.args.get('id'))
