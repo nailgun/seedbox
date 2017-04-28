@@ -3,7 +3,7 @@ Description=Kubelet via Hyperkube ACI
 Wants=flanneld.service
 
 [Service]
-Environment="KUBELET_ACI=quay.io/coreos/hyperkube"
+Environment="KUBELET_ACI={{ config.k8s_hyperkube_image }}"
 Environment="KUBELET_IMAGE_TAG={{ cluster.k8s_hyperkube_tag }}"
 Environment="RKT_RUN_ARGS=--uuid-file-save=/var/run/kubelet-pod.uuid \
   --volume resolv,kind=host,source=/etc/resolv.conf \
