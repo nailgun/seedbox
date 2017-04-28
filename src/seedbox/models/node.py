@@ -9,6 +9,7 @@ class Node(db.Model):
 
     maintenance_mode = db.Column(db.Boolean, nullable=False)
     debug_boot = db.Column(db.Boolean, nullable=False)
+    additional_kernel_cmdline = db.Column(db.String(255), default='', nullable=False)
 
     cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.id'), nullable=False)
     cluster = db.relationship('Cluster', backref=db.backref('nodes', lazy='dynamic'))

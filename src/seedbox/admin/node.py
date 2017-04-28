@@ -99,6 +99,7 @@ class NodeView(ModelView):
             'disable_ipv6',
             'mountpoints',
             'addresses',
+            'additional_kernel_cmdline',
         ], 'Boot'),
         rules.FieldSet([
             'is_etcd_server',

@@ -36,4 +36,7 @@ def get_kernel_arguments(node, url_root):
             'systemd.journald.max_level_kmsg=debug',
         ]
 
+    if node.additional_kernel_cmdline:
+        args += node.additional_kernel_cmdline.split()
+
     return args
