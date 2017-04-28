@@ -25,18 +25,13 @@ class SystemPackage(BaseIgnitionPackage):
             },
         ]
 
-        if self.cluster.etcd_version == 3:
-            etcdctl_template = 'cluster-etcdctl3'
-        else:
-            etcdctl_template = 'cluster-etcdctl'
-
         files += [
             {
                 'filesystem': 'root',
                 'path': '/opt/bin/cluster-etcdctl',
                 'mode': 0o755,
                 'contents': {
-                    'source': self.to_data_url(self.render_template(etcdctl_template)),
+                    'source': self.to_data_url(self.render_template('cluster-etcdctl')),
                 },
             },
         ]

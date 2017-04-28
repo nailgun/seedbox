@@ -24,7 +24,7 @@ class ClusterView(ModelView):
     }
     column_labels = {
         'ca_credentials': "CA credentials",
-        'etcd_version': "etcd version",
+        'etcd_image_tag': "etcd image tag",
         'suppose_etcd_cluster_exists': "Suppose etcd cluster already exists",
         'etcd_nodes_dns_name': "DNS name of any etcd node",
         'install_dnsmasq': "Install dnsmasq on cluster nodes",
@@ -46,7 +46,6 @@ class ClusterView(ModelView):
     }
     column_descriptions = {
         'name': "Human readable cluster name. Don't use spaces.",
-        'etcd_version': "2 or 3.",
         'suppose_etcd_cluster_exists': "This will set `initial-cluster-state` to `existing` for newly provisioned "
                                        "etcd members. Use it to add etcd members to existing cluster.",
         'etcd_nodes_dns_name': "Must be round-robin DNS record. If this is set it will be used by "
@@ -74,7 +73,7 @@ class ClusterView(ModelView):
         rules.Field('name'),
         rules.Field('install_dnsmasq'),
         rules.FieldSet([
-            'etcd_version',
+            'etcd_image_tag',
             'suppose_etcd_cluster_exists',
             'etcd_nodes_dns_name',
         ], 'etcd'),

@@ -97,16 +97,6 @@ def report(node):
     return Response('ok', mimetype='application/json')
 
 
-@app.route('/manifests/<cluster_name>/kube-system-role-binding.yaml')
-def k8s_manifest(cluster_name):
-    # TODO: not ready for multitenancy
-    cluster = models.Cluster.query.filter_by(name=cluster_name).first()
-    if cluster is None:
-        return abort(404)
-    return Response(config_renderer.manifests.render_yaml(cluster, 'kube-system-role-binding.yaml'),
-                    mimetype='text/x-yaml')
-
-
 @app.route('/addons/<cluster_name>/<addon_name>-<addon_version>.tar.gz')
 def k8s_addons_helm_chart(cluster_name, addon_name, addon_version):
     # TODO: not ready for multitenancy

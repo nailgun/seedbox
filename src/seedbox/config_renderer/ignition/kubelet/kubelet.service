@@ -43,7 +43,9 @@ ExecStart=/usr/lib/coreos/kubelet-wrapper \
   --allow-privileged=true \
   --hostname-override={{ node.fqdn }} \
   {% if node.is_k8s_master -%}
-  --node-labels=master=true \
+  --node-labels=node-role.kubernetes.io/master \
+  {% else -%}
+  --node-labels=node-role.kubernetes.io/node \
   {% endif -%}
   --cluster-dns={{ cluster.k8s_dns_service_ip }} \
   --cluster-domain={{ config.k8s_cluster_domain }} \

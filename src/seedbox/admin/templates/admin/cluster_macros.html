@@ -76,10 +76,6 @@
                     <code>$ export KUBECONFIG=/path/to/kubeconfig</code>
                 </li>
                 <li>
-                    Install required role binding:<br>
-                    <code>$ kubectl create -f {{ request.url_root }}manifests/{{ model.name }}/kube-system-role-binding.yaml</code>
-                </li>
-                <li>
                     Init helm:<br>
                     <code>$ helm init</code>
                 </li>

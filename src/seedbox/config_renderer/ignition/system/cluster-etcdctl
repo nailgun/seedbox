@@ -1,8 +1,23 @@
 #!/bin/sh
+set -e
 
-exec etcdctl \
-  --ca-file '{{ config.ca_cert_path }}' \
-  --cert-file '{{ config.node_cert_path }}' \
-  --key-file '{{ config.node_key_path }}' \
-  --endpoints {{ cluster.etcd_client_endpoints|join(',') }} \
-  "$@"
+# etcd-wrapper options
+export ETCD_IMAGE_TAG={{ cluster.etcd_image_tag }}
+export ETCD_USER=etcd
+export ETCD_DATA_DIR=/tmp/etdctl
+export ETCD_SSL_DIR={{ config.cluster_credentials_path }}
+export ETCD_IMAGE_ARGS='--exec /usr/bin/env'
+
+# used for ETCDCTL_API=2
+export ETCDCTL_CA_FILE=/etc/ssl/certs/{{ config.ca_cert_filename }}
+export ETCDCTL_CERT_FILE=/etc/ssl/certs/{{ config.node_cert_filename }}
+export ETCDCTL_KEY_FILE=/etc/ssl/certs/{{ config.node_key_filename }}
+
+# used for ETCDCTL_API=3
+export ETCDCTL_CACERT=$ETCDCTL_CA_FILE
+export ETCDCTL_CERT=$ETCDCTL_CERT_FILE
+export ETCDCTL_KEY=$ETCDCTL_KEY_FILE
+
+export ETCDCTL_ENDPOINTS={{ cluster.etcd_client_endpoints|join(',') }}
+
+exec /usr/lib/coreos/etcd-wrapper etcdctl "$@"
