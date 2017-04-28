@@ -13,6 +13,7 @@ log = logging.getLogger(__name__)
 app = Flask(__name__, template_folder='admin/templates')
 app.secret_key = config.secret_key
 app.config['SQLALCHEMY_DATABASE_URI'] = config.database_uri
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 models.db.app = app
 models.db.init_app(app)
 migrate = Migrate(app, models.db)
