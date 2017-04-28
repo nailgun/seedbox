@@ -18,6 +18,7 @@ default_boot_images_base_url = 'http://{}.release.core-os.net/amd64-usr/{}/'.for
 
 default_root_disk = '/dev/sda'
 default_linux_consoles = 'tty0,ttyS0'
+default_wipe_root_disk_next_boot = True
 
 etcd_client_port = 2379
 etcd_peer_port = 2380

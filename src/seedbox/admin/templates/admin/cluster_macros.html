@@ -16,6 +16,12 @@
 {% endmacro %}
 
 {% macro render_info(model, column) %}
+    <form class="icon" method="POST" action="{{ url_for('cluster.reset_state', id=model.id) }}">
+        <button onclick="return confirm('Are you sure you want to reset cluster state?');" class="btn btn-link">
+            [reset state]
+        </button>
+    </form>
+
     <div class="panel-group" id="accordion-{{ model.id }}" role="tablist" aria-multiselectable="true">
       <div class="panel panel-default">
         <div class="panel-heading" role="tab">

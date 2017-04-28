@@ -4,7 +4,7 @@ from flask_admin.form import rules
 from flask_admin.helpers import get_redirect_target
 from flask_admin.model.template import macro
 
-from seedbox import pki, models, config_renderer
+from seedbox import pki, models, config_renderer, config
 from .base import ModelView
 
 
@@ -136,3 +136,19 @@ class ClusterView(ModelView):
     @property
     def k8s_addons_dict(self):
         return config_renderer.charts.addons
+
+    @expose('/reset-state', methods=['POST'])
+    def reset_state(self):
+        model = self.get_one(request.args.get('id'))
+        model.nodes.update({
+            models.Node.target_config_version: 1,
+            models.Node.active_config_version: 0,
+            models.Node.active_ignition_config: '',
+            models.Node.wipe_root_disk_next_boot: config.default_wipe_root_disk_next_boot,
+        })
+        model.suppose_etcd_cluster_exists = False
+        self.session.add(model)
+        self.session.commit()
+        return_url = get_redirect_target() or self.get_url('.index_view')
+        flash('The cluster state has been successfully reset', 'success')
+        return redirect(return_url)

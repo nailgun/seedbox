@@ -18,12 +18,12 @@ class Node(db.Model):
     credentials = db.relationship('CredentialsData')
 
     target_config_version = db.Column(db.Integer, default=1, nullable=False)
-    active_config_version = db.Column(db.Integer, nullable=True)
+    active_config_version = db.Column(db.Integer, default=0, nullable=False)
     active_ignition_config = db.Column(db.Text, nullable=False)
 
     coreos_autologin = db.Column(db.Boolean, nullable=False)
     root_disk = db.Column(db.String(80), default=config.default_root_disk, nullable=False)
-    wipe_root_disk_next_boot = db.Column(db.Boolean, nullable=False)
+    wipe_root_disk_next_boot = db.Column(db.Boolean, nullable=False, default=config.default_wipe_root_disk_next_boot)
     root_disk_size_sectors = db.Column(db.Integer, nullable=True)  # TODO: rename to root_partition_size_sectors
     linux_consoles = db.Column(db.String(80), default=config.default_linux_consoles, nullable=False)
     disable_ipv6 = db.Column(db.Boolean, nullable=False)
