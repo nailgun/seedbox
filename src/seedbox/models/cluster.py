@@ -65,11 +65,6 @@ class Cluster(db.Model):
         ip = self.k8s_service_network.split('/')[0]
         return ip.rsplit('.', maxsplit=1)[0] + '.10'
 
-    # TODO: improve after https://github.com/kubernetes/kubernetes/issues/18174
-    @property
-    def k8s_apiserver_node(self):
-        return self.nodes.filter_by(is_k8s_master=True).first()
-
     @property
     def k8s_apiserver_nodes(self):
         return self.nodes.filter_by(is_k8s_master=True)
@@ -79,7 +74,7 @@ class Cluster(db.Model):
         if self.k8s_apiservers_dns_name:
             host = self.k8s_apiservers_dns_name
         else:
-            apiserver = self.k8s_apiserver_node
+            apiserver = self.k8s_apiserver_nodes.first()
             if apiserver is None:
                 raise exceptions.K8sNoClusterApiserver()
             host = apiserver.fqdn
