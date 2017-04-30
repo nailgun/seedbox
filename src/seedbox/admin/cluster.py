@@ -105,7 +105,7 @@ class ClusterView(ModelView):
         rules.FieldSet([
             'dnsmasq_static_records',
             'explicitly_advertise_addresses',
-        ], 'Virtual environment'),
+        ], 'Testing environment'),
     ]
 
     def _issue_creds(self, model):
