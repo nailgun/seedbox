@@ -1,3 +1,5 @@
+import logging
+
 from flask_script import Manager
 from flask_migrate import MigrateCommand
 
@@ -15,6 +17,7 @@ def watch_updates():
 
 
 def run():
+    logging.basicConfig(level='NOTSET')
     manager.run()
 
 

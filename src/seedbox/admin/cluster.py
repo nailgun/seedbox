@@ -1,4 +1,5 @@
 import json
+import logging
 
 from flask import request, flash, redirect
 from flask_admin import expose
@@ -8,6 +9,8 @@ from flask_admin.model.template import macro
 
 from seedbox import pki, models, config_renderer, config
 from .base import ModelView
+
+log = logging.getLogger()
 
 
 class ClusterView(ModelView):
@@ -168,4 +171,5 @@ class ClusterView(ModelView):
             with open(config.update_state_file, 'r') as fp:
                 return json.load(fp)
         except Exception:
+            log.exception('Failed to load component versions file')
             return {}
