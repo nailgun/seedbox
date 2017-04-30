@@ -28,27 +28,40 @@ def get_node(node_ip):
     return node
 
 
+@app.before_request
+def check_admin_secure():
+    if request.path.startswith(config.admin_base_url + '/'):
+        response = ensure_secure_request()
+        if response is not None:
+            return response
+
+
 def route(rule, request_name, secure=True, **route_kwargs):
     def decorator(func):
         def wrapped(*args, **kwargs):
             node_ip = request.remote_addr
             log.info('%s request from %s', request_name, node_ip)
+            if secure:
+                response = ensure_secure_request()
+                if response is not None:
+                    return response
             node = get_node(node_ip)
-
-            is_request_secure = request.environ['wsgi.url_scheme'] == 'https'
-            if secure and not is_request_secure and not node.cluster.allow_insecure_provision:
-                if request.method in ('POST', 'PUT', 'PATCH'):
-                    # request body already sent in insecure manner
-                    # return error in this case to notify cluster admin
-                    return abort(400)
-                else:
-                    return redirect(request.url.replace('http://', 'https://', 1))
-
             return func(node, *args, **kwargs)
 
         wrapped.__name__ = func.__name__
         return app.route(rule, **route_kwargs)(wrapped)
     return decorator
+
+
+def ensure_secure_request():
+    is_request_secure = request.environ['wsgi.url_scheme'] == 'https'
+    if not is_request_secure and not config.allow_insecure_transport:
+        if request.method in ('POST', 'PUT', 'PATCH'):
+            # request body already sent in insecure manner
+            # return error in this case to notify cluster admin
+            return abort(400)
+        else:
+            return redirect(request.url.replace('http://', 'https://', 1))
 
 
 @route('/ipxe', 'iPXE boot', secure=False)

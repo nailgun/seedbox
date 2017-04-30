@@ -3,10 +3,13 @@ import os
 dev_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 secret_key = os.environ.get('SECRET_KEY', '-')
+allow_insecure_transport = os.environ.get('ALLOW_INSECURE_TRANSPORT', '1').lower() in ('1', 'true', 'yes')
 database_uri = os.environ.get('DATABASE_URI', 'sqlite:///' + os.path.join(dev_root, 'test.db'))
 
 update_check_interval_sec = 24 * 60 * 60  # 24 hours
 update_state_file = os.environ.get('UPDATE_STATE_FILE', '/tmp/seedbox.json')
+
+admin_base_url = '/admin'
 
 default_coreos_channel = 'stable'
 default_coreos_version = '1353.7.0'  # 'current' is also applicable

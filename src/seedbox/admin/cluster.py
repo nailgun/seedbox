@@ -33,7 +33,6 @@ class ClusterView(ModelView):
         'suppose_etcd_cluster_exists': "Suppose etcd cluster already exists",
         'etcd_nodes_dns_name': "DNS name of any etcd node",
         'install_dnsmasq': "Install dnsmasq on cluster nodes",
-        'allow_insecure_provision': "Allow insecure node provisioning",
         'apiservers_audit_log': "Enable audit log on apiservers",
         'apiservers_swagger_ui': "Enable Swagger-UI on apiservers",
         'dnsmasq_static_records': "Add static records to dnsmasq",
@@ -60,8 +59,6 @@ class ClusterView(ModelView):
                                "add/remove nodes at any time just by updating DNS record.",
         'install_dnsmasq': "If this is set, dnsmasq will be run on each node for resolving cluster.local zone "
                            "using k8s DNS and for DNS caching.",
-        'allow_insecure_provision': "Allow nodes to download CoreOS Ignition config and credentials via "
-                                    "non-encrypted connection.",
         'dnsmasq_static_records': "Hosts' dnsmasq will serve cluster nodes' FQDNs and cluster components "
                                   "like etcd and apiserver.",
         'explicitly_advertise_addresses': "If this is set, cluster components will explicitly advertise "
@@ -107,7 +104,6 @@ class ClusterView(ModelView):
         ], 'Images'),
         rules.FieldSet([
             'dnsmasq_static_records',
-            'allow_insecure_provision',
             'explicitly_advertise_addresses',
         ], 'Virtual environment'),
     ]

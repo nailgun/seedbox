@@ -14,7 +14,6 @@ class Cluster(db.Model):
     suppose_etcd_cluster_exists = db.Column(db.Boolean, nullable=False)  # TODO: rename to assert_...
     etcd_nodes_dns_name = db.Column(db.String(80), default='', nullable=False)
 
-    allow_insecure_provision = db.Column(db.Boolean, nullable=False)
     apiservers_audit_log = db.Column(db.Boolean, nullable=False)    # TODO: add k8s_ prefix
     apiservers_swagger_ui = db.Column(db.Boolean, nullable=False)   # TODO: add k8s_ prefix
     dnsmasq_static_records = db.Column(db.Boolean, nullable=False)
