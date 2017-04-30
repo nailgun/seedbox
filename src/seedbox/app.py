@@ -108,7 +108,7 @@ def report(node):
     models.db.session.add(node)
 
     if node.cluster.are_etcd_nodes_configured:
-        node.cluster.suppose_etcd_cluster_exists = True
+        node.cluster.assert_etcd_cluster_exists = True
         models.db.session.add(node.cluster)
 
     models.db.session.commit()

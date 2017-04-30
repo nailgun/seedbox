@@ -117,7 +117,7 @@ class IgnitionConfig(object):
                     'label': 'ROOT',
                     'number': 0,
                     'start': 0,
-                    'size': self.node.root_disk_size_sectors or 0,
+                    'size': self.node.root_partition_size_sectors or 0,
                 }],
             }]
 

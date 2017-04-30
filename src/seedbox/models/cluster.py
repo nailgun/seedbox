@@ -11,11 +11,11 @@ class Cluster(db.Model):
     install_dnsmasq = db.Column(db.Boolean, nullable=False, default=True)
 
     etcd_image_tag = db.Column(db.String(80), default=config.default_etcd_image_tag, nullable=False)
-    suppose_etcd_cluster_exists = db.Column(db.Boolean, nullable=False)  # TODO: rename to assert_...
+    assert_etcd_cluster_exists = db.Column(db.Boolean, nullable=False)
     etcd_nodes_dns_name = db.Column(db.String(80), default='', nullable=False)
 
-    apiservers_audit_log = db.Column(db.Boolean, nullable=False)    # TODO: add k8s_ prefix
-    apiservers_swagger_ui = db.Column(db.Boolean, nullable=False)   # TODO: add k8s_ prefix
+    k8s_apiservers_audit_log = db.Column(db.Boolean, nullable=False)
+    k8s_apiservers_swagger_ui = db.Column(db.Boolean, nullable=False)
     dnsmasq_static_records = db.Column(db.Boolean, nullable=False)
 
     # workaround for a VirtualBox environment issue

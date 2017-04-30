@@ -40,7 +40,7 @@ class NodeView(ModelView):
         'coreos_autologin': "Enable terminal autologin",
         'root_disk': "Root disk device",
         'wipe_root_disk_next_boot': "Wipe root disk on next boot",
-        'root_disk_size_sectors': "Size of root partition (in sectors)",
+        'root_partition_size_sectors': "Size of root partition (in sectors)",
         'linux_consoles': "Linux console devices",
         'disable_ipv6': "Disable IPv6 in Linux kernel",
         'is_etcd_server': "etcd server",
@@ -59,8 +59,8 @@ class NodeView(ModelView):
                      "volatile data.",
         'wipe_root_disk_next_boot': "If this is set, node's root disk partition table will be wiped on next boot. "
                                     "This option will be automatically disabled on next provisiton report.",
-        'root_disk_size_sectors': "Used during root disk wiping. (Typically one sector is 512 bytes.) All disk space "
-                                  "will be used if this is empty.",
+        'root_partition_size_sectors': "Used during root disk wiping. (Typically one sector is 512 bytes.) All disk "
+                                       "space will be used if this is empty.",
         'linux_consoles': "Passed to kernel as `console` arguments. (Separate by comma.)",
         'disable_ipv6': "Passed to kernel as `ipv6.disable=1` argument.",
         'is_etcd_server': "Run etcd server on this node and connect other nodes to it.",
@@ -93,7 +93,7 @@ class NodeView(ModelView):
             'coreos_autologin',
             'root_disk',
             'wipe_root_disk_next_boot',
-            'root_disk_size_sectors',
+            'root_partition_size_sectors',
             'linux_consoles',
             'disable_ipv6',
             'mountpoints',

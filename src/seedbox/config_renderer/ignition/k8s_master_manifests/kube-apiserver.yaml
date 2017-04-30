@@ -26,10 +26,10 @@ spec:
     - --service-cluster-ip-range={{ cluster.k8s_service_network }}
     - --admission-control={{ cluster.k8s_admission_control }}
     - --service-account-key-file={{ config.k8s_service_account_public_key_path }}
-    {% if cluster.apiservers_audit_log -%}
+    {% if cluster.k8s_apiservers_audit_log -%}
     - --audit-log-path=/dev/stdout
     {% endif -%}
-    {% if cluster.apiservers_swagger_ui -%}
+    {% if cluster.k8s_apiservers_swagger_ui -%}
     - --enable-swagger-ui
     {% endif -%}
     - --anonymous-auth=false                                      # * -> apiserver

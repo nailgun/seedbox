@@ -14,7 +14,7 @@ log = logging.getLogger()
 
 
 class ClusterView(ModelView):
-    column_list = ['name', 'ca_credentials', 'is_configured', 'suppose_etcd_cluster_exists', 'info']
+    column_list = ['name', 'ca_credentials', 'is_configured', 'assert_etcd_cluster_exists', 'info']
     list_template = 'admin/cluster_list.html'
     details_template = 'admin/cluster_details.html'
     form_excluded_columns = [
@@ -30,11 +30,11 @@ class ClusterView(ModelView):
     column_labels = {
         'ca_credentials': "CA credentials",
         'etcd_image_tag': "etcd image tag",
-        'suppose_etcd_cluster_exists': "Suppose etcd cluster already exists",
+        'assert_etcd_cluster_exists': "Assert etcd cluster already exists",
         'etcd_nodes_dns_name': "DNS name of any etcd node",
         'install_dnsmasq': "Install dnsmasq on cluster nodes",
-        'apiservers_audit_log': "Enable audit log on apiservers",
-        'apiservers_swagger_ui': "Enable Swagger-UI on apiservers",
+        'k8s_apiservers_audit_log': "Enable audit log on apiservers",
+        'k8s_apiservers_swagger_ui': "Enable Swagger-UI on apiservers",
         'dnsmasq_static_records': "Add static records to dnsmasq",
         'explicitly_advertise_addresses': "Explicitly advertise addresses",
         'k8s_pod_network': "Pod network CIDR",
@@ -52,8 +52,8 @@ class ClusterView(ModelView):
     }
     column_descriptions = {
         'name': "Human readable cluster name. Don't use spaces.",
-        'suppose_etcd_cluster_exists': "This will set `initial-cluster-state` to `existing` for newly provisioned "
-                                       "etcd members. Use it to add etcd members to existing cluster.",
+        'assert_etcd_cluster_exists': "This will set `initial-cluster-state` to `existing` for newly provisioned "
+                                      "etcd members. Use it to add etcd members to existing cluster.",
         'etcd_nodes_dns_name': "Must be round-robin DNS record. If this is set it will be used by "
                                "all components to access etcd instead of hardcoded node list. You can "
                                "add/remove nodes at any time just by updating DNS record.",
@@ -81,12 +81,12 @@ class ClusterView(ModelView):
         rules.Field('install_dnsmasq'),
         rules.FieldSet([
             'etcd_image_tag',
-            'suppose_etcd_cluster_exists',
+            'assert_etcd_cluster_exists',
             'etcd_nodes_dns_name',
         ], 'etcd'),
         rules.FieldSet([
-            'apiservers_audit_log',
-            'apiservers_swagger_ui',
+            'k8s_apiservers_audit_log',
+            'k8s_apiservers_swagger_ui',
             'k8s_pod_network',
             'k8s_service_network',
             'k8s_hyperkube_tag',
@@ -154,7 +154,7 @@ class ClusterView(ModelView):
             models.Node.active_ignition_config: '',
             models.Node.wipe_root_disk_next_boot: config.default_wipe_root_disk_next_boot,
         })
-        model.suppose_etcd_cluster_exists = False
+        model.assert_etcd_cluster_exists = False
         self.session.add(model)
         self.session.commit()
         return_url = get_redirect_target() or self.get_url('.index_view')
