@@ -16,7 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = config.database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 models.db.app = app
 models.db.init_app(app)
-migrate = Migrate(app, models.db)
+migrate = Migrate(app, models.db, directory='seedbox/migrations')
 admin.init_app(app)
 
 
