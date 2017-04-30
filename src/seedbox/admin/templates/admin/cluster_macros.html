@@ -35,6 +35,24 @@
           <div class="panel-body">
             <ul>
                 <li>
+                    <strong>CoreOS:</strong> {{ model.coreos_channel }} {{ model.coreos_version }}
+                    {% if admin_view.latest_component_versions.coreos[model.coreos_channel] and model.coreos_version != admin_view.latest_component_versions.coreos[model.coreos_channel] %}
+                        <span class="glyphicon glyphicon-exclamation-sign text-warning" title="Current version is {{ admin_view.latest_component_versions.coreos[model.coreos_channel] }}" style="cursor: pointer"></span>
+                    {% endif %}
+                </li>
+                <li>
+                    <strong>etcd:</strong> {{ model.etcd_image_tag }}
+                    {% if admin_view.latest_component_versions.etcd and model.etcd_image_tag != admin_view.latest_component_versions.etcd %}
+                        <span class="glyphicon glyphicon-exclamation-sign text-warning" title="Current version is {{ admin_view.latest_component_versions.etcd }}" style="cursor: pointer"></span>
+                    {% endif %}
+                </li>
+                <li>
+                    <strong>hypercube:</strong> {{ model.k8s_hyperkube_tag }}
+                    {% if admin_view.latest_component_versions.hyperkube and model.k8s_hyperkube_tag != admin_view.latest_component_versions.hyperkube %}
+                        <span class="glyphicon glyphicon-exclamation-sign text-warning" title="Current version is {{ admin_view.latest_component_versions.hyperkube }}" style="cursor: pointer"></span>
+                    {% endif %}
+                </li>
+                <li>
                     <strong>etcd servers:</strong>
                     <ul>
                         {% set etcd_servers_count = model.nodes.filter_by(is_etcd_server=True).count() %}

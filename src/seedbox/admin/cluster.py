@@ -1,3 +1,5 @@
+import json
+
 from flask import request, flash, redirect
 from flask_admin import expose
 from flask_admin.form import rules
@@ -40,9 +42,11 @@ class ClusterView(ModelView):
         'k8s_apiservers_dns_name': "DNS name of any master node",
         'k8s_is_rbac_enabled': "Enable RBAC",
         'k8s_admission_control': "Admission control",
-        'boot_images_base_url': "Base HTTP URL of CoreOS images",
+        'custom_coreos_images_base_url': "Custom base HTTP URL of CoreOS images",
         'aci_proxy_url': "ACI proxy URL",
         'aci_proxy_ca_cert': "ACI proxy CA certificate (PEM)",
+        'coreos_channel': 'CoreOS channel',
+        'coreos_version': 'CoreOS version',
     }
     column_descriptions = {
         'name': "Human readable cluster name. Don't use spaces.",
@@ -68,6 +72,9 @@ class ClusterView(ModelView):
         'aci_proxy_ca_cert': "Docker and rkt download images via HTTPS. If your proxy intercepts "
                              "HTTPS connections you should add proxy CA certificate here. It will be "
                              "added to system root CA certificates on each node.",
+        'custom_coreos_images_base_url': "coreos_production_pxe.vmlinuz and coreos_production_pxe_image.cpio.gz. It "
+                                         "will be used instead of default if set.",
+        'coreos_channel': 'stable, beta or alpha',
     }
     form_rules = [
         rules.Field('name'),
@@ -89,7 +96,9 @@ class ClusterView(ModelView):
             'k8s_admission_control',
         ], 'Kubernetes'),
         rules.FieldSet([
-            'boot_images_base_url',
+            'coreos_channel',
+            'coreos_version',
+            'custom_coreos_images_base_url',
             'aci_proxy_url',
             'aci_proxy_ca_cert',
         ], 'Images'),
@@ -152,3 +161,11 @@ class ClusterView(ModelView):
         return_url = get_redirect_target() or self.get_url('.index_view')
         flash('The cluster state has been successfully reset', 'success')
         return redirect(return_url)
+
+    @property
+    def latest_component_versions(self):
+        try:
+            with open(config.update_state_file, 'r') as fp:
+                return json.load(fp)
+        except Exception:
+            return {}

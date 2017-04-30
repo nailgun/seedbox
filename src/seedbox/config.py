@@ -5,16 +5,19 @@ dev_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 secret_key = os.environ.get('SECRET_KEY', '-')
 database_uri = os.environ.get('DATABASE_URI', 'sqlite:///' + os.path.join(dev_root, 'test.db'))
 
+update_check_interval_sec = 24 * 60 * 60  # 24 hours
+update_state_file = os.environ.get('UPDATE_STATE_FILE', '/tmp/seedbox.json')
+
 default_coreos_channel = 'stable'
 default_coreos_version = '1353.7.0'  # 'current' is also applicable
+default_coreos_images_base_url = 'http://{channel}.release.core-os.net/amd64-usr/{version}/'
+etcd_image = 'quay.io/coreos/etcd'
 default_etcd_image_tag = 'v3.1.6'
 k8s_hyperkube_image = 'quay.io/coreos/hyperkube'
 default_k8s_hyperkube_tag = 'v1.6.2_coreos.0'
 default_k8s_pod_network = '10.2.0.0/16'
 default_k8s_service_network = '10.3.0.0/24'
 default_k8s_admission_control = 'NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota'
-default_boot_images_base_url = 'http://{}.release.core-os.net/amd64-usr/{}/'.format(default_coreos_channel,
-                                                                                    default_coreos_version)
 
 default_root_disk = '/dev/sda'
 default_linux_consoles = 'tty0,ttyS0'

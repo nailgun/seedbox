@@ -31,7 +31,9 @@ class Cluster(db.Model):
     k8s_is_rbac_enabled = db.Column(db.Boolean, nullable=False, default=True)
     k8s_admission_control = db.Column(db.String(80), default=config.default_k8s_admission_control, nullable=False)
 
-    boot_images_base_url = db.Column(db.String(80), default=config.default_boot_images_base_url, nullable=False)
+    coreos_channel = db.Column(db.String(80), default=config.default_coreos_channel, nullable=False)
+    coreos_version = db.Column(db.String(80), default=config.default_coreos_version, nullable=False)
+    custom_coreos_images_base_url = db.Column(db.String(80), default='', nullable=False)
 
     aci_proxy_url = db.Column(db.String(80), default='', nullable=False)
     aci_proxy_ca_cert = db.Column(db.Text, default='', nullable=False)
@@ -114,3 +116,11 @@ class Cluster(db.Model):
         from .node import Node
         return not self.nodes.filter(Node.is_etcd_server,
                                      Node.target_config_version != Node.active_config_version).count()
+
+    @property
+    def coreos_images_base_url(self):
+        if self.custom_coreos_images_base_url:
+            return self.custom_coreos_images_base_url
+        else:
+            return config.default_coreos_images_base_url.format(channel=self.coreos_channel,
+                                                                version=self.coreos_version)

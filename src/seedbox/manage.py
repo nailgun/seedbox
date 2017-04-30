@@ -3,10 +3,18 @@ from flask_migrate import MigrateCommand
 
 from seedbox.app import app
 
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
+
+
+@manager.command
+def watch_updates():
+    """Starts component updates watcher in foreground (CoreOS, k8s, etcd)"""
+    from seedbox import update_watcher
+    update_watcher.watch()
+
 
 def run():
-    manager = Manager(app)
-    manager.add_command('db', MigrateCommand)
     manager.run()
 
 

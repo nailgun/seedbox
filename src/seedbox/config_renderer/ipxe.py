@@ -8,7 +8,7 @@ boot
 
 def render(node, url_root):
     kernel_args = get_kernel_arguments(node, url_root)
-    return response_template.format(images_base_url=node.cluster.boot_images_base_url,
+    return response_template.format(images_base_url=node.cluster.coreos_images_base_url,
                                     kernel_args=' '.join(kernel_args))
 
 
