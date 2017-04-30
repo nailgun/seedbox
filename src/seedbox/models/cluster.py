@@ -86,14 +86,6 @@ class Cluster(db.Model):
         return 'https://{}:{}'.format(host, config.k8s_apiserver_secure_port)
 
     @property
-    def k8s_apiserver_endpoints(self):
-        if self.k8s_apiservers_dns_name:
-            hosts = [self.k8s_apiservers_dns_name]
-        else:
-            hosts = [n.fqdn for n in self.k8s_apiserver_nodes]
-        return ['https://{}:{}'.format(host, config.k8s_apiserver_secure_port) for host in hosts]
-
-    @property
     def etcd_nodes(self):
         return self.nodes.filter_by(is_etcd_server=True)
 
