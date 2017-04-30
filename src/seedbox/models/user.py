@@ -10,7 +10,7 @@ class User(db.Model):
     name = db.Column(db.String(80), nullable=False)  # TODO: unique together with cluster_id
     credentials_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
     credentials = db.relationship('CredentialsData')
-    groups = db.Column(db.String(255), nullable=False, default='')      # TODO: rename to k8s_groups
+    k8s_groups = db.Column(db.String(255), nullable=False, default='')
     ssh_key = db.Column(db.Text, nullable=False, default='')
 
     def __repr__(self):
@@ -24,8 +24,8 @@ class User(db.Model):
         try:
             pki.verify_certificate_chain(self.cluster.ca_credentials.cert, self.credentials.cert)
             pki.validate_certificate_common_name(self.credentials.cert, self.name)
-            if self.groups:
-                pki.validate_certificate_organizations(self.credentials.cert, self.groups.split(','))
+            if self.k8s_groups:
+                pki.validate_certificate_organizations(self.credentials.cert, self.k8s_groups.split(','))
             pki.validate_certificate_key_usage(self.credentials.cert, is_web_server=False, is_web_client=True)
         except pki.InvalidCertificate as e:
             return str(e)

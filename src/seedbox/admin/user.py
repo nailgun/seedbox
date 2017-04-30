@@ -22,16 +22,17 @@ class UserView(ModelView):
     }
     column_labels = {
         'ssh_key': 'SSH key',
+        'k8s_groups': 'Kubernetes groups',
     }
     column_descriptions = {
         'name': 'Will be used as CommonName in TLS certificate.',
-        'groups': 'Will be added as Organization(s) in TLS certificate. (Separate by comma.)',
+        'k8s_groups': 'Will be added as Organization(s) in TLS certificate. (Separate by comma.)',
         'ssh_key': 'This key will be authorized on all nodes of the cluster (as `core` user).',
     }
     form_rules = [
         rules.Field('cluster'),
         rules.Field('name'),
-        rules.Field('groups'),
+        rules.Field('k8s_groups'),
         rules.Field('ssh_key'),
     ]
 
@@ -39,8 +40,8 @@ class UserView(ModelView):
         with self.session.no_autoflush:
             ca_creds = model.cluster.ca_credentials
         creds = models.CredentialsData()
-        if model.groups:
-            orgs = model.groups.split(',')
+        if model.k8s_groups:
+            orgs = model.k8s_groups.split(',')
         else:
             orgs = []
         creds.cert, creds.key = pki.issue_certificate(model.name,
