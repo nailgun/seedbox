@@ -21,7 +21,8 @@ class ClusterView(ModelView):
         'ca_credentials',
         'nodes',
         'users',
-        'service_account_keypair',
+        'k8s_service_account_public_key',
+        'k8s_service_account_private_key',
     ]
     column_formatters = {
         'ca_credentials': macro('render_ca_credentials'),
@@ -114,11 +115,7 @@ class ClusterView(ModelView):
                                                     certify_days=10000)
         self.session.add(ca)
         model.ca_credentials = ca
-
-        service_account_keypair = models.CredentialsData()
-        service_account_keypair.cert, service_account_keypair.key = pki.generate_rsa_keypair()
-        self.session.add(service_account_keypair)
-        model.service_account_keypair = service_account_keypair
+        model.k8s_service_account_public_key, model.k8s_service_account_private_key = pki.generate_rsa_keypair()
 
     def on_model_change(self, form, model, is_created):
         if is_created:
@@ -128,7 +125,6 @@ class ClusterView(ModelView):
 
     def after_model_delete(self, model):
         models.CredentialsData.query.filter_by(id=model.ca_credentials_id).delete()
-        models.CredentialsData.query.filter_by(id=model.service_account_keypair_id).delete()
 
     @expose('/reissue-ca-credentials', methods=['POST'])
     def reissue_ca_creds_view(self):

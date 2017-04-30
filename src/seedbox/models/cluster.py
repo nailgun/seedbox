@@ -37,9 +37,8 @@ class Cluster(db.Model):
     aci_proxy_url = db.Column(db.String(80), default='', nullable=False)
     aci_proxy_ca_cert = db.Column(db.Text, default='', nullable=False)
 
-    # TODO: split into two fields: service_account_private/public_key
-    service_account_keypair_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
-    service_account_keypair = db.relationship('CredentialsData', foreign_keys=[service_account_keypair_id])
+    k8s_service_account_public_key = db.Column(db.Binary, nullable=False)
+    k8s_service_account_private_key = db.Column(db.Binary, nullable=False)
 
     def __repr__(self):
         return '<Cluster %r>' % self.name

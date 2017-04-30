@@ -10,7 +10,7 @@ class K8sMasterManifestsPackage(BaseIgnitionPackage):
                 'path': config.k8s_service_account_public_key_path,
                 'mode': 0o444,
                 'contents': {
-                    'source': self.to_data_url(self.cluster.service_account_keypair.cert),
+                    'source': self.to_data_url(self.cluster.k8s_service_account_public_key),
                 },
             },
             {
@@ -18,7 +18,7 @@ class K8sMasterManifestsPackage(BaseIgnitionPackage):
                 'path': config.k8s_service_account_private_key_path,
                 'mode': 0o444,
                 'contents': {
-                    'source': self.to_data_url(self.cluster.service_account_keypair.key),
+                    'source': self.to_data_url(self.cluster.k8s_service_account_private_key),
                 },
             },
             {
