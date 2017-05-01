@@ -2,7 +2,6 @@ from seedbox import pki
 from .db import db
 
 
-# TODO: allow user to belong to more then one cluster (https://kubernetes.io/docs/user-guide/kubeconfig-file/)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.id'), nullable=False)

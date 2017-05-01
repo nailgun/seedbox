@@ -1,7 +1,6 @@
 from .db import db
 
 
-# TODO: rename to Certificate, add column `issuer` and move generic validation and generation code here
 class CredentialsData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cert = db.Column(db.Binary, nullable=False)

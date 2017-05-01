@@ -117,7 +117,6 @@ def report(node):
 
 @app.route('/addons/<cluster_name>/<addon_name>-<addon_version>.tar.gz')
 def k8s_addons_helm_chart(cluster_name, addon_name, addon_version):
-    # TODO: not ready for multitenancy
     cluster = models.Cluster.query.filter_by(name=cluster_name).first()
     if cluster is None:
         return abort(404)
