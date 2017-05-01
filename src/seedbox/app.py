@@ -1,3 +1,4 @@
+import os
 import logging
 
 from flask import Flask, Response, request, abort, redirect
@@ -16,7 +17,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = config.database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 models.db.app = app
 models.db.init_app(app)
-migrate = Migrate(app, models.db, directory='seedbox/migrations')
+migrate = Migrate(app, models.db, directory=os.path.join(config.app_root, 'seedbox', 'migrations'))
 admin.init_app(app)
 
 

@@ -1,6 +1,7 @@
 import os
 
-dev_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+app_root = os.path.dirname(os.path.dirname(__file__))
+dev_root = os.path.dirname(os.path.dirname(app_root))
 
 secret_key = os.environ.get('SECRET_KEY', '-')
 allow_insecure_transport = os.environ.get('ALLOW_INSECURE_TRANSPORT', '1').lower() in ('1', 'true', 'yes')
