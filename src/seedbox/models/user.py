@@ -1,3 +1,5 @@
+from sqlalchemy.schema import UniqueConstraint
+
 from seedbox import pki
 from .db import db
 
@@ -6,11 +8,15 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.id'), nullable=False)
     cluster = db.relationship('Cluster', backref=db.backref('users', lazy='dynamic'))
-    name = db.Column(db.String(80), nullable=False)  # TODO: unique together with cluster_id
+    name = db.Column(db.String(80), nullable=False)
     credentials_id = db.Column(db.Integer, db.ForeignKey('credentials_data.id'), nullable=False)
     credentials = db.relationship('CredentialsData')
     k8s_groups = db.Column(db.String(255), nullable=False, default='')
     ssh_key = db.Column(db.Text, nullable=False, default='')
+
+    __table_args__ = (
+        UniqueConstraint('cluster_id', 'name', name='_cluster_name_uc'),
+    )
 
     def __repr__(self):
         return '<User %r>' % self.name
