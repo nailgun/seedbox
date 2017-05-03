@@ -1,12 +1,11 @@
 import io
 import os
 import re
-import tarfile
 
 import requests
 from jinja2 import Environment
 
-from seedbox import config
+from seedbox import config, utils
 
 NOT_SPECIFIED = object()
 jinja_var_env = Environment(autoescape=False)
@@ -163,16 +162,9 @@ addons = {
 }
 
 
-class TarFile(tarfile.TarFile):
-    def adddata(self, path, data):
-        info = tarfile.TarInfo(path)
-        info.size = len(data)
-        self.addfile(info, io.BytesIO(data))
-
-
 def render_addon_tgz(cluster, addon):
     tgz_fp = io.BytesIO()
-    with TarFile.open(fileobj=tgz_fp, mode='w:gz') as tgz:
+    with utils.TarFile.open(fileobj=tgz_fp, mode='w:gz') as tgz:
         for path, content in addon.render_files(cluster):
             tgz.adddata(os.path.join(addon.name, path), content)
     return tgz_fp.getvalue()

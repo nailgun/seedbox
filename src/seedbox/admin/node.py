@@ -1,6 +1,4 @@
-import json
-
-from flask import request, abort, Response, flash, redirect
+from flask import request, Response, flash, redirect
 from flask_admin import expose
 from flask_admin.form import rules
 from flask_admin.helpers import get_redirect_target
@@ -18,7 +16,7 @@ class NodeView(ModelView):
         'maintenance_mode',
         'wipe_root_disk_next_boot',
         'credentials',
-        'ignition_config',
+        'config',
     ]
     list_template = 'admin/node_list.html'
     details_template = 'admin/node_details.html'
@@ -26,11 +24,11 @@ class NodeView(ModelView):
         'credentials',
         'target_config_version',
         'active_config_version',
-        'active_ignition_config',
+        'provisions',
     ]
     column_formatters = {
         'credentials': macro('render_credentials'),
-        'ignition_config': macro('render_ignition_config'),
+        'config': macro('render_config'),
     }
     column_labels = {
         'ip': "Public IP",
@@ -133,7 +131,6 @@ class NodeView(ModelView):
     def on_model_change(self, form, model, is_created):
         if is_created:
             self._issue_creds(model)
-            model.active_ignition_config = ''
         else:
             model.target_config_version += 1
 
@@ -155,18 +152,14 @@ class NodeView(ModelView):
         flash('The credentials successfully reissued', 'success')
         return redirect(return_url)
 
-    @expose('/active-ignition.json')
-    def active_ignition_config_view(self):
-        node = self.get_one(request.args.get('id'))
-        if not node.active_ignition_config:
-            return abort(404)
-
-        data = json.loads(node.active_ignition_config)
-        data = json.dumps(data, indent=2)
-        return Response(data, mimetype='application/json')
-
     @expose('/target-ignition.json')
     def target_ignition_config_view(self):
         node = self.get_one(request.args.get('id'))
         response = config_renderer.ignition.render(node, indent=True)
         return Response(response, mimetype='application/json')
+
+    @expose('/target.ipxe')
+    def target_ipxe_config_view(self):
+        node = self.get_one(request.args.get('id'))
+        response = config_renderer.ipxe.render(node, request.url_root)
+        return Response(response, mimetype='text/plain')

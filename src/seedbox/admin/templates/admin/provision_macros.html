@@ -1,0 +1,10 @@
+{% macro render_data(model, column) %}
+    {% if model.ignition_config %}
+        <a href="{{ url_for('provision.raw_ignition_view', id=model.id) }}">[raw ignition]</a>
+        <a href="{{ url_for('provision.ignition_filesystem_view', id=model.id) }}">[ignition fs]</a>
+    {% endif %}
+
+    {% if model.ipxe_config %}
+        <a href="{{ url_for('provision.raw_ipxe_view', id=model.id) }}">[raw ipxe]</a>
+    {% endif %}
+{% endmacro %}

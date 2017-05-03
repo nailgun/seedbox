@@ -94,15 +94,21 @@ def credentials(node, cred_type):
 @route('/report', 'Provision report', methods=['POST'])
 def report(node):
     if not node.maintenance_mode:
-        node.active_config_version = request.args.get('version')
-        if node.active_config_version is None:
+        try:
+            node.active_config_version = int(request.args.get('version'))
+        except (ValueError, TypeError):
             return abort(400)
 
-        ignition_config = request.get_json()
-        if ignition_config is None:
+        if request.content_type != 'application/json':
             return abort(400)
 
-        node.active_ignition_config = request.data
+        provision = models.Provision()
+        provision.node = node
+        provision.config_version = node.active_config_version
+        provision.ignition_config = request.data
+        if node.target_config_version == node.active_config_version:
+            provision.ipxe_config = config_renderer.ipxe.render(node, request.url_root)
+        models.db.session.add(provision)
 
     node.wipe_root_disk_next_boot = False
 

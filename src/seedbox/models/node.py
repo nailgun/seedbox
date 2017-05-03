@@ -19,7 +19,6 @@ class Node(db.Model):
 
     target_config_version = db.Column(db.Integer, default=1, nullable=False)
     active_config_version = db.Column(db.Integer, default=0, nullable=False)
-    active_ignition_config = db.Column(db.Text, nullable=False)
 
     coreos_autologin = db.Column(db.Boolean, nullable=False)
     root_disk = db.Column(db.String(80), default=config.default_root_disk, nullable=False)
@@ -96,3 +95,11 @@ class Node(db.Model):
     @property
     def root_partition(self):
         return self.root_disk + '1'
+
+    @property
+    def active_config(self):
+        from . import Provision
+        if not self.active_config_version:
+            return None
+        else:
+            return self.provisions.order_by(Provision.applied_at.desc()).first()

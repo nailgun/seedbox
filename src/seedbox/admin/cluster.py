@@ -147,7 +147,6 @@ class ClusterView(ModelView):
         model.nodes.update({
             models.Node.target_config_version: 1,
             models.Node.active_config_version: 0,
-            models.Node.active_ignition_config: '',
             models.Node.wipe_root_disk_next_boot: config.default_wipe_root_disk_next_boot,
         })
         model.assert_etcd_cluster_exists = False
