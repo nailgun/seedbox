@@ -110,6 +110,9 @@
                     <code>$ helm init</code>
                 </li>
                 <li>
+                    If you have RBAC enabled, install helm tiller <a href="https://gist.github.com/nailgun/85833ffbd3adbfa8899208bb91a4fe79">workaround</a>.
+                </li>
+                <li>
                     Install any addons:<br>
                     <code>$ helm install -n RELEASE_NAME CHART_URL</code>.<br>
                     Where RELEASE_NAME is any name you like, and CHART_URL is one of the following:
