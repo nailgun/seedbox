@@ -1,6 +1,7 @@
 import io
 import os
 import re
+from urllib.parse import urljoin
 
 import requests
 from jinja2 import Environment
@@ -13,26 +14,25 @@ jinja_env = Environment(keep_trailing_newline=True, autoescape=False)
 
 
 class Addon:
-    base_url = 'https://github.com/kubernetes/kubernetes/raw/release-{version}/cluster/addons/{path}/'
+    base_url = 'https://github.com/kubernetes/kubernetes/raw/release-{version}/cluster/addons/'
     encoding = 'utf-8'
 
-    def __init__(self, name, version, manifest_files, vars_map=None, is_salt_template=False, path=None, base_url=None,
-                 notes=None):
+    def __init__(self, name, version, manifest_files, vars_map=None, is_salt_template=False, base_url=None, notes=None):
         if vars_map is None:
             vars_map = {}
 
-        if path is None:
-            path = name
-
         if base_url is None:
             base_url = self.base_url
+        else:
+            base_url = urljoin(self.base_url, base_url)
+        base_url = base_url.format(version=version)
 
         self.name = name
         self.version = version
 
         self.manifest_files = []
         for fname in manifest_files:
-            fname = base_url.format(path=path, version=self.version) + fname
+            fname = urljoin(base_url, fname)
             self.manifest_files.append(fname)
 
         self.vars_map = vars_map
@@ -134,20 +134,19 @@ addons = {
             'dashboard-controller.yaml',
             'dashboard-service.yaml',
         ], notes=dashboard_notes),
-        '1.6': Addon('dashboard', '1.6', [
-            'dashboard-controller.yaml',
-            'dashboard-service.yaml',
-        ], notes=dashboard_notes),
+        '1.6': Addon('dashboard', '1.6', ['kubernetes-dashboard.yaml'],
+                     notes=dashboard_notes,
+                     base_url='https://github.com/kubernetes/dashboard/raw/master/src/deploy/'),
     },
     'heapster': {
         '1.5': Addon('heapster', '1.5', [
             'heapster-controller.yaml',
             'heapster-service.yaml',
-        ], is_salt_template=True, path='cluster-monitoring/standalone'),
+        ], is_salt_template=True, base_url='cluster-monitoring/standalone'),
         '1.6': Addon('heapster', '1.6', [
             'heapster-controller.yaml',
             'heapster-service.yaml',
-        ], is_salt_template=True, path='cluster-monitoring/standalone'),
+        ], is_salt_template=True, base_url='cluster-monitoring/standalone'),
     },
     'fluentd-elasticsearch': {
         '1.6': Addon('fluentd-elasticsearch', '1.6', [
