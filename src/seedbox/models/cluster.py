@@ -109,3 +109,7 @@ class Cluster(db.Model):
         else:
             return config.default_coreos_images_base_url.format(channel=self.coreos_channel,
                                                                 version=self.coreos_version)
+
+    @property
+    def k8s_kube_proxy_user(self):
+        return self.users.filter_by(name=config.k8s_kube_proxy_user_name).first()

@@ -22,6 +22,12 @@
         </button>
     </form>
 
+    <div>
+        {% if not model.k8s_kube_proxy_user %}
+            <span class="label label-warning">no system:kube-proxy user</span>
+        {% endif %}
+    </div>
+
     <div class="panel-group" id="accordion-{{ model.id }}" role="tablist" aria-multiselectable="true">
       <div class="panel panel-default">
         <div class="panel-heading" role="tab">
