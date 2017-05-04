@@ -5,7 +5,7 @@ import yaml
 import yaml.resolver
 
 
-def render(users):
+def render(users, default_user=None):
     clusters_map = {}
     users_map = {}
 
@@ -44,6 +44,9 @@ def render(users):
         ('users', users),
         ('contexts', contexts),
     ])
+
+    if default_user:
+        config['current-context'] = default_user.name
 
     return yaml.dump(config, default_flow_style=False, Dumper=Dumper)
 

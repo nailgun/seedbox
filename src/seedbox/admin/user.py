@@ -83,6 +83,10 @@ class UserView(ModelView):
 
 def render_kubeconfig(users):
     try:
-        return config_renderer.kubeconfig.render(users)
+        default_user = None
+        if len(users) == 1:
+            default_user = users[0]
+
+        return config_renderer.kubeconfig.render(users, default_user=default_user)
     except exceptions.K8sNoClusterApiserver:
         return abort(404, 'No node with k8s apiserver.')
