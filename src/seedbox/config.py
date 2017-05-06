@@ -5,6 +5,8 @@ dev_root = os.path.dirname(os.path.dirname(app_root))
 
 secret_key = os.environ.get('SECRET_KEY', '-')
 allow_insecure_transport = os.environ.get('ALLOW_INSECURE_TRANSPORT', '1').lower() in ('1', 'true', 'yes')
+admin_username = os.environ.get('ADMIN_USERNAME', 'admin')
+admin_password = os.environ.get('ADMIN_PASSWORD', 'admin')
 database_uri = os.environ.get('DATABASE_URI', 'sqlite:///' + os.path.join(dev_root, 'test.db'))
 
 update_check_interval_sec = 24 * 60 * 60  # 24 hours

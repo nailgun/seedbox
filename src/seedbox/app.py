@@ -32,7 +32,7 @@ def get_node(node_ip):
 @app.before_request
 def check_admin_secure():
     if request.path.startswith(config.admin_base_url + '/'):
-        response = ensure_secure_request()
+        response = ensure_secure_request() or ensure_admin_authenticated()
         if response is not None:
             return response
 
@@ -63,6 +63,14 @@ def ensure_secure_request():
             return abort(400)
         else:
             return redirect(request.url.replace('http://', 'https://', 1))
+
+
+def ensure_admin_authenticated():
+    auth = request.authorization
+    if not auth or auth.username != config.admin_username or auth.password != config.admin_password:
+        return Response('401 Unauthorized', 401, {
+            'WWW-Authenticate': 'Basic realm="Login Required"'
+        })
 
 
 @route('/ipxe', 'iPXE boot', secure=False)
