@@ -28,7 +28,7 @@ class Cluster(db.Model):
     k8s_cni = db.Column(db.Boolean, nullable=False)
     k8s_apiservers_dns_name = db.Column(db.String(80), default='', nullable=False)
     k8s_is_rbac_enabled = db.Column(db.Boolean, nullable=False, default=True)
-    k8s_admission_control = db.Column(db.String(80), default=config.default_k8s_admission_control, nullable=False)
+    k8s_admission_control = db.Column(db.String(255), default=config.default_k8s_admission_control, nullable=False)
 
     coreos_channel = db.Column(db.String(80), default=config.default_coreos_channel, nullable=False)
     coreos_version = db.Column(db.String(80), default=config.default_coreos_version, nullable=False)
