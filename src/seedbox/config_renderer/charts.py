@@ -22,7 +22,7 @@ class Addon:
             vars_map = {}
 
         if base_url is None:
-            base_url = self.base_url
+            base_url = urljoin(self.base_url, name + '/')
         else:
             base_url = urljoin(self.base_url, base_url)
         base_url = base_url.format(version=version)
@@ -142,11 +142,11 @@ addons = {
         '1.5': Addon('heapster', '1.5', [
             'heapster-controller.yaml',
             'heapster-service.yaml',
-        ], is_salt_template=True, base_url='cluster-monitoring/standalone'),
+        ], is_salt_template=True, base_url='cluster-monitoring/standalone/'),
         '1.6': Addon('heapster', '1.6', [
             'heapster-controller.yaml',
             'heapster-service.yaml',
-        ], is_salt_template=True, base_url='cluster-monitoring/standalone', notes='RBAC instructions: '
+        ], is_salt_template=True, base_url='cluster-monitoring/standalone/', notes='RBAC instructions: '
                      'https://gist.github.com/nailgun/5a4413c8e2fd0bba8e8aa443e8ba9cee'),
     },
     'fluentd-elasticsearch': {
