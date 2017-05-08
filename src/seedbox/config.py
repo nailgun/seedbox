@@ -23,7 +23,7 @@ k8s_hyperkube_image = 'quay.io/coreos/hyperkube'
 default_k8s_hyperkube_tag = 'v1.6.2_coreos.0'
 default_k8s_pod_network = '10.2.0.0/16'
 default_k8s_service_network = '10.3.0.0/24'
-default_k8s_admission_control = 'NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota'
+default_k8s_admission_control = 'NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota'
 
 default_root_disk = '/dev/sda'
 default_linux_consoles = 'tty0,ttyS0'
