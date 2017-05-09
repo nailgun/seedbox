@@ -3,6 +3,7 @@ import logging
 
 from flask import Flask, Response, request, abort, redirect
 from flask_migrate import Migrate
+from werkzeug.contrib.fixers import ProxyFix
 
 from seedbox import config, models, config_renderer
 from seedbox.admin import admin
@@ -12,6 +13,8 @@ log = logging.getLogger(__name__)
 
 
 app = Flask(__name__, template_folder='admin/templates')
+if config.reverse_proxy_count:
+    app.wsgi_app = ProxyFix(app.wsgi_app, num_proxies=config.reverse_proxy_count)
 app.secret_key = config.secret_key
 app.config['SQLALCHEMY_DATABASE_URI'] = config.database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -37,24 +40,10 @@ def check_admin_secure():
             return response
 
 
-def get_remote_addr(req):
-    fwd = req.headers.get('x-forwarded-for')
-    if fwd:
-        addrs = [a.strip() for a in fwd.split(',')]
-    else:
-        addrs = []
-    addrs += [req.remote_addr]
-
-    try:
-        return addrs[-config.reverse_proxy_count - 1]
-    except IndexError:
-        return addrs[0]
-
-
 def route(rule, request_name, secure=True, **route_kwargs):
     def decorator(func):
         def wrapped(*args, **kwargs):
-            node_ip = get_remote_addr(request)
+            node_ip = request.remote_addr
             log.info('%s request from %s', request_name, node_ip)
             if secure:
                 response = ensure_secure_request()
