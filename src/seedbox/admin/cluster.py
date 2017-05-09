@@ -163,4 +163,4 @@ class ClusterView(ModelView):
                 return json.load(fp)
         except Exception:
             log.exception('Failed to load component versions file')
-            return {}
+            return None
