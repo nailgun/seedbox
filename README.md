@@ -12,11 +12,7 @@ $ docker-compose up
 $ docker-compose exec seedbox python -m seedbox db upgrade
 ```
 
-Open http://10.102.4.3:5000/admin
-
-> **Note:**
->   This IP is defined according to the `network` block specified in `docker-compose.yml`
->
+Open http://localhost:5000/admin/
 
 
 ## Comparison with other projects
