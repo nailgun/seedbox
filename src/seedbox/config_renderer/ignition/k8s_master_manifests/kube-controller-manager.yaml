@@ -16,8 +16,9 @@ spec:
     - --service-account-private-key-file={{ config.k8s_service_account_private_key_path }}
     - --leader-elect=true
     resources:
-      requests:
+      limits:
         cpu: 200m
+        memory: 100Mi
     livenessProbe:
       httpGet:
         host: 127.0.0.1

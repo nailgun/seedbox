@@ -60,6 +60,10 @@ spec:
     - mountPath: {{ config.k8s_secrets_path }}
       name: k8s-secrets
       readOnly: true
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
   volumes:
   - hostPath:
       path: {{ config.cluster_credentials_path }}
