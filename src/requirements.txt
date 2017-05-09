@@ -7,3 +7,4 @@ cryptography
 pyopenssl
 psycopg2
 PyYAML
+requests
