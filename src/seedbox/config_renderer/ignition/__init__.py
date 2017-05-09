@@ -27,6 +27,7 @@ class IgnitionConfig(object):
         files = list(itertools.chain.from_iterable(p.get_files() for p in packages))
         units = list(itertools.chain.from_iterable(p.get_units() for p in packages))
         networkd_units = list(itertools.chain.from_iterable(p.get_networkd_units() for p in packages))
+        ssh_keys = self.get_ssh_keys()
 
         return {
             'ignition': {
@@ -39,8 +40,11 @@ class IgnitionConfig(object):
             },
             'passwd': {
                 'users': [{
+                    'name': 'root',
+                    'sshAuthorizedKeys': ssh_keys,
+                }, {
                     'name': 'core',
-                    'sshAuthorizedKeys': self.get_ssh_keys(),
+                    'sshAuthorizedKeys': ssh_keys,
                 }],
             },
             'systemd': {
