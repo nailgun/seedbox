@@ -37,10 +37,24 @@ def check_admin_secure():
             return response
 
 
+def get_remote_addr(req):
+    fwd = req.headers.get('x-forwarded-for')
+    if fwd:
+        addrs = [a.strip() for a in fwd.split(',')]
+    else:
+        addrs = []
+    addrs += [req.remote_addr]
+
+    try:
+        return addrs[-config.reverse_proxy_count - 1]
+    except IndexError:
+        return addrs[0]
+
+
 def route(rule, request_name, secure=True, **route_kwargs):
     def decorator(func):
         def wrapped(*args, **kwargs):
-            node_ip = request.remote_addr
+            node_ip = get_remote_addr(request)
             log.info('%s request from %s', request_name, node_ip)
             if secure:
                 response = ensure_secure_request()
