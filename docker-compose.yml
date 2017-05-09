@@ -21,14 +21,3 @@ services:
       - '5432:5432'
     environment:
       - POSTGRES_USER=seedbox
-
-networks:
-  default:
-    driver: bridge
-    driver_opts:
-      com.docker.network.enable_ipv6: "false"
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.102.4.0/24
-          gateway: 10.102.4.1
