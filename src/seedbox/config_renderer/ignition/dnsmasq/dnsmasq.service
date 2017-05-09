@@ -4,6 +4,7 @@ Description=dnsmasq DNS service
 [Service]
 Restart=always
 RestartSec=10
+OOMScoreAdjust=-998
 ExecStart=/usr/bin/rkt run \
     --insecure-options=image \
     --net=host \

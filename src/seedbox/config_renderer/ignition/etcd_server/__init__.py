@@ -7,6 +7,7 @@ class EtcdServerPackage(BaseIgnitionPackage):
             self.get_unit_dropins('etcd-member.service', [
                 '40-etcd-cluster.conf',
                 '40-ssl.conf',
+                '40-oom.conf',
                 '30-image.conf',
             ], enableunit=True),
         ]

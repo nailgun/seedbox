@@ -58,6 +58,9 @@ class SystemPackage(BaseIgnitionPackage):
                 '40-etcd-cluster.conf',
                 '40-etcd-lock.conf',
             ]),
+            self.get_unit_dropins('sshd.service', ['40-oom.conf']),
+            self.get_unit_dropins('sshd@.service', ['40-oom.conf']),
+            self.get_unit_dropins('containerd.service', ['40-oom.conf']),
         ]
 
         if self.cluster.aci_proxy_url:

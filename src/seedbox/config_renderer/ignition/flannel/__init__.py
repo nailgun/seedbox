@@ -20,6 +20,7 @@ class FlannelPackage(BaseIgnitionPackage):
         dropins = [
             '40-etcd-cluster.conf',
             '40-network-config.conf',
+            '40-oom.conf',
         ]
 
         if self.cluster.explicitly_advertise_addresses:
