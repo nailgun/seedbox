@@ -1,6 +1,7 @@
+from types import SimpleNamespace
 from collections import defaultdict
 
-from seedbox import config, models
+from seedbox import config
 from seedbox.config_renderer.ignition.base import BaseIgnitionPackage
 
 
@@ -75,24 +76,20 @@ class SystemPackage(BaseIgnitionPackage):
 
         mountpoints = list(self.node.mountpoints.all())
         if self.node.persistent_partition:
-            mountpoint = models.Mountpoint()
-            mountpoint.what = self.node.persistent_partition
-            mountpoint.where = '/mnt/persistent'
-            mountpoint.wanted_by = models.Mountpoint.wanted_by.default.arg
-            mountpoints.append(mountpoint)
+            mountpoints += [SimpleNamespace(
+                what=self.node.persistent_partition,
+                where=config.persistent_dir_path,
+                wanted_by='local-fs.target',
+            )]
 
         for mountpoint in mountpoints:
-            enable = bool(mountpoint.wanted_by)
-
-            unit_name = mountpoint.where.replace('/', '-')
-            while unit_name[0] == '-':
-                unit_name = unit_name[1:]
-            unit_name += '.mount'
-
             units += [
-                self.get_unit(unit_name, enable=enable, template_name='volume.mount', additional_context={
-                    'mountpoint': mountpoint,
-                })
+                self.get_unit(mountpoint2unitname(mountpoint),
+                              enable=bool(mountpoint.wanted_by),
+                              template_name='volume.mount',
+                              additional_context={
+                                  'mountpoint': mountpoint,
+                              })
             ]
 
         return units
@@ -111,3 +108,10 @@ class SystemPackage(BaseIgnitionPackage):
                           })
             for interface, addresses in interfaces.items()
         ]
+
+
+def mountpoint2unitname(mountpoint):
+    unit_name = mountpoint.where.replace('/', '-')
+    while unit_name[0] == '-':
+        unit_name = unit_name[1:]
+    return unit_name + '.mount'

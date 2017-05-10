@@ -29,6 +29,7 @@ default_k8s_admission_control = 'NamespaceLifecycle,LimitRanger,ServiceAccount,D
 default_root_disk = '/dev/sda'
 default_linux_consoles = 'tty0,ttyS0'
 default_wipe_root_disk_next_boot = True
+persistent_dir_path = '/mnt/persistent'
 
 etcd_client_port = 2379
 etcd_peer_port = 2380
