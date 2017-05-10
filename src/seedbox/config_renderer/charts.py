@@ -14,7 +14,7 @@ jinja_env = Environment(keep_trailing_newline=True, autoescape=False)
 
 
 class Addon:
-    base_url = 'https://github.com/kubernetes/kubernetes/raw/release-{version}/cluster/addons/'
+    base_url = 'https://github.com/kubernetes/kubernetes/raw/{branch}/cluster/addons/'
     encoding = 'utf-8'
 
     def __init__(self, name, version, manifest_files, vars_map=None, is_salt_template=False, base_url=None, notes=None):
@@ -25,7 +25,12 @@ class Addon:
             base_url = urljoin(self.base_url, name + '/')
         else:
             base_url = urljoin(self.base_url, base_url)
-        base_url = base_url.format(version=version)
+
+        if version == 'master':
+            branch = 'master'
+        else:
+            branch = 'release-' + version
+        base_url = base_url.format(branch=branch)
 
         self.name = name
         self.version = version
@@ -128,6 +133,10 @@ addons = {
     'dns-horizontal-autoscaler': {
         '1.5': Addon('dns-horizontal-autoscaler', '1.5', ['dns-horizontal-autoscaler.yaml']),
         '1.6': Addon('dns-horizontal-autoscaler', '1.6', ['dns-horizontal-autoscaler.yaml']),
+        'master': Addon('dns-horizontal-autoscaler', 'master', [
+            'dns-horizontal-autoscaler.yaml',
+            'dns-horizontal-autoscaler-rbac.yaml',
+        ]),
     },
     'dashboard': {
         '1.5': Addon('dashboard', '1.5', [
