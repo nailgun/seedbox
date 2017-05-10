@@ -78,7 +78,7 @@ class UserView(ModelView):
     @action('kubeconfig', 'Get kubeconfig')
     def kubeconfig_action(self, ids):
         users = models.User.query.filter(models.User.id.in_(ids))
-        return Response(render_kubeconfig(users), mimetype='text/x-yaml')
+        return Response(render_kubeconfig(list(users)), mimetype='text/x-yaml')
 
 
 def render_kubeconfig(users):
