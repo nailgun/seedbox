@@ -98,32 +98,56 @@ class IgnitionConfig(object):
         return packages
 
     def get_storage_config(self, files):
-        config = {
-            'filesystems': [{
-                'name': 'root',
-                'mount': {
-                    'device': self.node.root_partition,
-                    'format': 'ext4',
-                    'create': {
-                        'force': True,
-                        'options': ['-LROOT'],
-                    },
+        filesystems = [{
+            'name': 'root',
+            'mount': {
+                'device': self.node.root_partition,
+                'format': 'ext4',
+                'create': {
+                    'force': True,
+                    'options': ['-LROOT'],
                 },
-            }],
+            },
+        }]
+
+        config = {
+            'filesystems': filesystems,
             'files': files,
         }
 
         if self.node.wipe_root_disk_next_boot:
+            partitions = [{
+                'label': 'ROOT',
+                'number': 1,
+                'start': 0,
+                'size': self.node.root_partition_size_sectors or 0,
+            }]
+
             config['disks'] = [{
                 'device': self.node.root_disk,
                 'wipeTable': True,
-                'partitions': [{
-                    'label': 'ROOT',
-                    'number': 0,
-                    'start': 0,
-                    'size': self.node.root_partition_size_sectors or 0,
-                }],
+                'partitions': partitions,
             }]
+
+            if self.node.persistent_partition:
+                partitions += [{
+                    'label': 'Persistent',
+                    'number': 2,
+                    'start': 0,
+                    'size': 0,
+                }]
+
+                filesystems += [{
+                    'name': 'persist',
+                    'mount': {
+                        'device': self.node.persistent_partition,
+                        'format': 'ext4',
+                        'create': {
+                            'force': True,
+                            'options': ['-LPersistent'],
+                        },
+                    },
+                }]
 
         return config
 

@@ -97,6 +97,12 @@ class Node(db.Model):
         return self.root_disk + '1'
 
     @property
+    def persistent_partition(self):
+        if self.root_partition_size_sectors:
+            return self.root_disk + '2'
+        return None
+
+    @property
     def active_config(self):
         from . import Provision
         if not self.active_config_version:

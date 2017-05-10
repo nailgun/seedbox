@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from seedbox import config
+from seedbox import config, models
 from seedbox.config_renderer.ignition.base import BaseIgnitionPackage
 
 
@@ -73,7 +73,15 @@ class SystemPackage(BaseIgnitionPackage):
                 self.get_unit('add-http-proxy-ca-certificate.service', enable=True)
             ]
 
-        for mountpoint in self.node.mountpoints.all():
+        mountpoints = list(self.node.mountpoints.all())
+        if self.node.persistent_partition:
+            mountpoint = models.Mountpoint()
+            mountpoint.what = self.node.persistent_partition
+            mountpoint.where = '/mnt/persistent'
+            mountpoint.wanted_by = models.Mountpoint.wanted_by.default.arg
+            mountpoints.append(mountpoint)
+
+        for mountpoint in mountpoints:
             enable = bool(mountpoint.wanted_by)
 
             unit_name = mountpoint.where.replace('/', '-')
