@@ -53,7 +53,7 @@
                     {% endif %}
                 </li>
                 <li>
-                    <strong>hypercube:</strong> {{ model.k8s_hyperkube_tag }}
+                    <strong>hyperkube:</strong> {{ model.k8s_hyperkube_tag }}
                     {% if admin_view.latest_component_versions and admin_view.latest_component_versions.hyperkube and model.k8s_hyperkube_tag != admin_view.latest_component_versions.hyperkube %}
                         <span class="glyphicon glyphicon-exclamation-sign text-warning" title="Current version is {{ admin_view.latest_component_versions.hyperkube }}" style="cursor: pointer"></span>
                     {% endif %}
