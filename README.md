@@ -5,7 +5,7 @@ clusters using PXE without installation. But it easily can be extended to render
 different deployments.
 
 
-## TL;DR
+## Installation
 
 ```
 $ docker-compose up
@@ -13,6 +13,12 @@ $ docker-compose exec seedbox python -m seedbox db upgrade
 ```
 
 Open http://localhost:5000/admin/
+
+
+### helm chart
+
+If you have already running Kubernetes cluster and want to provision another one, take a took
+at [seedbox helm chart](charts/seedbox).
 
 
 ## Comparison with other projects
