@@ -1,0 +1,35 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: postgres
+    release: {{ .Release.Name }}
+    version: {{ .Chart.Version }}
+  name: postgres
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: postgres
+      labels:
+        app: postgres
+        release: {{ .Release.Name }}
+        version: {{ .Chart.Version }}
+    spec:
+      volumes:
+      - name: postgres
+        persistentVolumeClaim:
+          claimName: postgres
+      containers:
+      - name: main
+        image: postgres:9.6
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: seedbox
+        volumeMounts:
+        - name: postgres
+          mountPath: /var/lib/postgresql/data
+          subPath: data

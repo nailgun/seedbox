@@ -1,0 +1,5 @@
+image: nailgun/seedbox
+secret_key: 'my secret key'
+allow_insecure_transport: 'false'
+admin_password: admin
+reverse_proxy_count: 0

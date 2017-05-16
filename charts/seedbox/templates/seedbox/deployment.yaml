@@ -1,0 +1,53 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: seedbox
+    release: {{ .Release.Name }}
+    version: {{ .Chart.Version }}
+  name: seedbox
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: seedbox
+      labels:
+        app: seedbox
+        release: {{ .Release.Name }}
+        version: {{ .Chart.Version }}
+    spec:
+      containers:
+      - name: web
+        image: {{ .Values.image }}
+        args: [runserver, --host, 0.0.0.0]
+        ports:
+        - containerPort: 5000
+        env:
+        - name: SECRET_KEY
+          value: {{ .Values.secret_key | quote }}
+        - name: ALLOW_INSECURE_TRANSPORT
+          value: {{ .Values.allow_insecure_transport | quote }}
+        - name: ADMIN_PASSWORD
+          value: {{ .Values.admin_password | quote }}
+        - name: DATABASE_URI
+          value: postgres://seedbox@postgres/seedbox
+        - name: REVERSE_PROXY_COUNT
+          value: {{ .Values.reverse_proxy_count | quote }}
+        - name: UPDATE_STATE_FILE
+          value: /seedbox/versions.json
+        volumeMounts:
+        - name: state
+          mountPath: /seedbox
+      - name: update-watcher
+        image: {{ .Values.image }}
+        args: [watch_updates]
+        env:
+        - name: UPDATE_STATE_FILE
+          value: /seedbox/versions.json
+        volumeMounts:
+        - name: state
+          mountPath: /seedbox
+      volumes:
+      - name: state
+        emptyDir: {}
