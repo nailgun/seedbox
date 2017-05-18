@@ -3,7 +3,7 @@ version: '2'
 
 services:
   seedbox:
-    image: seedbox
+    image: seedbox:hostpath-scheduler
     build: ./src/
     command: runserver --host 0.0.0.0 --port 5000 --debug
     environment:
