@@ -121,9 +121,11 @@ def report(node):
             provision.ipxe_config = config_renderer.ipxe.render(node, request.url_root)
         models.db.session.add(provision)
 
-    node.wipe_root_disk_next_boot = False
-
     models.db.session.add(node)
+
+    node.disks.update({
+        models.Disk.wipe_next_boot: False
+    })
 
     if node.cluster.are_etcd_nodes_configured:
         node.cluster.assert_etcd_cluster_exists = True

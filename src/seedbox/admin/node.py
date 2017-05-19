@@ -14,7 +14,6 @@ class NodeView(ModelView):
         'fqdn',
         'ip',
         'maintenance_mode',
-        'wipe_root_disk_next_boot',
         'credentials',
         'config',
     ]
@@ -25,6 +24,7 @@ class NodeView(ModelView):
         'target_config_version',
         'active_config_version',
         'provisions',
+        'disks',
     ]
     column_formatters = {
         'credentials': macro('render_credentials'),
@@ -36,9 +36,6 @@ class NodeView(ModelView):
         'maintenance_mode': "Maintenance mode",
         'debug_boot': "Debug boot",
         'coreos_autologin': "Enable terminal autologin",
-        'root_disk': "Root disk device",
-        'wipe_root_disk_next_boot': "Wipe root disk on next boot",
-        'root_partition_size_sectors': "Size of root partition (in sectors)",
         'linux_consoles': "Linux console devices",
         'disable_ipv6': "Disable IPv6 in Linux kernel",
         'is_etcd_server': "etcd server",
@@ -53,14 +50,6 @@ class NodeView(ModelView):
         'debug_boot': "Forward all system journal messages to kmsg for troubleshooting.",
         'coreos_autologin': "If this is set, main terminal will be logged-in with `core` user after boot. Useful "
                             "for debugging. Don't enable in production.",
-        'root_disk': "First partition of this disk will be wiped on every boot. CoreOS will use it to store "
-                     "volatile data.",
-        'wipe_root_disk_next_boot': "If this is set, node's root disk partition table will be wiped on next boot. "
-                                    "This option will be automatically disabled on next provisiton report.",
-        'root_partition_size_sectors': "Typically one sector is 512 bytes. Used during root disk wiping. If unset "
-                                       "entire disk will be used. It's highly recommended to set this value, as "
-                                       "long as second partition will survive reboots and can be used to store "
-                                       "critical data.",
         'linux_consoles': "Passed to kernel as `console` arguments. (Separate by comma.)",
         'disable_ipv6': "Passed to kernel as `ipv6.disable=1` argument.",
         'is_etcd_server': "Run etcd server on this node and connect other nodes to it.",
@@ -74,6 +63,7 @@ class NodeView(ModelView):
                 'what': 'Device to mount.',
                 'where': 'Mount path.',
                 'wanted_by': 'WantedBy systemd unit.',
+                'is_persistent': 'Use this partition to store critical data that should survive reboots.',
             }
         }),
         (models.Address, {
@@ -91,9 +81,6 @@ class NodeView(ModelView):
             'maintenance_mode',
             'debug_boot',
             'coreos_autologin',
-            'root_disk',
-            'wipe_root_disk_next_boot',
-            'root_partition_size_sectors',
             'linux_consoles',
             'disable_ipv6',
             'mountpoints',

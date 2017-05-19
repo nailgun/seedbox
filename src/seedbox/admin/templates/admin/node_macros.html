@@ -35,4 +35,14 @@
     {% endif %}
 
     <a href="{{ url_for('provision.index_view', node_id=model.id) }}">[history]</a>
+
+    {% set disks_error=model.disks_error %}
+    {% if disks_error %}
+        <span class="glyphicon glyphicon-exclamation-sign text-danger" title="{{ disks_error }}" style="cursor: pointer"></span>
+    {% else %}
+        {% set disks_warning=model.disks_warning %}
+        {% if disks_warning %}
+            <span class="glyphicon glyphicon-exclamation-sign text-warning" title="{{ disks_warning }}" style="cursor: pointer"></span>
+        {% endif %}
+    {% endif %}
 {% endmacro %}

@@ -74,15 +74,7 @@ class SystemPackage(BaseIgnitionPackage):
                 self.get_unit('add-http-proxy-ca-certificate.service', enable=True)
             ]
 
-        mountpoints = list(self.node.mountpoints.all())
-        if self.node.persistent_partition:
-            mountpoints += [SimpleNamespace(
-                what=self.node.persistent_partition,
-                where=config.persistent_dir_path,
-                wanted_by='local-fs.target',
-            )]
-
-        for mountpoint in mountpoints:
+        for mountpoint in self.node.mountpoints.all():
             units += [
                 self.get_unit(mountpoint2unitname(mountpoint),
                               enable=bool(mountpoint.wanted_by),
