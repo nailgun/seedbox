@@ -1,4 +1,4 @@
-from seedbox import pki, config
+from seedbox import pki, config, exceptions
 from .db import db
 
 
@@ -21,9 +21,6 @@ class Node(db.Model):
     active_config_version = db.Column(db.Integer, default=0, nullable=False)
 
     coreos_autologin = db.Column(db.Boolean, nullable=False)
-    root_disk = db.Column(db.String(80), default=config.default_root_disk, nullable=False)
-    wipe_root_disk_next_boot = db.Column(db.Boolean, nullable=False, default=config.default_wipe_root_disk_next_boot)
-    root_partition_size_sectors = db.Column(db.Integer, nullable=True)
     linux_consoles = db.Column(db.String(80), default=config.default_linux_consoles, nullable=False)
     disable_ipv6 = db.Column(db.Boolean, nullable=False)
 
@@ -94,13 +91,23 @@ class Node(db.Model):
 
     @property
     def root_partition(self):
-        return self.root_disk + '1'
+        from .disk_partition import DiskPartition
+        partitions = list(DiskPartition.query.filter(DiskPartition.disk.has(node_id=self.id),
+                                                     DiskPartition.label == 'ROOT'))
+        if not partitions:
+            raise exceptions.NoRootPartition()
+        if len(partitions) > 1:
+            raise exceptions.MultipleRootPartitions()
+        return partitions[0]
 
     @property
-    def persistent_partition(self):
-        if self.root_partition_size_sectors:
-            return self.root_disk + '2'
-        return None
+    def persistent_mountpoint(self):
+        mountpoints = list(self.mountpoints.filter_by(is_persistent=True))
+        if not mountpoints:
+            return None
+        if len(mountpoints) > 1:
+            raise exceptions.MultiplePersistentMountpoints()
+        return mountpoints[0]
 
     @property
     def active_config(self):
@@ -109,3 +116,19 @@ class Node(db.Model):
             return None
         else:
             return self.provisions.order_by(Provision.applied_at.desc()).first()
+
+    @property
+    def disks_error(self):
+        try:
+            _ = self.root_partition
+        except (exceptions.NoRootPartition, exceptions.MultipleRootPartitions) as e:
+            return str(e)
+        try:
+            _ = self.persistent_mountpoint
+        except exceptions.MultiplePersistentMountpoints as e:
+            return str(e)
+
+    @property
+    def disks_warning(self):
+        if not self.persistent_mountpoint:
+            return 'No persistent mountpoint defined'

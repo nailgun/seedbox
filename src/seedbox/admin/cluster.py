@@ -147,8 +147,10 @@ class ClusterView(ModelView):
         model.nodes.update({
             models.Node.target_config_version: 1,
             models.Node.active_config_version: 0,
-            models.Node.wipe_root_disk_next_boot: config.default_wipe_root_disk_next_boot,
         })
+        models.Disk.query.filter(models.Disk.node.has(cluster_id=model.id)).update({
+            models.Disk.wipe_next_boot: True
+        }, synchronize_session='fetch')
         model.assert_etcd_cluster_exists = False
         self.session.add(model)
         self.session.commit()

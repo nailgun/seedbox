@@ -10,6 +10,7 @@ class Mountpoint(db.Model):
     what = db.Column(db.String(80), nullable=False)
     where = db.Column(db.String(80), nullable=False)
     wanted_by = db.Column(db.String(80), default='local-fs.target', nullable=False)
+    is_persistent = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
         return '<Mountpoint %r>' % self.id

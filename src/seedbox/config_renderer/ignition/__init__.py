@@ -98,58 +98,66 @@ class IgnitionConfig(object):
         return packages
 
     def get_storage_config(self, files):
-        filesystems = [{
-            'name': 'root',
-            'mount': {
-                'device': self.node.root_partition,
-                'format': 'ext4',
-                'create': {
-                    'force': True,
-                    'options': ['-LROOT'],
-                },
-            },
-        }]
+        disks = []
+        filesystems = []
 
         config = {
+            'disks': disks,
             'filesystems': filesystems,
             'files': files,
         }
 
-        if self.node.wipe_root_disk_next_boot:
-            partitions = [{
-                'label': 'ROOT',
-                'number': 1,
-                'start': 0,
-                'size': self.node.root_partition_size_sectors or 0,
-            }]
+        root_fs = False
 
-            config['disks'] = [{
-                'device': self.node.root_disk,
+        for disk in self.node.disks.filter_by(wipe_next_boot=True):
+            partitions = []
+
+            disks += [{
+                'device': disk.device,
                 'wipeTable': True,
                 'partitions': partitions,
             }]
 
-            if self.node.persistent_partition:
+            for partition in disk.partitions.all():
+                if partition.size_mibs:
+                    size_sectors = partition.size_mibs * 1024 * 1024 // disk.sector_size_bytes
+                else:
+                    size_sectors = 0
+
                 partitions += [{
-                    'label': 'Persistent',
-                    'number': 2,
+                    'number': partition.number,
                     'start': 0,
-                    'size': 0,
+                    'size': size_sectors,
+                    'label': partition.label,
                 }]
 
-                filesystems += [{
-                    'name': 'persist',
-                    'mount': {
-                        'device': self.node.persistent_partition,
-                        'format': 'ext4',
-                        'create': {
-                            'force': True,
-                            'options': ['-LPersistent'],
-                        },
-                    },
-                }]
+                filesystems += [partition2ignitionfs(partition)]
+
+                if partition.is_root:
+                    root_fs = True
+
+        if not root_fs:
+            filesystems += [partition2ignitionfs(self.node.root_partition)]
 
         return config
 
     def get_ssh_keys(self):
         return [user.ssh_key for user in self.cluster.users.filter(models.User.ssh_key != '')]
+
+
+def partition2ignitionfs(partition):
+    fs = {
+        'mount': {
+            'device': partition.device,
+            'format': partition.format,
+            'create': {
+                'force': True,
+                'options': ['-L{}'.format(partition.label)],
+            },
+        },
+    }
+
+    if partition.is_root:
+        fs['name'] = 'root'
+
+    return fs

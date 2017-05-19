@@ -10,7 +10,7 @@ class EtcdServerPackage(BaseIgnitionPackage):
             '30-image.conf',
         ]
 
-        if self.node.persistent_partition:
+        if self.node.persistent_mountpoint:
             dropins += ['40-persistent.conf']
 
         return [

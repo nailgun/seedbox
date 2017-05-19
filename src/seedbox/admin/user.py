@@ -88,5 +88,5 @@ def render_kubeconfig(users):
             default_user = users[0]
 
         return config_renderer.kubeconfig.render(users, default_user=default_user)
-    except exceptions.K8sNoClusterApiserver:
-        return abort(404, 'No node with k8s apiserver.')
+    except exceptions.K8sNoClusterApiserver as e:
+        return abort(404, str(e))

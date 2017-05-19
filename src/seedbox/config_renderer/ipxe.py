@@ -25,7 +25,7 @@ def get_kernel_arguments(node, url_root):
         args.append('console=' + console)
 
     if not node.maintenance_mode:
-        args.append('root=' + node.root_partition)
+        args.append('root=' + node.root_partition.device)
 
     if node.disable_ipv6:
         args.append('ipv6.disable=1')
