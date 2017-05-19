@@ -7,7 +7,7 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-scheduler
-    image: nailgun/kube-scheduler-amd64:{{ cluster.k8s_hyperkube_tag|replace('coreos', 'hostpath') }}
+    image: nailgun/kube-scheduler-amd64:{{ kube_scheduler_tag }}
     command:
     - /hyperkube
     - scheduler

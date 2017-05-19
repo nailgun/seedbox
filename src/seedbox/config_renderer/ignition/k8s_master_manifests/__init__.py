@@ -46,3 +46,8 @@ class K8sMasterManifestsPackage(BaseIgnitionPackage):
                 },
             },
         ]
+
+    def get_template_context(self):
+        return {
+            'kube_scheduler_tag': self.cluster.k8s_hyperkube_tag.split('_')[0] + '_hostpath.0',
+        }
