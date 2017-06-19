@@ -48,8 +48,8 @@ class ClusterView(ModelView):
         'custom_coreos_images_base_url': "Custom base HTTP URL of CoreOS images",
         'aci_proxy_url': "ACI proxy URL",
         'aci_proxy_ca_cert': "ACI proxy CA certificate (PEM)",
-        'coreos_channel': 'CoreOS channel',
-        'coreos_version': 'CoreOS version',
+        'coreos_channel': "CoreOS channel",
+        'coreos_version': "CoreOS version",
     }
     column_descriptions = {
         'name': "Human readable cluster name. Don't use spaces.",
@@ -75,11 +75,13 @@ class ClusterView(ModelView):
                              "added to system root CA certificates on each node.",
         'custom_coreos_images_base_url': "coreos_production_pxe.vmlinuz and coreos_production_pxe_image.cpio.gz. It "
                                          "will be used instead of default if set.",
-        'coreos_channel': 'stable, beta or alpha',
+        'coreos_channel': "stable, beta or alpha",
+        'docker_config': "~/.docker/config.json file with auth and other configuration."
     }
     form_rules = [
         rules.Field('name'),
         rules.Field('install_dnsmasq'),
+        rules.Field('docker_config'),
         rules.FieldSet([
             'etcd_image_tag',
             'assert_etcd_cluster_exists',

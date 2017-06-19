@@ -20,6 +20,8 @@ Environment="RKT_RUN_ARGS=--uuid-file-save=/var/run/kubelet-pod.uuid \
   --mount volume=modprobe,target=/usr/sbin/modprobe \
   --volume lib-modules,kind=host,source=/lib/modules \
   --mount volume=lib-modules,target=/lib/modules \
+  --volume docker-config,kind=host,source=/root/.docker,readOnly=true \
+  --mount volume=docker-config,target=/.docker \
   "
 
 ExecStartPre=/usr/bin/mkdir -p {{ config.k8s_manifests_path }}

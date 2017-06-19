@@ -24,15 +24,20 @@ class SystemPackage(BaseIgnitionPackage):
                     'source': self.to_data_url(self.node.fqdn + '\n'),
                 },
             },
-        ]
-
-        files += [
             {
                 'filesystem': 'root',
                 'path': '/opt/bin/cluster-etcdctl',
                 'mode': 0o755,
                 'contents': {
                     'source': self.to_data_url(self.render_template('cluster-etcdctl')),
+                },
+            },
+            {
+                'filesystem': 'root',
+                'path': '/root/.docker/config.json',
+                'mode': 0o600,
+                'contents': {
+                    'source': self.to_data_url(self.cluster.docker_config),
                 },
             },
         ]
