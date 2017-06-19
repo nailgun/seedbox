@@ -40,6 +40,8 @@ class Cluster(db.Model):
     k8s_service_account_public_key = db.Column(db.Binary, nullable=False)
     k8s_service_account_private_key = db.Column(db.Binary, nullable=False)
 
+    docker_config = db.Column(db.Text, default='{}', nullable=False)
+
     def __repr__(self):
         return '<Cluster %r>' % self.name
 
