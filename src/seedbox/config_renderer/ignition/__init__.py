@@ -107,6 +107,9 @@ class IgnitionConfig(object):
             'files': files,
         }
 
+        if self.node.maintenance_mode:
+            return config
+
         root_fs = False
 
         for disk in self.node.disks.filter_by(wipe_next_boot=True):
